@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { generateRouteFlights, INDIAN_AIRPORTS } from '../data/indianAviation';
 
 // Determine backend API base:
 // In local development, default to http://localhost:5000 if not specified.
@@ -466,7 +467,7 @@ export const api = {
       if (data && data.length > 0) return data.map((d: any) => d.iata_code);
     } catch {}
 
-    return ['DEL', 'BOM', 'BLR', 'HYD', 'MAA', 'CCU', 'GOI', 'AMD', 'PNQ', 'COK', 'JAI', 'LKO', 'GAU', 'IXC'];
+    return INDIAN_AIRPORTS.map(a => a.code);
   },
 
   getAirlines: async () => {
@@ -525,19 +526,15 @@ export const api = {
   },
 
   // Flight search
-  searchFlights: async (from: string, to: string, date?: string) => {
+  searchFlights: async (from: string, to: string, date?: string, cabinClass: string = 'Economy') => {
     if (API_BASE) {
       try {
-        return await fetchJson(`/api/flights/search?from=${from}&to=${to}${date ? `&date=${date}` : ''}`);
+        const res = await fetchJson(`/api/flights/search?from=${from}&to=${to}${date ? `&date=${date}` : ''}`);
+        if (Array.isArray(res) && res.length > 0) return res;
       } catch {}
     }
 
-    return [
-      { id: '1', flight: '6E-204', airline: 'IndiGo', price: 4850, departure: '06:00 AM', arrival: '08:15 AM', duration: '2h 15m', seats: 9 },
-      { id: '2', flight: 'AI-805', airline: 'Air India', price: 5320, departure: '09:30 AM', arrival: '11:45 AM', duration: '2h 15m', seats: 4 },
-      { id: '3', flight: 'UK-992', airline: 'Vistara', price: 5890, departure: '02:15 PM', arrival: '04:30 PM', duration: '2h 15m', seats: 6 },
-      { id: '4', flight: 'QP-112', airline: 'Akasa Air', price: 4620, departure: '07:45 PM', arrival: '10:00 PM', duration: '2h 15m', seats: 12 },
-    ];
+    return generateRouteFlights(from, to, date, cabinClass);
   },
 
   // Price alerts
