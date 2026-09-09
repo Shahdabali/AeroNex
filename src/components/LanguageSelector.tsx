@@ -22,7 +22,7 @@ export function LanguageSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A1838]/85 hover:bg-[#0E204A] border border-slate-700/80 hover:border-slate-500 shadow-md backdrop-blur-md text-slate-300 hover:text-white transition-all text-xs font-semibold cursor-pointer"
+        className="lang-selector-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A1838]/85 hover:bg-[#0E204A] border border-slate-700/80 hover:border-slate-500 shadow-md backdrop-blur-md text-slate-300 hover:text-white transition-all text-xs font-semibold cursor-pointer"
       >
         <span className="text-sm">🇮🇳</span>
         <span>{language}</span>
@@ -30,7 +30,7 @@ export function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-32 bg-[#0A1838] border border-slate-700 rounded-xl shadow-2xl p-1 z-50 animate-in fade-in slide-in-from-top-2">
+        <div className="lang-selector-menu absolute right-0 top-full mt-2 w-36 bg-[#0A1838] border border-slate-700 rounded-xl shadow-2xl p-1 z-50 animate-in fade-in slide-in-from-top-2">
           <button
             type="button"
             className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors flex items-center gap-2 cursor-pointer ${

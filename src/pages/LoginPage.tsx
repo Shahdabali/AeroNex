@@ -14,7 +14,7 @@ export function LoginPage() {
       
       {/* 1. Cinematic Airplane Wing over Golden Sunset Cloudscape */}
       <div 
-        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center sm:bg-right opacity-90 transition-opacity duration-1000"
+        className="login-bg-image absolute inset-0 pointer-events-none z-0 bg-cover bg-center sm:bg-right opacity-90 transition-opacity duration-1000"
         style={{
           backgroundImage: 'url(/assets/login-hero-clean.jpg)',
         }}
@@ -24,8 +24,8 @@ export function LoginPage() {
       <div className="login-gradient-overlay absolute inset-0 bg-gradient-to-r from-[#02091B]/95 via-[#02091B]/70 to-[#02091B]/40 pointer-events-none z-0 transition-all duration-300" />
       
       {/* Ambient Glow Orbs */}
-      <div className="absolute top-[10%] left-[15%] w-[500px] h-[500px] bg-[#00A3FF]/15 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="absolute bottom-[10%] right-[25%] w-[450px] h-[450px] bg-[#4E55F5]/10 rounded-full blur-[130px] pointer-events-none z-0" />
+      <div className="login-ambient-orb absolute top-[10%] left-[15%] w-[500px] h-[500px] bg-[#00A3FF]/15 rounded-full blur-[140px] pointer-events-none z-0 transition-opacity duration-300" />
+      <div className="login-ambient-orb absolute bottom-[10%] right-[25%] w-[450px] h-[450px] bg-[#4E55F5]/10 rounded-full blur-[130px] pointer-events-none z-0 transition-opacity duration-300" />
 
       {/* Top Header Bar */}
       <header className="w-full max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-14 pt-6 pb-2 flex items-center justify-between relative z-30">
@@ -53,13 +53,17 @@ export function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <h1 className="text-[40px] sm:text-[50px] lg:text-[56px] font-black text-white leading-[1.08] tracking-tight login-hero-headline">
-              Smarter Flights.<br />
-              <span className="text-[#38BDF8]">Better Journeys.</span>
+            <h1 className="login-hero-headline text-[38px] sm:text-[48px] lg:text-[54px] font-black text-white leading-[1.08] tracking-tight">
+              Track fares.<br />
+              Understand<br />
+              trends. <span className="text-[#00D2FF]">Travel</span><br />
+              <span className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#818CF8] bg-clip-text text-transparent login-headline-gradient">
+                smarter.
+              </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-slate-300 text-[15px] sm:text-[16px] leading-relaxed max-w-md mt-4">
+            <p className="login-hero-subtitle text-slate-300 text-[15px] sm:text-[16px] leading-relaxed max-w-md mt-4 transition-colors duration-300">
               AI-powered flight suggestions, best time to book, and return flight insights — all in one place.
             </p>
           </motion.div>
@@ -72,40 +76,40 @@ export function LoginPage() {
             className="grid grid-cols-3 gap-3 sm:gap-4 mt-8 max-w-lg"
           >
             {/* 1. AI Trip Suggester */}
-            <div className="flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
+            <div className="login-feature-card flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
+              <div className="login-feature-icon w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
                 <Sparkles size={19} />
               </div>
-              <span className="text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
+              <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
                 AI Trip Suggester
               </span>
-              <span className="text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
+              <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
                 Smart routes & flight options
               </span>
             </div>
 
             {/* 2. Best Time to Book */}
-            <div className="flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
+            <div className="login-feature-card flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
+              <div className="login-feature-icon w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
                 <Calendar size={19} />
               </div>
-              <span className="text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
+              <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
                 Best Time to Book
               </span>
-              <span className="text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
+              <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
                 Save more with AI insights
               </span>
             </div>
 
             {/* 3. Return Flight Optimizer */}
-            <div className="flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
+            <div className="login-feature-card flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
+              <div className="login-feature-icon w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
                 <Repeat size={19} />
               </div>
-              <span className="text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
+              <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
                 Return Flight Optimizer
               </span>
-              <span className="text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
+              <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
                 Get the best time & price
               </span>
             </div>
@@ -118,14 +122,14 @@ export function LoginPage() {
             transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
             className="mt-8 flex items-center gap-3 select-none"
           >
-            <span className="font-['Caveat',cursive] text-[28px] sm:text-[32px] text-[#38BDF8] font-bold leading-[1.05] drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]">
+            <span className="login-script-text font-['Caveat',cursive] text-[28px] sm:text-[32px] text-[#38BDF8] font-bold leading-[1.05] drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]">
               Your Next Trip<br />Starts Here
             </span>
             <div className="relative w-16 h-8 flex items-center -ml-1">
-              <svg className="w-16 h-8 text-[#38BDF8]" viewBox="0 0 70 30" fill="none">
+              <svg className="login-script-arrow w-16 h-8 text-[#38BDF8]" viewBox="0 0 70 30" fill="none">
                 <path d="M 5 22 Q 35 28 55 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="3 3" />
               </svg>
-              <Plane size={18} className="text-[#38BDF8] fill-[#38BDF8] transform -rotate-12 absolute right-0 top-0" />
+              <Plane size={18} className="login-script-plane text-[#38BDF8] fill-[#38BDF8] transform -rotate-12 absolute right-0 top-0" />
             </div>
           </motion.div>
 

@@ -307,37 +307,212 @@ html.light .hover\:bg-white\/5:hover {
 
 /* Login Page Light Mode Specific Adjustments */
 html.light .login-page-bg {
-  background-color: #F1F5F9 !important;
+  background-color: #F8FAFC !important;
+}
+
+html.light .login-bg-image {
+  opacity: 0.32 !important;
+  mix-blend-mode: multiply !important;
+  filter: brightness(1.05) contrast(1.1) !important;
 }
 
 html.light .login-gradient-overlay {
-  background: linear-gradient(to right, rgba(241, 245, 249, 0.92) 0%, rgba(248, 250, 252, 0.75) 50%, rgba(255, 255, 255, 0.95) 100%) !important;
+  background: linear-gradient(to right, rgba(248, 250, 252, 0.95) 0%, rgba(248, 250, 252, 0.82) 50%, rgba(255, 255, 255, 0.94) 100%) !important;
 }
 
-html.light .login-card-container {
-  background-color: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(203, 213, 225, 0.8) !important;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+html.light .login-ambient-orb {
+  opacity: 0.25 !important;
 }
 
-html.light .login-card-container input {
-  background-color: #F8FAFC !important;
-  border-color: #CBD5E1 !important;
+html.light .login-hero-headline {
   color: #0F172A !important;
 }
 
-html.light .login-card-container input:focus {
-  background-color: #FFFFFF !important;
-  border-color: #1788FF !important;
+html.light .login-hero-headline .text-\[\#00D2FF\] {
+  color: #0284C7 !important;
 }
 
-html.light .login-demo-box {
-  background-color: #F8FAFC !important;
+html.light .login-headline-gradient {
+  background-image: linear-gradient(to right, #2563EB, #4F46E5) !important;
+}
+
+html.light .login-hero-subtitle {
+  color: #475569 !important;
+}
+
+/* Feature Cards on Left */
+html.light .login-feature-card {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04) !important;
+}
+
+html.light .login-feature-card:hover {
+  border-color: #38BDF8 !important;
+  box-shadow: 0 12px 30px -4px rgba(14, 165, 233, 0.18) !important;
+}
+
+html.light .login-feature-icon {
+  background-color: #EFF6FF !important;
+  border-color: #BFDBFE !important;
+  color: #0284C7 !important;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.15) !important;
+}
+
+html.light .login-feature-title {
+  color: #0F172A !important;
+}
+
+html.light .login-feature-desc {
+  color: #64748B !important;
+}
+
+/* Handwritten Cursive Accent */
+html.light .login-script-text {
+  color: #0284C7 !important;
+  text-shadow: 0 0 12px rgba(2, 132, 199, 0.25) !important;
+}
+
+html.light .login-script-arrow,
+html.light .login-script-plane {
+  color: #0284C7 !important;
+  fill: #0284C7 !important;
+}
+
+/* Header Controls */
+html.light .theme-toggle-btn,
+html.light .lang-selector-btn {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .theme-toggle-track {
+  background-color: #E2E8F0 !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light .lang-selector-menu {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Login Card Container */
+html.light .login-card-container {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+}
+
+html.light .login-card-title {
+  color: #0F172A !important;
+}
+
+html.light .login-card-subtitle {
+  color: #64748B !important;
+}
+
+/* Segmented Tab Switcher */
+html.light .login-tab-container {
+  background-color: #F1F5F9 !important;
   border-color: #E2E8F0 !important;
 }
 
-html.light .login-demo-btn {
+html.light .login-tab-inactive {
+  color: #64748B !important;
+}
+
+html.light .login-tab-inactive:hover {
+  color: #0F172A !important;
+}
+
+html.light .login-tab-active {
+  background-color: #00A3FF !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 12px rgba(0, 163, 255, 0.35) !important;
+}
+
+/* Inputs & Forms */
+html.light .login-input-row {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light .login-input-row:focus-within {
   background-color: #FFFFFF !important;
+  border-color: #00A3FF !important;
+  box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.15) !important;
+}
+
+html.light .login-input-field {
+  background-color: transparent !important;
+  color: #0F172A !important;
+}
+
+html.light .login-input-field::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light .login-input-icon {
+  color: #64748B !important;
+}
+
+html.light .login-select-option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+html.light .login-remember-text {
+  color: #475569 !important;
+}
+
+/* Divider */
+html.light .login-divider-line {
+  background-color: #E2E8F0 !important;
+}
+
+html.light .login-divider-text {
+  color: #94A3B8 !important;
+}
+
+/* Social Buttons */
+html.light .login-social-btn {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .login-social-btn:hover {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light .login-social-text {
+  color: #0F172A !important;
+}
+
+html.light .login-apple-icon {
+  fill: #0F172A !important;
+}
+
+/* Legal Terms */
+html.light .login-terms-text {
+  color: #64748B !important;
+}
+
+/* Demo Credentials Accordion */
+html.light .login-demo-section {
+  border-color: #E2E8F0 !important;
+}
+
+html.light .login-demo-title {
+  color: #475569 !important;
+}
+
+html.light .login-demo-btn {
+  background-color: #F8FAFC !important;
   border-color: #E2E8F0 !important;
 }
 
@@ -346,13 +521,12 @@ html.light .login-demo-btn:hover {
   border-color: #93C5FD !important;
 }
 
-html.light .login-tab-container {
-  background-color: #F1F5F9 !important;
-  border-color: #E2E8F0 !important;
+html.light .login-demo-btn-title {
+  color: #0F172A !important;
 }
 
-html.light .login-hero-headline {
-  color: #0F172A !important;
+html.light .login-demo-btn-sub {
+  color: #64748B !important;
 }
 
 /* Radar Sweep Animation */
