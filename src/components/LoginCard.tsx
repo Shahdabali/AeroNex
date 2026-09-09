@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Lock, Eye, EyeOff, User, 
   CheckCircle2, AlertCircle, FlaskConical, 
-  BarChart3, Shield, ArrowRight, ChevronUp, ChevronDown 
+  BarChart3, Shield, ArrowRight, ChevronUp, ChevronDown, Sparkles 
 } from 'lucide-react';
-import { AirFareXLogo } from './AirFareXLogo';
+import { AeroNexLogo } from './AeroNexLogo';
 import { authService } from '../services/authService';
 import { useAppContext } from '../context/AppProvider';
 
@@ -50,7 +51,7 @@ export function LoginCard() {
       }
 
       login(response.user, response.token);
-      setSuccess("Authentication successful! Welcome to AirFareX.");
+      setSuccess("Authentication successful! Welcome to AeroNex.");
       setTimeout(() => {
         navigate('/dashboard');
       }, 350);
@@ -76,7 +77,7 @@ export function LoginCard() {
     try {
       const response = await authService.register(fullName, signupEmail, signupPassword, role);
       login(response.user, response.token);
-      setSuccess("Account successfully created! Entering AirFareX dashboard...");
+      setSuccess("Account successfully created! Welcome to AeroNex.");
       setTimeout(() => {
         navigate('/dashboard');
       }, 350);
@@ -111,7 +112,6 @@ export function LoginCard() {
         navigate('/dashboard');
       }, 250);
     } catch {
-      // Direct fallback
       const fallbackUser = {
         id: `demo_${demoRole.toLowerCase()}`,
         name: demoRole === 'Admin' ? 'Operations Admin' : demoRole === 'Researcher' ? 'AeroNex Analyst' : 'Shadab Ali',
@@ -164,11 +164,16 @@ export function LoginCard() {
   };
 
   return (
-    <div className="w-full max-w-[490px] rounded-[28px] bg-[#06112A]/85 backdrop-blur-2xl border border-slate-700/60 p-7 sm:p-9 shadow-[0_25px_70px_rgba(0,0,0,0.65)] flex flex-col justify-between relative transition-all">
+    <motion.div 
+      initial={{ opacity: 0, y: 35, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="login-card-container w-full max-w-[490px] rounded-[28px] bg-[#06112A]/85 backdrop-blur-2xl border border-slate-700/60 p-7 sm:p-9 shadow-[0_25px_70px_rgba(0,0,0,0.65)] flex flex-col justify-between relative transition-all"
+    >
       
-      {/* 1. Card Top Brand */}
+      {/* 1. Card Top Brand: Official AERONEX Logo */}
       <div className="flex justify-center mb-6">
-        <AirFareXLogo size={36} showSubtitle={true} className="justify-center" />
+        <AeroNexLogo size={46} showTagline={true} className="justify-center" />
       </div>
 
       {/* 2. Welcome Title */}
@@ -178,26 +183,38 @@ export function LoginCard() {
         </h2>
         <p className="text-slate-400 text-xs mt-1">
           {isSignUpMode 
-            ? 'Join AirFareX for live aviation price tracking across India' 
-            : 'Sign in to AirFareX'
+            ? 'Join AeroNex for live aviation price tracking across India' 
+            : 'Sign in to AeroNex'
           }
         </p>
       </div>
 
       {/* Error & Success alerts */}
-      {error && (
-        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-red-400 text-xs flex items-center gap-2 animate-in fade-in">
-          <AlertCircle size={15} className="shrink-0 text-red-400" />
-          <span>{error}</span>
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -6 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -6 }}
+            className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-red-400 text-xs flex items-center gap-2"
+          >
+            <AlertCircle size={15} className="shrink-0 text-red-400" />
+            <span>{error}</span>
+          </motion.div>
+        )}
 
-      {success && (
-        <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 size={15} className="shrink-0 text-emerald-400" />
-          <span>{success}</span>
-        </div>
-      )}
+        {success && (
+          <motion.div 
+            initial={{ opacity: 0, y: -6 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -6 }}
+            className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2"
+          >
+            <CheckCircle2 size={15} className="shrink-0 text-emerald-400" />
+            <span>{success}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 3. SIGN IN FORM */}
       {!isSignUpMode ? (
@@ -266,17 +283,19 @@ export function LoginCard() {
           </div>
 
           {/* Submit button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={isLoading}
-            className="w-full h-[46px] mt-1 rounded-2xl bg-gradient-to-r from-[#1788FF] via-[#3B82F6] to-[#4E55F5] hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            className="w-full h-[46px] mt-1 rounded-2xl bg-gradient-to-r from-[#1788FF] via-[#3B82F6] to-[#4E55F5] hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <span className="flex items-center gap-1.5">Sign In <ArrowRight size={15} /></span>
+              <span className="flex items-center gap-1.5">Sign In to AeroNex <ArrowRight size={15} /></span>
             )}
-          </button>
+          </motion.button>
         </form>
       ) : (
         /* 4. SIGN UP FORM */
@@ -343,17 +362,19 @@ export function LoginCard() {
             </div>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={isLoading}
-            className="w-full h-[44px] mt-1.5 rounded-2xl bg-gradient-to-r from-[#1788FF] via-[#3B82F6] to-[#4E55F5] hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full h-[44px] mt-1.5 rounded-2xl bg-gradient-to-r from-[#1788FF] via-[#3B82F6] to-[#4E55F5] hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <span>Create Account & Sign In →</span>
             )}
-          </button>
+          </motion.button>
         </form>
       )}
 
@@ -368,10 +389,12 @@ export function LoginCard() {
 
       {/* 6. Social Logins */}
       <div className="flex gap-3">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => handleSocial('Google')}
-          className="flex-1 h-[42px] rounded-xl bg-[#081533]/80 hover:bg-[#0C1F4A] border border-slate-700 hover:border-slate-500 text-white text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+          className="flex-1 h-[42px] rounded-xl bg-[#081533]/80 hover:bg-[#0C1F4A] border border-slate-700 hover:border-slate-500 text-white text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -380,12 +403,14 @@ export function LoginCard() {
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
           Google
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => handleSocial('Microsoft')}
-          className="flex-1 h-[42px] rounded-xl bg-[#081533]/80 hover:bg-[#0C1F4A] border border-slate-700 hover:border-slate-500 text-white text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+          className="flex-1 h-[42px] rounded-xl bg-[#081533]/80 hover:bg-[#0C1F4A] border border-slate-700 hover:border-slate-500 text-white text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm"
         >
           <svg className="w-4 h-4" viewBox="0 0 21 21">
             <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
@@ -394,7 +419,7 @@ export function LoginCard() {
             <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
           </svg>
           Microsoft
-        </button>
+        </motion.button>
       </div>
 
       {/* 7. Toggle between Sign In & Sign Up */}
@@ -424,16 +449,17 @@ export function LoginCard() {
         )}
       </div>
 
-      {/* 8. Demo Access Accordion / Box (Matching Screenshot) */}
+      {/* 8. Demo Access Accordion / Box */}
       <div className="mt-4 pt-3 border-t border-slate-800/80 text-left">
-        <div className="bg-[#040D24]/90 border border-blue-500/25 rounded-2xl p-3.5 shadow-inner">
+        <div className="login-demo-box bg-[#040D24]/90 border border-blue-500/25 rounded-2xl p-3.5 shadow-inner">
           <div 
             onClick={() => setShowDemoAccess(!showDemoAccess)}
             className="flex items-center justify-between cursor-pointer select-none"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
               <FlaskConical size={14} className="text-cyan-400" />
-              <span>Demo Access</span>
+              <span>One-Click Demo Access</span>
+              <Sparkles size={11} className="text-amber-400 animate-pulse" />
             </div>
             {showDemoAccess ? (
               <ChevronUp size={14} className="text-slate-400" />
@@ -442,51 +468,65 @@ export function LoginCard() {
             )}
           </div>
 
-          {showDemoAccess && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 animate-in fade-in">
-              {/* Passenger Demo */}
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('Passenger')}
-                className="p-2.5 rounded-xl bg-[#091738]/80 hover:bg-blue-500/20 border border-slate-700/80 hover:border-blue-500/50 text-left transition-all cursor-pointer group"
+          <AnimatePresence>
+            {showDemoAccess && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 overflow-hidden"
               >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <User size={13} className="text-cyan-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-[11px] font-bold text-white block truncate">Passenger Demo</span>
-                </div>
-                <span className="text-[9px] text-slate-400 block truncate">Explore as a traveler</span>
-              </button>
+                {/* Passenger Demo */}
+                <motion.button
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  onClick={() => handleDemoLogin('Passenger')}
+                  className="login-demo-btn p-2.5 rounded-xl bg-[#091738]/80 hover:bg-blue-500/20 border border-slate-700/80 hover:border-blue-500/50 text-left transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <User size={13} className="text-cyan-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] font-bold text-white block truncate">Passenger Demo</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 block truncate">Explore as a traveler</span>
+                </motion.button>
 
-              {/* Researcher Demo */}
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('Researcher')}
-                className="p-2.5 rounded-xl bg-[#091738]/80 hover:bg-purple-500/20 border border-slate-700/80 hover:border-purple-500/50 text-left transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <BarChart3 size={13} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-[11px] font-bold text-white block truncate">Researcher Demo</span>
-                </div>
-                <span className="text-[9px] text-slate-400 block truncate">View analytics dashboard</span>
-              </button>
+                {/* Researcher Demo */}
+                <motion.button
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  onClick={() => handleDemoLogin('Researcher')}
+                  className="login-demo-btn p-2.5 rounded-xl bg-[#091738]/80 hover:bg-purple-500/20 border border-slate-700/80 hover:border-purple-500/50 text-left transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <BarChart3 size={13} className="text-purple-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] font-bold text-white block truncate">Researcher Demo</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 block truncate">View analytics dashboard</span>
+                </motion.button>
 
-              {/* Admin Demo */}
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('Admin')}
-                className="p-2.5 rounded-xl bg-[#091738]/80 hover:bg-emerald-500/20 border border-slate-700/80 hover:border-emerald-500/50 text-left transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Shield size={13} className="text-emerald-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-[11px] font-bold text-white block truncate">Admin Demo</span>
-                </div>
-                <span className="text-[9px] text-slate-400 block truncate">Manage system</span>
-              </button>
-            </div>
-          )}
+                {/* Admin Demo */}
+                <motion.button
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  onClick={() => handleDemoLogin('Admin')}
+                  className="login-demo-btn p-2.5 rounded-xl bg-[#091738]/80 hover:bg-emerald-500/20 border border-slate-700/80 hover:border-emerald-500/50 text-left transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Shield size={13} className="text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] font-bold text-white block truncate">Admin Demo</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 block truncate">Manage system</span>
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-    </div>
+    </motion.div>
   );
 }

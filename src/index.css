@@ -70,48 +70,84 @@ html.light aside a.text-slate-400:hover {
 /* Header Bar */
 html.light header,
 html.light header.bg-\[rgba\(2\,10\,29\,0\.8\)\] {
-  background-color: rgba(255, 255, 255, 0.85) !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
   border-color: #E2E8F0 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Card Backgrounds (All Variants) */
+/* All Dark Navy Containers & Cards */
 html.light .bg-\[rgba\(10\,24\,56\,0\.6\)\],
+html.light .bg-\[rgba\(10\,24\,56\,0\.65\)\],
+html.light .bg-\[rgba\(10\,24\,56\,0\.7\)\],
+html.light .bg-\[rgba\(10\,24\,56\,0\.8\)\],
 html.light .bg-\[rgba\(5\,20\,52\,0\.75\)\],
+html.light .bg-\[rgba\(5\,20\,52\,0\.85\)\],
 html.light .bg-\[rgba\(5\,15\,40\,0\.5\)\],
 html.light .bg-\[rgba\(10\,20\,50\,0\.4\)\],
 html.light .bg-\[rgba\(11\,27\,66\,0\.5\)\],
+html.light .bg-\[rgba\(11\,27\,66\,0\.6\)\],
 html.light [class*="bg-[rgba(10,24,56"],
 html.light [class*="bg-[rgba(5,20,52"],
 html.light [class*="bg-[rgba(5,15,40"],
 html.light [class*="bg-[rgba(10,20,50"],
-html.light [class*="bg-[rgba(11,27,66"] {
-  background-color: #FFFFFF !important;
-  border-color: #E2E8F0 !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
-}
-
-/* Sub-containers, nested blocks, and dark panels */
+html.light [class*="bg-[rgba(11,27,66"],
 html.light .bg-\[\#0A1838\],
 html.light .bg-\[\#0C1F4A\],
 html.light .bg-\[\#0D1E45\],
 html.light .bg-\[\#132A60\],
 html.light .bg-\[\#06112a\],
+html.light .bg-\[\#06112A\],
 html.light .bg-\[\#061A42\],
 html.light .bg-\[\#0B1B42\],
+html.light .bg-\[\#050D24\],
+html.light .bg-\[\#040D24\],
+html.light .bg-\[\#051434\],
+html.light .bg-\[\#07132e\],
+html.light .bg-\[\#081533\],
+html.light .bg-\[\#091738\],
+html.light .bg-\[\#131C38\],
+html.light .bg-\[\#030B1E\],
+html.light .bg-\[\#030C22\],
+html.light .bg-\[\#03091B\],
 html.light [class*="bg-[#0A1838]"],
 html.light [class*="bg-[#06112a]"],
+html.light [class*="bg-[#06112A]"],
 html.light [class*="bg-[#061A42]"],
-html.light [class*="bg-[#0B1B42]"] {
+html.light [class*="bg-[#0B1B42]"],
+html.light [class*="bg-[#050D24]"],
+html.light [class*="bg-[#040D24]"],
+html.light [class*="bg-[#051434]"],
+html.light [class*="bg-[#07132e]"],
+html.light [class*="bg-[#081533]"],
+html.light [class*="bg-[#091738]"],
+html.light [class*="bg-[#131C38]"],
+html.light [class*="bg-[#030B1E]"],
+html.light [class*="bg-[#030C22]"],
+html.light [class*="bg-[#03091B]"] {
   background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Subtle backgrounds & pills */
+html.light .bg-\[\#0A1838\]\/80,
+html.light .bg-\[\#0A1838\]\/50,
+html.light .bg-\[\#040D24\]\/80,
+html.light .bg-\[\#040D24\]\/90,
+html.light .bg-\[\#050D24\]\/80 {
+  background-color: #F8FAFC !important;
   border-color: #E2E8F0 !important;
 }
 
-/* Pill tags and subtle backgrounds */
-html.light .bg-\[\#0A1838\]\/80,
-html.light .bg-\[\#0A1838\]\/50,
-html.light .bg-\[\#040D24\]\/80 {
-  background-color: #F8FAFC !important;
+/* Dropdowns, Modals, and Popovers */
+html.light [class*="top-\["],
+html.light .shadow-2xl,
+html.light [class*="shadow-2xl"] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06) !important;
 }
 
 /* Input Fields, Selects, and Textareas */
@@ -172,10 +208,15 @@ html.light .text-slate-500 {
 /* Borders */
 html.light .border-slate-800,
 html.light .border-slate-700,
+html.light .border-slate-600,
 html.light [class*="border-slate-800"],
 html.light [class*="border-slate-700"],
 html.light [class*="border-blue-500/20"],
-html.light [class*="border-blue-500/30"] {
+html.light [class*="border-blue-500/25"],
+html.light [class*="border-blue-500/30"],
+html.light [class*="border-blue-500/40"],
+html.light [class*="border-purple-500/30"],
+html.light [class*="border-cyan-500/40"] {
   border-color: #E2E8F0 !important;
 }
 
@@ -200,24 +241,6 @@ html.light table tbody tr:hover {
 
 html.light table td {
   color: #1E293B !important;
-}
-
-/* Dropdown Menus and Popovers */
-html.light .top-\[48px\],
-html.light .top-\[50px\],
-html.light .top-\[55px\] {
-  background-color: #FFFFFF !important;
-  border-color: #E2E8F0 !important;
-  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06) !important;
-}
-
-html.light .top-\[55px\] button {
-  color: #334155 !important;
-}
-
-html.light .top-\[55px\] button:hover {
-  background-color: #F1F5F9 !important;
-  color: #0F172A !important;
 }
 
 /* Dashboard Welcome Banner in Light Mode */
@@ -282,3 +305,43 @@ html.light .hover\:bg-white\/5:hover {
   background-color: #F1F5F9 !important;
 }
 
+/* Login Page Light Mode Specific Adjustments */
+html.light .login-page-bg {
+  background-color: #F1F5F9 !important;
+}
+
+html.light .login-gradient-overlay {
+  background: linear-gradient(to right, rgba(241, 245, 249, 0.92) 0%, rgba(248, 250, 252, 0.75) 50%, rgba(255, 255, 255, 0.95) 100%) !important;
+}
+
+html.light .login-card-container {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+}
+
+html.light .login-card-container input {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light .login-card-container input:focus {
+  background-color: #FFFFFF !important;
+  border-color: #1788FF !important;
+}
+
+html.light .login-demo-box {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .login-demo-btn {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .login-demo-btn:hover {
+  background-color: #EFF6FF !important;
+  border-color: #93C5FD !important;
+}
