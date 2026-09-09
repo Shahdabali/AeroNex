@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Search, MapPin, Calendar, Users, Briefcase } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { api } from '../services/api';
 
 export function FlightSearch() {
   usePageTitle('Flight Search');
@@ -11,11 +12,7 @@ export function FlightSearch() {
 
   const { data: flights, isLoading } = useQuery({
     queryKey: ['flights', searchParams],
-    queryFn: async () => {
-      const res = await fetch(`http://localhost:5000/api/flights/search?from=${searchParams.from}&to=${searchParams.to}&date=${searchParams.date}`);
-      if (!res.ok) throw new Error('Failed to fetch flights');
-      return res.json();
-    },
+    queryFn: () => api.searchFlights(searchParams.from, searchParams.to, searchParams.date),
     enabled: hasSearched,
   });
 
