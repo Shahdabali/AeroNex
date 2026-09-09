@@ -41,11 +41,11 @@ export function Sidebar() {
               className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
                 isActive 
                   ? 'bg-[#1788FF] text-white shadow-[0_0_15px_rgba(23,136,255,0.3)]' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >
               <div className="flex items-center gap-3">
-                <item.icon size={18} className={isActive ? 'text-white' : item.label.includes('AI') ? 'text-cyan-400' : 'text-slate-400'} />
+                <item.icon size={18} className={isActive ? 'text-white' : item.label.includes('AI') ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400'} />
                 <span className="text-[14px] font-medium">{item.label}</span>
               </div>
               {item.badge && (
@@ -54,7 +54,7 @@ export function Sidebar() {
                 </div>
               )}
               {item.badgeText && (
-                <div className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
+                <div className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
                   {item.badgeText}
                 </div>
               )}
@@ -66,16 +66,16 @@ export function Sidebar() {
       <div className="p-4 mt-auto">
         <div className="w-full rounded-2xl bg-gradient-to-br from-[#061B42] to-[#030E26] p-4 border border-blue-500/25 relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               {t.sidebarLiveStream}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">5s</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">5s</span>
           </div>
-          <h4 className="text-white font-bold text-[13px] flex items-center gap-1.5">
+          <h4 className="text-slate-900 dark:text-white font-bold text-[13px] flex items-center gap-1.5">
             <Activity size={14} className="text-[#1788FF]" /> {t.sidebarRealtimeFeed}
           </h4>
-          <p className="text-slate-400 text-[11px] mt-1 leading-snug">
+          <p className="text-slate-600 dark:text-slate-400 text-[11px] mt-1 leading-snug">
             {t.sidebarFeedDesc}
           </p>
         </div>

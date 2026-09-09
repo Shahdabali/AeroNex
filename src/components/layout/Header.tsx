@@ -166,17 +166,17 @@ export function Header() {
                             <Plane size={14} />
                           </div>
                           <div>
-                            <span className="text-xs font-medium text-slate-200 group-hover:text-white block">
+                            <span className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-[#1788FF] dark:group-hover:text-white block">
                               {r.label}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                               {r.from} ➔ {r.to}
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-bold text-white block">{r.fare}</span>
-                          <span className={`text-[10px] font-medium ${r.trend.startsWith('+') ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          <span className="text-xs font-bold text-slate-900 dark:text-white block">{r.fare}</span>
+                          <span className={`text-[10px] font-medium ${r.trend.startsWith('+') ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                             {r.trend}
                           </span>
                         </div>
@@ -188,7 +188,7 @@ export function Header() {
                 {/* Section 2: Quick Features Navigation */}
                 <div>
                   <div className="px-2 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <Sparkles size={12} className="text-amber-400" /> Platform Direct Access
                     </span>
                   </div>
@@ -208,10 +208,10 @@ export function Header() {
                             <Icon size={14} />
                           </div>
                           <div className="min-w-0">
-                            <span className="text-xs font-semibold text-slate-200 group-hover:text-white block truncate">
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-[#1788FF] dark:group-hover:text-white block truncate">
                               {item.label}
                             </span>
-                            <span className="text-[10px] text-slate-400 block truncate">
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
                               {item.desc}
                             </span>
                           </div>
@@ -224,7 +224,7 @@ export function Header() {
                 {/* Section 3: Major Hub Airports */}
                 <div>
                   <div className="px-2 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <MapPin size={12} /> Popular Indian Hubs
                     </span>
                   </div>
@@ -233,9 +233,9 @@ export function Header() {
                       <button
                         key={airport.code}
                         onClick={() => handleAirportSelect(airport.code)}
-                        className="px-2.5 py-1 rounded-lg bg-[#0C1E47] hover:bg-[#1788FF]/30 border border-slate-700/70 hover:border-[#1788FF]/50 text-xs text-slate-200 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-[#0C1E47] hover:bg-blue-500/15 border border-slate-700/70 hover:border-[#1788FF]/50 text-xs text-slate-800 dark:text-slate-200 hover:text-[#1788FF] dark:hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
                       >
-                        <span className="font-mono font-bold text-cyan-400">{airport.code}</span>
+                        <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">{airport.code}</span>
                         <span>{airport.city}</span>
                       </button>
                     ))}
@@ -348,9 +348,9 @@ export function Header() {
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative cursor-pointer p-2 rounded-full hover:bg-white/5 transition-colors"
           >
-            <Bell size={20} className="text-slate-300 hover:text-white transition-colors" />
+            <Bell size={20} className="text-slate-500 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white transition-colors" />
             {unreadCount > 0 && (
-              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white animate-pulse">
+              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white animate-pulse">
                 {unreadCount}
               </div>
             )}
@@ -358,12 +358,12 @@ export function Header() {
 
           {showNotifications && (
             <div className="absolute right-0 top-[50px] w-80 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-4 z-50">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <span className="text-white font-bold text-sm">{t.notifications}</span>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <span className="text-slate-900 dark:text-white font-bold text-sm">{t.notifications}</span>
                 {unreadCount > 0 && (
                   <button 
                     onClick={() => setUnreadCount(0)} 
-                    className="text-xs text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-blue-500 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Check size={12} /> {t.markRead}
                   </button>
@@ -372,8 +372,8 @@ export function Header() {
               <div className="flex flex-col gap-2 mt-3 max-h-60 overflow-y-auto">
                 {notifications.map((notif: any, i: number) => (
                   <div key={i} className="p-2.5 rounded-xl bg-[#040D24]/80 border border-slate-800/60 hover:border-blue-500/30 transition-all">
-                    <p className="text-xs text-slate-200 leading-snug">{notif.message || notif.title}</p>
-                    <span className="text-[10px] text-slate-500 mt-1 block">Real-time alert</span>
+                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">{notif.message || notif.title}</p>
+                    <span className="text-[10px] text-slate-400 mt-1 block">Just now</span>
                   </div>
                 ))}
               </div>
@@ -384,7 +384,7 @@ export function Header() {
         <ThemeToggle />
         <LanguageSelector />
 
-        {/* Profile Menu */}
+        {/* User Profile */}
         <div className="relative" ref={profileRef}>
           <div 
             onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -398,8 +398,8 @@ export function Header() {
               />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[13px] font-semibold text-white leading-tight">{user?.name || 'Shadab Ali'}</span>
-              <span className="text-[11px] text-slate-400 leading-tight">{user?.role || 'Passenger'}</span>
+              <span className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight">{user?.name || 'Shadab Ali'}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{user?.role || 'Passenger'}</span>
             </div>
             <ChevronDown size={14} className={`text-slate-400 ml-1 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
           </div>
@@ -408,33 +408,33 @@ export function Header() {
             <div className="absolute right-0 top-[55px] w-56 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1">
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white hover:bg-blue-500/15 rounded-xl transition-all text-left cursor-pointer"
               >
                 <User size={16} className="text-[#1788FF]" />
                 {t.profileAccount}
               </button>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/my-flights'); }}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white hover:bg-blue-500/15 rounded-xl transition-all text-left cursor-pointer"
               >
                 <Bookmark size={16} className="text-purple-400" />
                 {t.mySavedFlights}
               </button>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white hover:bg-blue-500/15 rounded-xl transition-all text-left cursor-pointer"
               >
                 <Settings size={16} className="text-emerald-400" />
                 {t.headerSettings}
               </button>
-              <div className="h-px bg-slate-800 my-1" />
+              <div className="h-px bg-slate-200 dark:bg-slate-800 my-1" />
               <button 
                 onClick={() => {
                   setShowProfileMenu(false);
                   logout();
                   navigate('/login');
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-left cursor-pointer"
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-left cursor-pointer"
               >
                 <LogOut size={16} />
                 {t.signOut}

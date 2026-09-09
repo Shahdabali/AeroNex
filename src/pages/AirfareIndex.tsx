@@ -30,11 +30,11 @@ export function AirfareIndex() {
     <DashboardLayout>
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">Airfare Index</h1>
-          <div className="flex bg-[#0A1838] border border-slate-700 rounded-xl overflow-hidden">
-            <button className="px-4 py-2 text-white bg-blue-500/20">24h</button>
-            <button className="px-4 py-2 text-slate-400 hover:text-white transition-colors">7d</button>
-            <button className="px-4 py-2 text-slate-400 hover:text-white transition-colors">30d</button>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Airfare Index</h1>
+          <div className="flex bg-[#0A1838] border border-slate-700/60 rounded-xl overflow-hidden">
+            <button className="px-4 py-2 text-white bg-[#1788FF] font-semibold text-xs shadow-sm cursor-pointer">24h</button>
+            <button className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-colors cursor-pointer">7d</button>
+            <button className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-colors cursor-pointer">30d</button>
           </div>
         </div>
 

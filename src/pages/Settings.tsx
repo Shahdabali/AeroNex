@@ -149,7 +149,7 @@ export function Settings() {
                       className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
                         language === 'English' 
                           ? 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                       }`}
                     >
                       <span>🇮🇳</span> English
@@ -160,13 +160,13 @@ export function Settings() {
                       className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
                         language === 'Hindi' 
                           ? 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                       }`}
                     >
                       <span>🇮🇳</span> हिन्दी
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-snug">
                     {t.languageDesc}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export function Settings() {
                       className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all cursor-pointer ${
                         theme === 'dark' 
                           ? 'bg-[#1788FF] text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       <Moon className="w-4 h-4" /> {t.dark}
@@ -192,7 +192,7 @@ export function Settings() {
                       className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all cursor-pointer ${
                         theme === 'light' 
                           ? 'bg-white text-blue-600 shadow-md font-bold' 
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       <Sun className="w-4 h-4" /> {t.light}
@@ -232,7 +232,7 @@ export function Settings() {
                       checked={emailAlerts}
                       onChange={(e) => setEmailAlerts(e.target.checked)}
                     />
-                    <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1788FF]"></div>
+                    <div className="w-11 h-6 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1788FF]"></div>
                   </label>
                 </div>
                 
@@ -248,7 +248,7 @@ export function Settings() {
                       checked={pushAlerts}
                       onChange={(e) => setPushAlerts(e.target.checked)}
                     />
-                    <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1788FF]"></div>
+                    <div className="w-11 h-6 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1788FF]"></div>
                   </label>
                 </div>
               </div>

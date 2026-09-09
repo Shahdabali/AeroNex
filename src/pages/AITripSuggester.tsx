@@ -483,11 +483,11 @@ export function AITripSuggester() {
                             {a.code}
                           </span>
                           <div>
-                            <span className="text-xs font-semibold text-white block">{a.city}</span>
-                            <span className="text-[10px] text-slate-400 block truncate max-w-[190px]">{a.name}</span>
+                            <span className="text-xs font-semibold text-slate-900 dark:text-white block">{a.city}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[190px]">{a.name}</span>
                           </div>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
                           {a.region}
                         </span>
                       </div>
@@ -565,11 +565,11 @@ export function AITripSuggester() {
                             {a.code}
                           </span>
                           <div>
-                            <span className="text-xs font-semibold text-white block">{a.city}</span>
-                            <span className="text-[10px] text-slate-400 block truncate max-w-[190px]">{a.name}</span>
+                            <span className="text-xs font-semibold text-slate-900 dark:text-white block">{a.city}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[190px]">{a.name}</span>
                           </div>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
                           {a.tag}
                         </span>
                       </div>

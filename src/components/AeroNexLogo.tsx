@@ -49,7 +49,7 @@ export function AeroNexLogo({
           />
         </div>
         <div className="flex flex-col text-left">
-          <span className="text-2xl font-black tracking-wider text-white font-['Inter',sans-serif] flex items-center leading-none">
+          <span className="text-2xl font-black tracking-wider text-slate-900 dark:text-white font-['Inter',sans-serif] flex items-center leading-none">
             AERO<span className="bg-gradient-to-r from-cyan-400 via-[#1788FF] to-[#4E55F5] bg-clip-text text-transparent">NEX</span>
           </span>
         </div>
@@ -60,7 +60,7 @@ export function AeroNexLogo({
   // Full default variant
   return (
     <div className={cn("flex items-center gap-3.5", className)}>
-      <div className="relative overflow-hidden rounded-2xl shrink-0 border border-blue-500/30 shadow-[0_0_20px_rgba(23,136,255,0.35)] bg-[#040D24]/60 p-0.5">
+      <div className="relative overflow-hidden rounded-2xl shrink-0 border border-blue-500/30 shadow-[0_0_20px_rgba(23,136,255,0.25)] bg-white/80 dark:bg-[#040D24]/60 p-0.5">
         <img 
           src="/assets/aeronex-icon.png" 
           alt="AeroNex Logo" 
@@ -72,14 +72,14 @@ export function AeroNexLogo({
         />
       </div>
       <div className="flex flex-col text-left">
-        <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-white flex items-center leading-none">
+        <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center leading-none">
           AERO<span className="bg-gradient-to-r from-cyan-400 via-[#1788FF] to-[#4E55F5] bg-clip-text text-transparent">NEX</span>
         </h1>
         {showTagline && (
-          <p className="text-[9px] font-bold tracking-[0.22em] text-cyan-400 uppercase mt-1 flex items-center gap-1.5 leading-tight">
-            <span className="w-3.5 h-[1px] bg-cyan-400/80 inline-block" />
+          <p className="text-[9px] font-bold tracking-[0.22em] text-cyan-700 dark:text-cyan-400 uppercase mt-1 flex items-center gap-1.5 leading-tight">
+            <span className="w-3.5 h-[1px] bg-cyan-600/80 dark:bg-cyan-400/80 inline-block" />
             FLY BEYOND LIMITS
-            <span className="w-3.5 h-[1px] bg-cyan-400/80 inline-block" />
+            <span className="w-3.5 h-[1px] bg-cyan-600/80 dark:bg-cyan-400/80 inline-block" />
           </p>
         )}
       </div>

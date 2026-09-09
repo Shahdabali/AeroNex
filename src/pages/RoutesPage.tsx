@@ -141,16 +141,16 @@ export function RoutesPage() {
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       {selectedRoute.origin} → {selectedRoute.destination}
-                      <span className="text-xs font-medium text-slate-400">AeroNex AI Route Analysis</span>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">AeroNex AI Route Analysis</span>
                     </h2>
-                    <p className="text-slate-400 text-xs">{selectedRoute.originName} to {selectedRoute.destName}</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs">{selectedRoute.originName} to {selectedRoute.destName}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setSelectedRoute(null)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -161,7 +161,7 @@ export function RoutesPage() {
                 {aiAnalysisMutation.isPending && (
                   <div className="py-12 flex flex-col items-center justify-center gap-3 text-center">
                     <div className="w-10 h-10 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-slate-200 text-sm font-semibold">AeroNex AI is performing corridor analysis...</p>
+                    <p className="text-slate-700 dark:text-slate-200 text-sm font-semibold">AeroNex AI is performing corridor analysis...</p>
                     <p className="text-slate-500 text-xs">Evaluating carrier pricing distributions and booking windows</p>
                   </div>
                 )}
@@ -169,10 +169,10 @@ export function RoutesPage() {
                 {aiAnalysisMutation.isError && (
                   <div className="py-8 flex flex-col items-center text-center gap-3">
                     <ShieldAlert className="w-10 h-10 text-red-400" />
-                    <p className="text-red-400 text-sm font-semibold">AeroNex AI analysis temporarily unavailable.</p>
+                    <p className="text-red-500 dark:text-red-400 text-sm font-semibold">AeroNex AI analysis temporarily unavailable.</p>
                     <button 
                       onClick={() => aiAnalysisMutation.mutate(`${selectedRoute.origin}-${selectedRoute.destination}`)}
-                      className="mt-2 px-4 py-1.5 rounded-lg bg-blue-500/20 border border-blue-500 text-white text-xs flex items-center gap-1.5 cursor-pointer hover:bg-blue-500/40 transition-all"
+                      className="mt-2 px-4 py-1.5 rounded-lg bg-blue-500/15 border border-blue-500 text-blue-600 dark:text-white text-xs flex items-center gap-1.5 cursor-pointer hover:bg-blue-500/30 transition-all"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       Retry Analysis
@@ -184,45 +184,45 @@ export function RoutesPage() {
                   <div className="flex flex-col gap-4">
                     {/* Key metrics grid */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-[#0A1838] p-3.5 rounded-xl border border-slate-800">
-                        <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
-                          <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
+                      <div className="bg-[#0A1838] p-3.5 rounded-xl border border-slate-700/50">
+                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs mb-1">
+                          <TrendingUp className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
                           Price Trajectory
                         </div>
-                        <div className="text-sm font-bold text-white">
+                        <div className="text-sm font-bold text-slate-900 dark:text-white">
                           {aiAnalysisMutation.data.priceTrend || 'Stable / Moderate Fluctuations'}
                         </div>
                       </div>
 
-                      <div className="bg-[#0A1838] p-3.5 rounded-xl border border-slate-800">
-                        <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
-                          <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                      <div className="bg-[#0A1838] p-3.5 rounded-xl border border-slate-700/50">
+                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs mb-1">
+                          <Calendar className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
                           Optimal Booking Window
                         </div>
-                        <div className="text-sm font-bold text-white">
+                        <div className="text-sm font-bold text-slate-900 dark:text-white">
                           {aiAnalysisMutation.data.bestBookingWindow || '14-21 days ahead'}
                         </div>
                       </div>
                     </div>
 
                     {/* Strategic recommendation */}
-                    <div className="bg-gradient-to-r from-blue-900/30 to-cyan-900/20 p-4 rounded-xl border border-cyan-500/30">
-                      <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider mb-1">
+                    <div className="bg-gradient-to-r from-blue-900/15 to-cyan-900/10 p-4 rounded-xl border border-cyan-500/30">
+                      <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 font-bold text-xs uppercase tracking-wider mb-1">
                         <Lightbulb className="w-4 h-4" />
                         Strategic Advice
                       </div>
-                      <p className="text-slate-200 text-sm leading-snug">
+                      <p className="text-slate-800 dark:text-slate-200 text-sm leading-snug">
                         {aiAnalysisMutation.data.recommendation}
                       </p>
                     </div>
 
                     {/* Deep explanation */}
-                    <div className="bg-[#0A1838] p-4 rounded-xl border border-slate-800">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Market Context</h4>
-                      <p className="text-slate-300 text-xs leading-relaxed">
+                    <div className="bg-[#0A1838] p-4 rounded-xl border border-slate-700/50">
+                      <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Market Context</h4>
+                      <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
                         {aiAnalysisMutation.data.explanation}
                       </p>
-                      <p className="text-slate-400 text-xs mt-2 pt-2 border-t border-slate-800/80">
+                      <p className="text-slate-500 dark:text-slate-400 text-xs mt-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
                         {aiAnalysisMutation.data.currentSituation}
                       </p>
                     </div>
@@ -235,10 +235,10 @@ export function RoutesPage() {
               </div>
 
               {/* Footer */}
-              <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                 <button 
                   onClick={() => setSelectedRoute(null)}
-                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Close
                 </button>

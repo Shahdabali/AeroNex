@@ -66,17 +66,17 @@ export function KPIGrid() {
         >
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#1788FF]/5 rounded-bl-full pointer-events-none group-hover:bg-[#1788FF]/15 transition-colors" />
           <div className="flex items-center gap-4 mb-4 relative z-10">
-            <div className="w-12 h-12 rounded-full bg-[#132A60] flex items-center justify-center border border-blue-500/30 text-[#1788FF] group-hover:bg-[#1788FF] group-hover:text-white transition-all">
+            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-[#132A60] flex items-center justify-center border border-blue-500/30 text-[#1788FF] group-hover:bg-[#1788FF] group-hover:text-white transition-all">
               <kpi.icon size={24} />
             </div>
-            <span className="text-slate-400 font-medium text-[15px] group-hover:text-slate-200 transition-colors">{kpi.label}</span>
+            <span className="text-slate-600 dark:text-slate-400 font-medium text-[15px] group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{kpi.label}</span>
           </div>
           <div className="flex items-end justify-between relative z-10">
-            <h3 className="text-white text-[32px] font-bold leading-none tracking-tight">
+            <h3 className="text-slate-900 dark:text-white text-[32px] font-bold leading-none tracking-tight">
               {kpi.prefix}{kpi.value}
             </h3>
             <div className="flex flex-col items-end">
-              <span className={`text-[13px] font-bold flex items-center gap-1 ${kpi.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <span className={`text-[13px] font-bold flex items-center gap-1 ${kpi.change >= 0 ? 'text-emerald-600 dark:text-green-400' : 'text-rose-600 dark:text-red-400'}`}>
                 {kpi.change >= 0 ? '↑' : '↓'} {Math.abs(kpi.change)}%
               </span>
               <span className="text-[10px] text-slate-500 mt-0.5">vs. last week</span>

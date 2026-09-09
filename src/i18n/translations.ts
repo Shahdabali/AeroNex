@@ -125,6 +125,24 @@ export const translations = {
     demoResearcherDesc: "CPI & analytics",
     demoAdmin: "Admin",
     demoAdminDesc: "Full system",
+
+    // Common UI & Actions
+    trendingDomesticRoutes: "Trending Domestic Routes",
+    platformAccess: "Platform Direct Access",
+    popularHubs: "Popular Indian Hubs",
+    searchAllFlights: "Search all flights for",
+    noFlightsFound: "No flights found",
+    filterBy: "Filter by",
+    sortBy: "Sort by",
+    cheapest: "Cheapest",
+    fastest: "Fastest",
+    directOnly: "Direct Only",
+    bookNow: "Book Now",
+    viewFlight: "View Flight",
+    aiAnalysisTitle: "AI Route Analysis",
+    retry: "Retry",
+    close: "Close",
+    loading: "Loading...",
   },
   Hindi: {
     // Brand & Tagline
@@ -252,7 +270,42 @@ export const translations = {
     demoResearcherDesc: "सीपीआई और विश्लेषिकी",
     demoAdmin: "व्यवस्थापक",
     demoAdminDesc: "पूर्ण सिस्टम",
+
+    // Common UI & Actions
+    trendingDomesticRoutes: "प्रचलित घरेलू मार्ग",
+    platformAccess: "प्लेटफ़ॉर्म सीधा एक्सेस",
+    popularHubs: "प्रमुख भारतीय हवाई अड्डे",
+    searchAllFlights: "सभी उड़ानें खोजें:",
+    noFlightsFound: "कोई उड़ान नहीं मिली",
+    filterBy: "फ़िल्टर करें",
+    sortBy: "क्रमबद्ध करें",
+    cheapest: "सबसे सस्ता",
+    fastest: "सबसे तेज़",
+    directOnly: "केवल डायरेक्ट उड़ानें",
+    bookNow: "अभी बुक करें",
+    viewFlight: "उड़ान देखें",
+    aiAnalysisTitle: "एआई मार्ग विश्लेषण",
+    retry: "पुनः प्रयास करें",
+    close: "बंद करें",
+    loading: "लोड हो रहा है...",
   }
 } as const;
 
 export type Language = keyof typeof translations;
+
+export function getSafeTranslations(lang: Language): typeof translations['English'] {
+  const current = translations[lang] || translations['English'];
+  const english = translations['English'];
+  return new Proxy(current as any, {
+    get(target, prop: string) {
+      if (prop in target && target[prop] !== undefined && target[prop] !== '') {
+        return target[prop];
+      }
+      if (prop in english && (english as any)[prop] !== undefined) {
+        return (english as any)[prop];
+      }
+      return prop;
+    }
+  });
+}
+

@@ -115,16 +115,16 @@ export function Predictions() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Card 1: Recommendation */}
               <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[16px] p-6 flex flex-col justify-between">
-                <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
-                  <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  <ShieldCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                   Recommendation
                 </div>
-                <div className="text-3xl font-extrabold text-cyan-400 capitalize my-2">
+                <div className="text-3xl font-extrabold text-cyan-600 dark:text-cyan-400 capitalize my-2">
                   {data.recommendedAction ? data.recommendedAction.replace('_', ' ') : 'Book Soon'}
                 </div>
-                <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-2">
+                <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-2">
                   <span>Confidence:</span>
-                  <span className="font-bold text-white bg-blue-500/20 px-2 py-0.5 rounded-md border border-blue-500/30">
+                  <span className="font-bold text-blue-700 dark:text-white bg-blue-500/15 px-2 py-0.5 rounded-md border border-blue-500/30">
                     {Math.round((data.confidence || 0.82) * 100)}%
                   </span>
                 </div>
@@ -132,13 +132,13 @@ export function Predictions() {
 
               {/* Card 2: Current vs Predicted */}
               <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[16px] p-6 flex flex-col justify-between">
-                <div className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                <div className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
                   Price Forecast
                 </div>
                 <div className="flex items-baseline gap-3 my-2">
-                  <span className="text-2xl font-bold text-slate-300">₹{(data.currentFare || 5240).toLocaleString()}</span>
+                  <span className="text-2xl font-bold text-slate-600 dark:text-slate-300">₹{(data.currentFare || 5240).toLocaleString()}</span>
                   <ArrowRight className="w-4 h-4 text-slate-500" />
-                  <span className="text-3xl font-black text-white">₹{(data.predictedFare || 5680).toLocaleString()}</span>
+                  <span className="text-3xl font-black text-slate-900 dark:text-white">₹{(data.predictedFare || 5680).toLocaleString()}</span>
                 </div>
                 <div className={`text-xs font-semibold flex items-center gap-1 ${data.direction === 'increase' ? 'text-red-400' : 'text-emerald-400'}`}>
                   {data.direction === 'increase' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}

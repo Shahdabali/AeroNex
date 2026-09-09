@@ -53,12 +53,12 @@ export function RouteChangesTable() {
                     onClick={() => navigate('/price-trends')}
                     className="border-b border-slate-800/50 hover:bg-blue-500/10 transition-colors cursor-pointer"
                   >
-                    <td className="py-3 text-[14px] text-white font-medium flex items-center gap-2">
+                    <td className="py-3 text-[14px] text-slate-900 dark:text-white font-medium flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                       {route.route}
                     </td>
-                    <td className="py-3 text-[14px] text-slate-300 text-right">₹ {route.currentFare.toLocaleString()}</td>
-                    <td className={`py-3 text-[13px] font-bold text-right ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                    <td className="py-3 text-[14px] text-slate-700 dark:text-slate-300 text-right">₹ {route.currentFare.toLocaleString()}</td>
+                    <td className={`py-3 text-[13px] font-bold text-right ${isUp ? 'text-emerald-600 dark:text-green-400' : 'text-rose-600 dark:text-red-400'}`}>
                       {isUp ? '↑' : '↓'} {Math.abs(route.change)}%
                     </td>
                   </tr>

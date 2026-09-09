@@ -68,9 +68,9 @@ export function PopularRoutes() {
             <div 
               key={i} 
               onClick={() => navigate('/price-trends')}
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-blue-500/10 transition-colors group cursor-pointer border border-transparent hover:border-slate-800"
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-blue-500/10 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/30"
             >
-              <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 relative bg-slate-800 ring-1 ring-blue-500/20">
+              <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 relative bg-slate-100 dark:bg-slate-800 ring-1 ring-blue-500/20">
                 <img 
                   src={r.img} 
                   alt={r.dest} 
@@ -83,14 +83,14 @@ export function PopularRoutes() {
                 <div className="absolute inset-0 bg-blue-950/20 mix-blend-multiply" />
               </div>
               <div className="flex-1 flex flex-col">
-                <span className="text-[13px] font-bold text-white leading-tight">{r.origin} → {r.dest}</span>
-                <span className="text-[11px] text-slate-400 leading-tight mt-0.5 flex items-center gap-1">
+                <span className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight">{r.origin} → {r.dest}</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 flex items-center gap-1">
                   <Plane size={11} className="text-[#1788FF]" /> {r.code}
                 </span>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[13px] font-bold text-slate-200">₹ {r.price.toLocaleString()}</span>
-                <span className={`text-[11px] font-bold flex items-center gap-0.5 ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                <span className="text-[13px] font-bold text-slate-700 dark:text-slate-200">₹ {r.price.toLocaleString()}</span>
+                <span className={`text-[11px] font-bold flex items-center gap-0.5 ${isUp ? 'text-emerald-600 dark:text-green-400' : 'text-rose-600 dark:text-red-400'}`}>
                   {isUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                   <span>{isUp ? `+${r.change}` : r.change}%</span>
                 </span>

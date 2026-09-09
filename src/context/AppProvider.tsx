@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { translations } from '../i18n/translations';
+import { translations, getSafeTranslations } from '../i18n/translations';
 import type { Language } from '../i18n/translations';
 
 export type Theme = 'light' | 'dark';
@@ -125,7 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('aeronex_token');
   };
 
-  const t = translations[language];
+  const t = getSafeTranslations(language);
 
   return (
     <AppContext.Provider 

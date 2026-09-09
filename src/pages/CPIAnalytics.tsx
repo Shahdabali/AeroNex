@@ -342,9 +342,9 @@ export function CPIAnalytics() {
                         style={{ width: `${item.weight}%`, backgroundColor: item.color }} 
                       />
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-                      <span>CPI Correlation: <strong className="text-slate-300">{item.cpiCorrelation}</strong></span>
-                      <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-medium">{item.impact}</span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
+                      <span>CPI Correlation: <strong className="text-slate-700 dark:text-slate-300">{item.cpiCorrelation}</strong></span>
+                      <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">{item.impact}</span>
                     </div>
                   </div>
                 ))}
