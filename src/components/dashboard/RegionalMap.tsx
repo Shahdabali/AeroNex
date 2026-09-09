@@ -28,7 +28,7 @@ export function RegionalMap() {
   const { data: regionalData } = useQuery({
     queryKey: ['regionalIndex'],
     queryFn: api.getRegionalIndex,
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   });
 
   const getRegionMetrics = (regionId: string) => {

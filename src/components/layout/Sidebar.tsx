@@ -66,15 +66,15 @@ export function Sidebar() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Live 1s Stream
+              Live 5s Stream
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">1.0 Hz</span>
+            <span className="text-[10px] text-slate-400 font-mono">5s</span>
           </div>
           <h4 className="text-white font-bold text-[13px] flex items-center gap-1.5">
-            <Activity size={14} className="text-[#1788FF]" /> High-Frequency Feed
+            <Activity size={14} className="text-[#1788FF]" /> Realtime Feed
           </h4>
           <p className="text-slate-400 text-[11px] mt-1 leading-snug">
-            Realtime airfare indexes & flight routes updated continuously every second.
+            Realtime airfare indexes & flight routes updated continuously every 5 seconds.
           </p>
         </div>
       </div>

@@ -151,7 +151,7 @@ export function Header() {
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#1788FF] flex items-center gap-1.5">
                       <TrendingUp size={12} /> Trending Domestic Routes
                     </span>
-                    <span className="text-[10px] text-slate-400">Live 1s Feed</span>
+                    <span className="text-[10px] text-slate-400">Live 5s Feed</span>
                   </div>
                   <div className="space-y-1">
                     {trendingRoutes.map((r, i) => (

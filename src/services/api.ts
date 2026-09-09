@@ -314,7 +314,7 @@ export const api = {
     return {
       lastUpdatedAt: liveAirfareEngine.lastUpdated,
       status: 'live',
-      frequency: '1s High Frequency',
+      frequency: '5s High Frequency',
       ticks: liveAirfareEngine.ticksCount,
     };
   },

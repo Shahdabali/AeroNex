@@ -7,7 +7,7 @@ export function RouteChangesTable() {
   const { data, isLoading } = useQuery({
     queryKey: ['routeChanges'],
     queryFn: api.getRouteChanges,
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   });
 
   return (
@@ -17,7 +17,7 @@ export function RouteChangesTable() {
           <h3 className="text-white text-[16px] font-bold">Top Routes by Price Change</h3>
           <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            1s LIVE
+            5s LIVE
           </span>
         </div>
         <button 

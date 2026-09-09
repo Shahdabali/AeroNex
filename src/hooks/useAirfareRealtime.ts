@@ -6,7 +6,7 @@ export function useAirfareRealtime() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // 1-Second Continuous Live Streaming Loop
+    // 5-Second Continuous Live Streaming Loop
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
       queryClient.invalidateQueries({ queryKey: ['routeChanges'] });
@@ -16,7 +16,7 @@ export function useAirfareRealtime() {
       queryClient.invalidateQueries({ queryKey: ['airfareIndexMetrics'] });
       queryClient.invalidateQueries({ queryKey: ['airfareChartData'] });
       queryClient.invalidateQueries({ queryKey: ['airfareIndexRegional'] });
-    }, 1000);
+    }, 5000);
 
     // Supabase Realtime Pipeline Listener (for server events when connected)
     const channel = supabase

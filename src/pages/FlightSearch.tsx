@@ -203,7 +203,7 @@ export function FlightSearch() {
             <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2.5">
               Flight Search & Real-Time Fares
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30">
-                1s Live Pricing
+                5s Live Pricing
               </span>
             </h1>
             <p className="text-slate-400 text-sm mt-1">

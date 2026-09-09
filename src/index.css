@@ -345,3 +345,23 @@ html.light .login-demo-btn:hover {
   background-color: #EFF6FF !important;
   border-color: #93C5FD !important;
 }
+
+html.light .login-tab-container {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .login-hero-headline {
+  color: #0F172A !important;
+}
+
+/* Radar Sweep Animation */
+@keyframes radar-sweep {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+

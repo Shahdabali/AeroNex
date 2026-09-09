@@ -94,7 +94,7 @@ export function AirfareIndex() {
                   </div>
                   <p className="text-slate-400 text-sm font-medium">{r.region} Region</p>
                   <h3 className="text-2xl font-bold text-white mt-1">{r.value}</h3>
-                  <span className="text-[11px] text-slate-500 mt-1 block">Live 1s Realtime Stream</span>
+                  <span className="text-[11px] text-slate-500 mt-1 block">Live 5s Realtime Stream</span>
                 </div>
               ))}
             </div>

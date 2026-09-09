@@ -7,7 +7,7 @@ export function WelcomeBanner() {
   const { data: freshness } = useQuery({
     queryKey: ['dataFreshness'],
     queryFn: api.getFreshness,
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   });
 
   const now = new Date();
