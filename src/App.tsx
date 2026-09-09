@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginPage } from './pages/LoginPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { FlightSearch } from './pages/FlightSearch';
+import { AITripSuggester } from './pages/AITripSuggester';
 import { AirfareIndex } from './pages/AirfareIndex';
 import { PriceTrends } from './pages/PriceTrends';
 import { Predictions } from './pages/Predictions';
@@ -31,6 +32,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/ai-trip-suggester" element={<AITripSuggester />} />
+            <Route path="/trip-suggester" element={<Navigate to="/ai-trip-suggester" replace />} />
             <Route path="/search" element={<FlightSearch />} />
             <Route path="/flights" element={<FlightSearch />} />
             <Route path="/airfare-index" element={<AirfareIndex />} />

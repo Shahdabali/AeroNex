@@ -1,5 +1,13 @@
 import { supabase } from '../lib/supabase';
-import { generateRouteFlights, INDIAN_AIRPORTS } from '../data/indianAviation';
+import { 
+  generateRouteFlights, 
+  INDIAN_AIRPORTS,
+  validateDomesticAirports,
+  parseNaturalLanguageTrip,
+  generateDomesticTripRecommendations,
+  type TripSuggesterParams,
+  type TripSuggesterResult
+} from '../data/indianAviation';
 
 // Determine backend API base:
 // In local development, default to http://localhost:5000 if not specified.
@@ -613,5 +621,51 @@ export const api = {
         ai: 'ok',
       },
     };
+  },
+
+  // AI Trip Suggester — India Domestic
+  validateDomesticAirports: (origin: string, destination: string) => {
+    return validateDomesticAirports(origin, destination);
+  },
+
+  parseTripPrompt: async (prompt: string): Promise<Partial<TripSuggesterParams>> => {
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/ai/parse-trip', { prompt });
+        if (res && res.origin) return res;
+      } catch {}
+    }
+    return parseNaturalLanguageTrip(prompt);
+  },
+
+  suggestTrip: async (params: TripSuggesterParams): Promise<TripSuggesterResult> => {
+    // Validate first
+    const check = validateDomesticAirports(params.origin, params.destination);
+    if (!check.valid) {
+      return {
+        valid: false,
+        error: check.error,
+        originInfo: null as any,
+        destinationInfo: null as any,
+        params,
+        bestOverall: null as any,
+        cheapest: null as any,
+        fastest: null as any,
+        bestValue: null as any,
+        bestTimeToBook: null as any,
+        timestamp: new Date().toISOString(),
+        refreshedAt: new Date().toLocaleTimeString('en-IN')
+      };
+    }
+
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/ai/trip-suggester', params);
+        if (res && res.valid) return res;
+      } catch {}
+    }
+
+    // High-performance client intelligence fallback
+    return generateDomesticTripRecommendations(params);
   },
 };

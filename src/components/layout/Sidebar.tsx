@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, Lightbulb, 
-  Bell, Map, Plane, Calculator, Ticket, Settings, Activity
+  Bell, Map, Plane, Calculator, Ticket, Settings, Activity, Sparkles
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 
 const navItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
+  { icon: Sparkles, label: 'AI Trip Suggester', path: '/ai-trip-suggester', badgeText: 'India' },
   { icon: Search, label: 'Flight Search', path: '/search' },
   { icon: LineChart, label: 'Airfare Index', path: '/airfare-index' },
   { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
@@ -42,12 +43,17 @@ export function Sidebar() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
+                <item.icon size={18} className={isActive ? 'text-white' : item.label.includes('AI') ? 'text-cyan-400' : 'text-slate-400'} />
                 <span className="text-[14px] font-medium">{item.label}</span>
               </div>
               {item.badge && (
                 <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold text-white">
                   {item.badge}
+                </div>
+              )}
+              {item.badgeText && (
+                <div className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
+                  {item.badgeText}
                 </div>
               )}
             </Link>

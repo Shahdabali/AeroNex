@@ -47,10 +47,10 @@ export function Header() {
 
   // Quick Feature Links
   const quickLinks = [
+    { label: 'AI Trip Suggester', path: '/ai-trip-suggester', icon: Sparkles, desc: 'Domestic India optimizer' },
     { label: 'Airfare Index', path: '/airfare-index', icon: BarChart3, desc: 'Live benchmark & regional map' },
     { label: 'CPI Analytics', path: '/cpi-analytics', icon: Calculator, desc: 'Aviation vs CPI inflation' },
-    { label: 'AI Price Predictions', path: '/predictions', icon: Sparkles, desc: 'Gemini ML predictive model' },
-    { label: 'Routes Intelligence', path: '/routes', icon: Plane, desc: 'Explore all 180+ domestic routes' },
+    { label: 'AI Predictions', path: '/predictions', icon: Sparkles, desc: 'Gemini ML predictive model' },
   ];
 
   // Filtered results when user types
