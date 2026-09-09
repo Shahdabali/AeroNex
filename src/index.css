@@ -249,17 +249,17 @@ html.light .h-\[220px\].rounded-2xl .bg-\[\#061A42\]\/80 {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Gamification card in sidebar */
-html.light aside .from-\[\#132A60\] {
+/* Live stream widget in sidebar */
+html.light aside .from-\[\#061B42\] {
   background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
   border-color: #BFDBFE !important;
 }
 
-html.light aside .from-\[\#132A60\] h4 {
+html.light aside .from-\[\#061B42\] h4 {
   color: #1D4ED8 !important;
 }
 
-html.light aside .from-\[\#132A60\] p {
+html.light aside .from-\[\#061B42\] p {
   color: #475569 !important;
 }
 

@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Globe } from 'lucide-react';
 import { api } from '../services/api';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { RegionalMap } from '../components/dashboard/RegionalMap';
 
 export function AirfareIndex() {
   usePageTitle('Airfare Index');
@@ -68,28 +69,36 @@ export function AirfareIndex() {
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-white mt-4">Regional Breakdown</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {(regionalData.length > 0 ? regionalData : [
-            { region: 'North', value: 118.6, change: 2.3 },
-            { region: 'West', value: 124.2, change: 3.1 },
-            { region: 'East', value: 112.7, change: 1.8 },
-            { region: 'South', value: 131.5, change: 4.2 }
-          ]).map((r: any, i: number) => (
-            <div key={i} className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[16px] p-5">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Globe className="w-5 h-5 text-[#1788FF]" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+          <div className="lg:col-span-1">
+            <RegionalMap />
+          </div>
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <h2 className="text-xl font-bold text-white">Regional Breakdown Corridors</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(regionalData.length > 0 ? regionalData : [
+                { region: 'North', value: 118.6, change: 2.3 },
+                { region: 'West', value: 124.2, change: 3.1 },
+                { region: 'East', value: 112.7, change: 1.8 },
+                { region: 'South', value: 131.5, change: 4.2 }
+              ]).map((r: any, i: number) => (
+                <div key={i} className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[16px] p-5 shadow-lg">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                      <Globe className="w-5 h-5 text-[#1788FF]" />
+                    </div>
+                    <span className={`text-sm font-semibold ${r.change >= 0 ? 'text-emerald-400' : 'text-rose-400'} flex items-center`}>
+                      {r.change >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                      {r.change >= 0 ? `+${r.change}` : r.change}%
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-sm font-medium">{r.region} Region</p>
+                  <h3 className="text-2xl font-bold text-white mt-1">{r.value}</h3>
+                  <span className="text-[11px] text-slate-500 mt-1 block">Live 1s Realtime Stream</span>
                 </div>
-                <span className={`text-sm ${r.change >= 0 ? 'text-emerald-400' : 'text-red-400'} flex items-center`}>
-                  {r.change >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                  {r.change}%
-                </span>
-              </div>
-              <p className="text-slate-400 text-sm">{r.region}</p>
-              <h3 className="text-xl font-bold text-white mt-1">{r.value}</h3>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </DashboardLayout>

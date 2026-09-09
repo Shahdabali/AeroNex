@@ -7,7 +7,7 @@ export function WelcomeBanner() {
   const { data: freshness } = useQuery({
     queryKey: ['dataFreshness'],
     queryFn: api.getFreshness,
-    refetchInterval: 15000,
+    refetchInterval: 1000,
   });
 
   const now = new Date();
@@ -16,7 +16,7 @@ export function WelcomeBanner() {
   const firstName = user?.name ? user.name.split(' ')[0] : 'Shadab';
 
   const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   return (
     <div className="w-full h-[220px] rounded-2xl relative overflow-hidden flex flex-col justify-end p-8 border border-blue-500/20 shadow-xl">

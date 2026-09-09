@@ -10,7 +10,6 @@ import { PriceAlerts } from './pages/PriceAlerts';
 import { RoutesPage } from './pages/RoutesPage';
 import { AirlinesPage } from './pages/AirlinesPage';
 import { CPIAnalytics } from './pages/CPIAnalytics';
-import { Gamification } from './pages/Gamification';
 import { MyFlights } from './pages/MyFlights';
 import { Settings } from './pages/Settings';
 import { AppProvider } from './context/AppProvider';
@@ -44,8 +43,8 @@ function App() {
             <Route path="/airlines" element={<AirlinesPage />} />
             <Route path="/cpi-analytics" element={<CPIAnalytics />} />
             <Route path="/cpi" element={<CPIAnalytics />} />
-            <Route path="/gamification" element={<Gamification />} />
-            <Route path="/rewards" element={<Gamification />} />
+            <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
             <Route path="/my-flights" element={<MyFlights />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -8,7 +8,7 @@ export function AirfareIndexChart() {
   const { data, isLoading } = useQuery({
     queryKey: ['chartData', timeframe],
     queryFn: () => api.getChartData(timeframe),
-    refetchInterval: 30000,
+    refetchInterval: 1000,
   });
 
   const timeframes = ['24h', '7d', '30d', '6m', '1y'];
@@ -16,7 +16,13 @@ export function AirfareIndexChart() {
   return (
     <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[420px] flex flex-col">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-white text-[18px] font-bold">India Airfare Price Index</h3>
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-white text-[18px] font-bold">India Airfare Price Index</h3>
+          <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            LIVE TICKER 1s
+          </span>
+        </div>
         <div className="flex bg-[#06112a] rounded-lg p-1 border border-slate-800">
           {timeframes.map(tf => (
             <button

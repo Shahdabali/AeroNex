@@ -8,7 +8,7 @@ export function KPIGrid() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboardMetrics'],
     queryFn: api.getDashboardMetrics,
-    refetchInterval: 10000,
+    refetchInterval: 1000,
   });
 
   if (isLoading || !data) {

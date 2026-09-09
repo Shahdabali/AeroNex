@@ -1,51 +1,214 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { TrendingUp, TrendingDown, Plane } from 'lucide-react';
+
+interface RegionPoint {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  hub: string;
+  defaultVal: number;
+  defaultChange: number;
+  routes: string;
+}
+
+const REGION_HUBS: RegionPoint[] = [
+  { id: 'North', name: 'Northern Sector', x: 195, y: 115, hub: 'DEL (Delhi)', defaultVal: 118.6, defaultChange: 2.3, routes: 'DEL-BOM, DEL-BLR' },
+  { id: 'West', name: 'Western Sector', x: 125, y: 220, hub: 'BOM (Mumbai)', defaultVal: 124.2, defaultChange: 3.1, routes: 'BOM-BLR, BOM-GOI' },
+  { id: 'East', name: 'Eastern Sector', x: 310, y: 190, hub: 'CCU (Kolkata)', defaultVal: 112.7, defaultChange: 1.8, routes: 'CCU-DEL, CCU-BLR' },
+  { id: 'Central', name: 'Central Sector', x: 190, y: 225, hub: 'HYD (Hyderabad)', defaultVal: 121.4, defaultChange: -0.8, routes: 'HYD-DEL, HYD-BLR' },
+  { id: 'South', name: 'Southern Sector', x: 175, y: 310, hub: 'BLR / MAA (Bengaluru/Chennai)', defaultVal: 131.5, defaultChange: 4.2, routes: 'BLR-BOM, MAA-DEL' },
+];
 
 export function RegionalMap() {
-  const { data, isLoading } = useQuery({
+  const [activeRegion, setActiveRegion] = useState<string>('North');
+  
+  const { data: regionalData } = useQuery({
     queryKey: ['regionalIndex'],
     queryFn: api.getRegionalIndex,
+    refetchInterval: 1000,
   });
 
+  const getRegionMetrics = (regionId: string) => {
+    if (Array.isArray(regionalData)) {
+      const found = regionalData.find((r: any) => r.region?.toLowerCase() === regionId.toLowerCase());
+      if (found) return { value: found.value, change: found.change };
+    }
+    const fallback = REGION_HUBS.find(h => h.id === regionId);
+    return { value: fallback?.defaultVal ?? 122.0, change: fallback?.defaultChange ?? 2.5 };
+  };
+
+  const selectedPoint = REGION_HUBS.find(h => h.id === activeRegion) || REGION_HUBS[0];
+  const selectedMetrics = getRegionMetrics(selectedPoint.id);
+
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[420px] flex flex-col relative overflow-hidden">
-      <h3 className="text-white text-[16px] font-bold mb-6">Airfare Index by Region</h3>
-      
-      {isLoading || !data ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#1788FF] border-t-transparent rounded-full animate-spin" />
+    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-5 h-[420px] flex flex-col relative overflow-hidden">
+      <div className="flex items-center justify-between mb-2 z-10">
+        <div>
+          <h3 className="text-white text-[15px] font-bold flex items-center gap-2">
+            <span>Airfare Index by Region</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          </h3>
+          <p className="text-slate-400 text-[11px]">Interactive Aviation Radar & Fare Corridors</p>
         </div>
-      ) : (
-        <div className="flex-1 relative flex items-center justify-center">
-          {/* Mock glowing India map using SVG overlay */}
-          <div className="absolute inset-0 opacity-40 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/India_map_en.svg')] bg-contain bg-center bg-no-repeat filter invert sepia hue-rotate-[180deg] brightness-[1.5]" />
-          
-          {/* Overlay markers based on regional data */}
-          {data.map((region: any, i: number) => {
-            const positions: Record<string, string> = {
-              'North': 'top-[20%] left-[45%]',
-              'West': 'top-[50%] left-[25%]',
-              'East': 'top-[50%] right-[20%]',
-              'South': 'bottom-[20%] left-[40%]'
-            };
-            const posClass = positions[region.region] || 'top-1/2 left-1/2';
-            const isUp = region.change >= 0;
+        <div className="text-right">
+          <span className="text-[11px] text-[#1788FF] font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+            {selectedPoint.id} Sector: {selectedMetrics.value}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 relative flex items-center justify-center">
+        {/* Custom Vector SVG Map of India & Aviation Routes */}
+        <svg viewBox="0 0 400 420" className="w-full h-full max-h-[300px] select-none">
+          <defs>
+            <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1788FF" stopOpacity="0.25" />
+              <stop offset="50%" stopColor="#4E55F5" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#0B1B42" stopOpacity="0.3" />
+            </linearGradient>
+
+            <linearGradient id="routeGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#1788FF" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#00F2FE" stopOpacity="0.8" />
+            </linearGradient>
+
+            <linearGradient id="routeGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#4E55F5" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#1788FF" stopOpacity="0.8" />
+            </linearGradient>
             
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          {/* Radar Background Rings */}
+          <circle cx="200" cy="210" r="160" fill="none" stroke="#1788FF" strokeWidth="0.5" strokeDasharray="3 6" opacity="0.15" />
+          <circle cx="200" cy="210" r="110" fill="none" stroke="#1788FF" strokeWidth="0.5" strokeDasharray="2 4" opacity="0.2" />
+          <circle cx="200" cy="210" r="60" fill="none" stroke="#1788FF" strokeWidth="0.5" opacity="0.25" />
+
+          {/* Detailed Geographic Vector Outline of India */}
+          <path
+            d="
+              M 175 30 
+              C 185 20, 205 20, 215 35
+              C 225 50, 235 60, 240 75
+              C 255 85, 275 90, 285 105
+              C 300 115, 340 125, 360 140
+              C 375 155, 385 175, 370 190
+              C 355 200, 335 185, 320 185
+              C 310 195, 305 210, 290 220
+              C 275 230, 260 250, 250 270
+              C 235 305, 220 345, 195 385
+              C 185 395, 175 395, 168 385
+              C 150 350, 135 305, 120 270
+              C 110 245, 95 230, 85 210
+              C 75 190, 85 170, 95 160
+              C 110 145, 125 155, 140 145
+              C 150 135, 155 110, 160 90
+              C 165 65, 170 45, 175 30 
+              Z
+            "
+            fill="url(#mapGradient)"
+            stroke="#1788FF"
+            strokeWidth="1.5"
+            className="filter drop-shadow-[0_0_12px_rgba(23,136,255,0.25)] transition-all duration-300"
+          />
+
+          {/* Aviation Corridors / Arcs */}
+          {/* DEL (195, 115) to BOM (125, 220) */}
+          <path d="M 195 115 Q 150 160 125 220" fill="none" stroke="url(#routeGrad1)" strokeWidth="1.8" strokeDasharray="3 2" className="opacity-80" />
+          {/* BOM (125, 220) to BLR (175, 310) */}
+          <path d="M 125 220 Q 140 270 175 310" fill="none" stroke="url(#routeGrad2)" strokeWidth="1.8" strokeDasharray="3 2" className="opacity-80" />
+          {/* DEL (195, 115) to BLR (175, 310) */}
+          <path d="M 195 115 Q 210 210 175 310" fill="none" stroke="#1788FF" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
+          {/* DEL (195, 115) to CCU (310, 190) */}
+          <path d="M 195 115 Q 260 140 310 190" fill="none" stroke="#00F2FE" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.7" />
+          {/* HYD (190, 225) to DEL (195, 115) */}
+          <path d="M 190 225 L 195 115" fill="none" stroke="#4E55F5" strokeWidth="1.2" strokeDasharray="2 3" opacity="0.6" />
+
+          {/* Regional Sector Hub Markers */}
+          {REGION_HUBS.map((hub) => {
+            const metrics = getRegionMetrics(hub.id);
+            const isSelected = activeRegion === hub.id;
+            const isUp = metrics.change >= 0;
+
             return (
-              <div key={i} className={`absolute ${posClass} flex flex-col items-center group cursor-pointer z-10`}>
-                <div className="w-3 h-3 bg-[#1788FF] rounded-full shadow-[0_0_15px_#1788FF] mb-2 group-hover:scale-150 transition-transform" />
-                <div className="bg-[#020A1D]/90 backdrop-blur-md border border-slate-700/50 rounded-lg p-2 text-center pointer-events-none group-hover:border-[#1788FF]/50 transition-colors">
-                  <div className="text-[11px] text-slate-400 font-medium mb-0.5">{region.region}</div>
-                  <div className="text-white font-bold text-[14px] leading-none mb-1">{region.value}</div>
-                  <div className={`text-[10px] font-bold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
-                    {isUp ? '↑' : '↓'} {Math.abs(region.change)}%
-                  </div>
-                </div>
-              </div>
+              <g 
+                key={hub.id} 
+                onClick={() => setActiveRegion(hub.id)}
+                className="cursor-pointer group"
+              >
+                {/* Outer ping animation */}
+                <circle 
+                  cx={hub.x} 
+                  cy={hub.y} 
+                  r={isSelected ? 14 : 9} 
+                  fill="none" 
+                  stroke={isSelected ? "#00F2FE" : isUp ? "#10B981" : "#EF4444"} 
+                  strokeWidth="1.5" 
+                  className="animate-ping" 
+                  opacity={isSelected ? "0.8" : "0.4"} 
+                />
+                
+                {/* Selection ring */}
+                <circle 
+                  cx={hub.x} 
+                  cy={hub.y} 
+                  r={isSelected ? 9 : 6} 
+                  fill={isSelected ? "#00F2FE" : isUp ? "#10B981" : "#EF4444"} 
+                  className="transition-all duration-300 filter drop-shadow-[0_0_8px_#00F2FE]" 
+                />
+                
+                {/* Center dot */}
+                <circle cx={hub.x} cy={hub.y} r="3" fill="#FFFFFF" />
+
+                {/* Hub Label */}
+                <text 
+                  x={hub.x + (hub.x > 250 ? -12 : 12)} 
+                  y={hub.y + 4} 
+                  fill={isSelected ? "#00F2FE" : "#E2E8F0"} 
+                  fontSize="11" 
+                  fontWeight={isSelected ? "bold" : "600"}
+                  textAnchor={hub.x > 250 ? "end" : "start"}
+                  className="drop-shadow-md transition-colors"
+                >
+                  {hub.id} ({metrics.value})
+                </text>
+              </g>
             );
           })}
+        </svg>
+
+        {/* Selected Hub Floating Intelligence Card */}
+        <div className="absolute bottom-1 left-2 right-2 p-2.5 rounded-xl bg-[#030E26]/90 backdrop-blur-md border border-blue-500/30 flex items-center justify-between text-xs z-20 shadow-xl">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-[#1788FF]">
+              <Plane size={16} />
+            </div>
+            <div>
+              <div className="font-bold text-white flex items-center gap-1.5">
+                <span>{selectedPoint.name}</span>
+                <span className="text-[10px] text-slate-400 font-normal">({selectedPoint.hub})</span>
+              </div>
+              <div className="text-[11px] text-slate-400">Routes: {selectedPoint.routes}</div>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <div className="text-white font-extrabold text-sm">{selectedMetrics.value}</div>
+            <div className={`text-[10px] font-bold flex items-center justify-end gap-0.5 ${selectedMetrics.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {selectedMetrics.change >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+              <span>{selectedMetrics.change >= 0 ? `+${selectedMetrics.change}` : selectedMetrics.change}%</span>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
+

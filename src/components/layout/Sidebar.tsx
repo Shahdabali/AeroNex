@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, Lightbulb, 
-  Bell, Map, Plane, Calculator, Trophy, Ticket, Settings
+  Bell, Map, Plane, Calculator, Ticket, Settings, Activity
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 
@@ -15,7 +15,6 @@ const navItems = [
   { icon: Map, label: 'Routes', path: '/routes' },
   { icon: Plane, label: 'Airlines', path: '/airlines' },
   { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
-  { icon: Trophy, label: 'Gamification', path: '/gamification' },
   { icon: Ticket, label: 'My Flights', path: '/my-flights' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -57,22 +56,20 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 mt-auto">
-        <div className="w-full rounded-2xl bg-gradient-to-br from-[#132A60] to-[#0B1A42] p-5 border border-blue-500/20 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-screen group-hover:opacity-20 transition-opacity" />
-          <div className="relative z-10 flex flex-col gap-2">
-            <h4 className="text-white font-bold text-[15px] flex items-center gap-2">
-              <span className="text-yellow-400 text-lg leading-none">👑</span> Earn Rewards
-            </h4>
-            <p className="text-slate-300 text-[12px] leading-snug">
-              Check prices, set alerts, complete quests & earn points!
-            </p>
-            <Link 
-              to="/gamification" 
-              className="mt-2 w-full py-2 rounded-lg bg-gradient-to-r from-[#4E55F5] to-[#1788FF] text-white text-[13px] font-medium shadow-lg hover:shadow-[0_0_15px_rgba(23,136,255,0.4)] transition-all text-center block cursor-pointer"
-            >
-              View Rewards
-            </Link>
+        <div className="w-full rounded-2xl bg-gradient-to-br from-[#061B42] to-[#030E26] p-4 border border-blue-500/25 relative overflow-hidden shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              Live 1s Stream
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">1.0 Hz</span>
           </div>
+          <h4 className="text-white font-bold text-[13px] flex items-center gap-1.5">
+            <Activity size={14} className="text-[#1788FF]" /> High-Frequency Feed
+          </h4>
+          <p className="text-slate-400 text-[11px] mt-1 leading-snug">
+            Realtime airfare indexes & flight routes updated continuously every second.
+          </p>
         </div>
       </div>
     </aside>
