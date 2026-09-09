@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { useAppContext } from '../../context/AppProvider';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function AirfareIndexChart() {
+  const { t } = useAppContext();
   const [timeframe, setTimeframe] = useState('24h');
   const { data, isLoading } = useQuery({
     queryKey: ['chartData', timeframe],
@@ -17,10 +19,10 @@ export function AirfareIndexChart() {
     <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[420px] flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
-          <h3 className="text-white text-[18px] font-bold">India Airfare Price Index</h3>
+          <h3 className="text-white text-[18px] font-bold">{t.indiaAirfarePriceIndex}</h3>
           <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            LIVE TICKER 5s
+            {t.liveTicker5s}
           </span>
         </div>
         <div className="flex bg-[#06112a] rounded-lg p-1 border border-slate-800">

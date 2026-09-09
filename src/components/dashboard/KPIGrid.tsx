@@ -2,9 +2,11 @@ import { BarChart3, TrendingUp, Plane, Map } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import { useAppContext } from '../../context/AppProvider';
 
 export function KPIGrid() {
   const navigate = useNavigate();
+  const { t } = useAppContext();
   const { data, isLoading } = useQuery({
     queryKey: ['dashboardMetrics'],
     queryFn: api.getDashboardMetrics,
@@ -22,7 +24,7 @@ export function KPIGrid() {
   const kpis = [
     {
       icon: BarChart3,
-      label: 'Airfare Index',
+      label: t.airfareIndexKpi,
       value: data.airfareIndex.value,
       change: data.airfareIndex.change,
       prefix: '',
@@ -30,7 +32,7 @@ export function KPIGrid() {
     },
     {
       icon: TrendingUp,
-      label: 'Average Fare',
+      label: t.todaysChangeKpi,
       value: data.averageFare.value.toLocaleString(),
       change: data.averageFare.change,
       prefix: '₹ ',
@@ -38,7 +40,7 @@ export function KPIGrid() {
     },
     {
       icon: Plane,
-      label: 'Flights Tracked',
+      label: t.activeFlightsKpi,
       value: data.flightsTracked.value.toLocaleString(),
       change: data.flightsTracked.change,
       prefix: '',
@@ -46,7 +48,7 @@ export function KPIGrid() {
     },
     {
       icon: Map,
-      label: 'Routes Tracked',
+      label: t.monitoredRoutesKpi,
       value: data.routesTracked.value.toLocaleString(),
       change: data.routesTracked.change,
       prefix: '',

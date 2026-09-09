@@ -13,7 +13,7 @@ import { useAppContext } from '../context/AppProvider';
 
 export function LoginCard() {
   const navigate = useNavigate();
-  const { login } = useAppContext();
+  const { login, t } = useAppContext();
   
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -198,7 +198,7 @@ export function LoginCard() {
                 transition={{ type: 'spring', stiffness: 400, damping: 32 }}
               />
             )}
-            Sign In
+            {t.signInTab}
           </button>
 
           <button
@@ -215,19 +215,19 @@ export function LoginCard() {
                 transition={{ type: 'spring', stiffness: 400, damping: 32 }}
               />
             )}
-            Create Account
+            {t.createAccountTab}
           </button>
         </div>
 
         {/* 3. Welcome Headline */}
         <div className="mb-4 text-left">
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            {isSignUpMode ? 'Create Your Account ✈️' : 'Welcome Back 👋'}
+            {isSignUpMode ? `${t.createYourAccount} ✈️` : `${t.welcomeBack} 👋`}
           </h2>
           <p className="text-slate-400 text-xs mt-1">
             {isSignUpMode 
-              ? 'Join AeroNex for real-time airfare intelligence across India' 
-              : 'Sign in to access live fares, indices & predictive analytics'
+              ? t.signUpSubtitle
+              : t.signInSubtitle
             }
           </p>
         </div>
@@ -265,7 +265,7 @@ export function LoginCard() {
             {/* Email field */}
             <div className="flex flex-col gap-1 text-left">
               <label className="text-slate-300 text-xs font-semibold flex items-center gap-1.5">
-                <Mail size={13} className="text-[#38BDF8]" /> Email Address
+                <Mail size={13} className="text-[#38BDF8]" /> {t.emailLabel}
               </label>
               <div className="relative flex items-center">
                 <Mail size={15} className="absolute left-3.5 text-slate-500 pointer-events-none" />
@@ -274,7 +274,7 @@ export function LoginCard() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder={t.emailPlaceholder}
                   className="w-full h-[44px] bg-[#0A1838]/70 border border-slate-700/80 rounded-xl pl-10 pr-4 text-white text-xs placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
                 />
               </div>
@@ -283,7 +283,7 @@ export function LoginCard() {
             {/* Password field */}
             <div className="flex flex-col gap-1 text-left">
               <label className="text-slate-300 text-xs font-semibold flex items-center gap-1.5">
-                <Lock size={13} className="text-[#38BDF8]" /> Password
+                <Lock size={13} className="text-[#38BDF8]" /> {t.passwordLabel}
               </label>
               <div className="relative flex items-center">
                 <Lock size={15} className="absolute left-3.5 text-slate-500 pointer-events-none" />
@@ -292,7 +292,7 @@ export function LoginCard() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t.passwordPlaceholder}
                   className="w-full h-[44px] bg-[#0A1838]/70 border border-slate-700/80 rounded-xl pl-10 pr-10 text-white text-xs placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
                 />
                 <button
@@ -314,14 +314,14 @@ export function LoginCard() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-3.5 h-3.5 rounded bg-[#0A1838] border-slate-700 text-[#1788FF] focus:ring-0 cursor-pointer" 
                 />
-                <span className="text-slate-300 text-xs">Remember me</span>
+                <span className="text-slate-300 text-xs">{t.rememberMe}</span>
               </label>
               <a 
                 href="#" 
                 onClick={handleForgotPassword}
                 className="text-[#1788FF] hover:underline font-medium text-xs"
               >
-                Forgot password?
+                {t.forgotPassword}
               </a>
             </div>
 
@@ -337,7 +337,7 @@ export function LoginCard() {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  Sign In to AeroNex 
+                  {t.signInBtn}
                   <Plane size={14} className="transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
                 </span>
               )}
@@ -348,7 +348,7 @@ export function LoginCard() {
           <form onSubmit={handleSignUp} className="flex flex-col gap-2.5">
             <div className="flex flex-col gap-1 text-left">
               <label className="text-slate-300 text-xs font-semibold flex items-center gap-1.5">
-                <User size={13} className="text-[#38BDF8]" /> Full Name
+                <User size={13} className="text-[#38BDF8]" /> {t.fullName}
               </label>
               <input
                 type="text"
@@ -362,7 +362,7 @@ export function LoginCard() {
 
             <div className="flex flex-col gap-1 text-left">
               <label className="text-slate-300 text-xs font-semibold flex items-center gap-1.5">
-                <Mail size={13} className="text-[#38BDF8]" /> Email Address
+                <Mail size={13} className="text-[#38BDF8]" /> {t.emailLabel}
               </label>
               <input
                 type="email"
@@ -375,21 +375,21 @@ export function LoginCard() {
             </div>
 
             <div className="flex flex-col gap-1 text-left">
-              <label className="text-slate-300 text-xs font-semibold">Account Role</label>
+              <label className="text-slate-300 text-xs font-semibold">{t.accountRoleLabel}</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full h-[40px] bg-[#0A1838] border border-slate-700/80 rounded-xl px-3 text-white text-xs outline-none focus:border-cyan-400"
               >
-                <option value="Passenger">Passenger / Traveler</option>
-                <option value="Researcher">Aviation Analyst / Researcher</option>
-                <option value="Admin">Operations Admin</option>
+                <option value="Passenger">{t.rolePassenger}</option>
+                <option value="Researcher">{t.roleResearcher}</option>
+                <option value="Admin">{t.roleAdmin}</option>
               </select>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-left">
               <div>
-                <label className="text-slate-300 text-xs font-semibold block mb-1">Password</label>
+                <label className="text-slate-300 text-xs font-semibold block mb-1">{t.passwordLabel}</label>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -400,13 +400,13 @@ export function LoginCard() {
                 />
               </div>
               <div>
-                <label className="text-slate-300 text-xs font-semibold block mb-1">Confirm</label>
+                <label className="text-slate-300 text-xs font-semibold block mb-1">{t.confirmPasswordLabel}</label>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-type password"
+                  placeholder={t.confirmPasswordPlaceholder}
                   className="w-full h-[40px] bg-[#0A1838]/70 border border-slate-700/80 rounded-xl px-3 text-white text-xs placeholder-slate-500 outline-none focus:border-cyan-400"
                 />
               </div>
@@ -422,7 +422,7 @@ export function LoginCard() {
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <span>Create Account & Sign In →</span>
+                <span>{t.signUpBtn} →</span>
               )}
             </motion.button>
           </form>
@@ -432,7 +432,7 @@ export function LoginCard() {
         <div className="my-3.5 flex items-center gap-3">
           <div className="flex-1 h-px bg-slate-800" />
           <span className="text-slate-500 text-[9px] font-extrabold tracking-widest uppercase">
-            OR CONTINUE WITH
+            {t.orContinueWith}
           </span>
           <div className="flex-1 h-px bg-slate-800" />
         </div>
@@ -481,7 +481,7 @@ export function LoginCard() {
             >
               <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
                 <FlaskConical size={14} className="text-cyan-400" />
-                <span>One-Click Instant Demo</span>
+                <span>{t.demoAccessTitle}</span>
                 <Sparkles size={11} className="text-amber-400 animate-pulse" />
               </div>
               {showDemoAccess ? (
@@ -510,9 +510,9 @@ export function LoginCard() {
                   >
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <User size={12} className="text-cyan-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold text-white block truncate">Passenger</span>
+                      <span className="text-[10px] font-bold text-white block truncate">{t.demoPassenger}</span>
                     </div>
-                    <span className="text-[9px] text-slate-400 block truncate">Traveler view</span>
+                    <span className="text-[9px] text-slate-400 block truncate">{t.demoPassengerDesc}</span>
                   </motion.button>
 
                   {/* Researcher Demo */}
@@ -525,9 +525,9 @@ export function LoginCard() {
                   >
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <BarChart3 size={12} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold text-white block truncate">Researcher</span>
+                      <span className="text-[10px] font-bold text-white block truncate">{t.demoResearcher}</span>
                     </div>
-                    <span className="text-[9px] text-slate-400 block truncate">CPI & analytics</span>
+                    <span className="text-[9px] text-slate-400 block truncate">{t.demoResearcherDesc}</span>
                   </motion.button>
 
                   {/* Admin Demo */}
@@ -540,9 +540,9 @@ export function LoginCard() {
                   >
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <Shield size={12} className="text-emerald-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold text-white block truncate">Admin</span>
+                      <span className="text-[10px] font-bold text-white block truncate">{t.demoAdmin}</span>
                     </div>
-                    <span className="text-[9px] text-slate-400 block truncate">Full system</span>
+                    <span className="text-[9px] text-slate-400 block truncate">{t.demoAdminDesc}</span>
                   </motion.button>
                 </motion.div>
               )}

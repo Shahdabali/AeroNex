@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, Bell, ChevronDown, User, Settings, LogOut, Bookmark, Check, TrendingUp, Plane, BarChart3, Calculator, Sparkles, MapPin, ArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle';
+import { LanguageSelector } from '../LanguageSelector';
 import { api } from '../../services/api';
 import { useQuery } from '@tanstack/react-query';
 import { useAppContext } from '../../context/AppProvider';
@@ -9,7 +10,7 @@ import { INDIAN_AIRPORTS } from '../../data/indianAviation';
 
 export function Header() {
   const navigate = useNavigate();
-  const { user, logout } = useAppContext();
+  const { user, logout, t } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -125,7 +126,7 @@ export function Header() {
             onFocus={() => setShowSearchDropdown(true)}
             onClick={() => setShowSearchDropdown(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Search flights, routes, airports, CPI, analytics..."
+            placeholder={t.searchPlaceholder}
             className="w-full h-[42px] bg-[#0A1838] border border-slate-700/50 rounded-full pl-11 pr-10 text-[14px] text-white placeholder-slate-400 focus:outline-none focus:border-[#1788FF] focus:bg-[#0D1E45] transition-all shadow-inner"
           />
           {searchTerm && (
@@ -358,13 +359,13 @@ export function Header() {
           {showNotifications && (
             <div className="absolute right-0 top-[50px] w-80 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-4 z-50">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <span className="text-white font-bold text-sm">Notifications</span>
+                <span className="text-white font-bold text-sm">{t.notifications}</span>
                 {unreadCount > 0 && (
                   <button 
                     onClick={() => setUnreadCount(0)} 
                     className="text-xs text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    <Check size={12} /> Mark read
+                    <Check size={12} /> {t.markRead}
                   </button>
                 )}
               </div>
@@ -381,6 +382,7 @@ export function Header() {
         </div>
 
         <ThemeToggle />
+        <LanguageSelector />
 
         {/* Profile Menu */}
         <div className="relative" ref={profileRef}>
@@ -409,21 +411,21 @@ export function Header() {
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
               >
                 <User size={16} className="text-[#1788FF]" />
-                Profile & Account
+                {t.profileAccount}
               </button>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/my-flights'); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
               >
                 <Bookmark size={16} className="text-purple-400" />
-                My Saved Flights
+                {t.mySavedFlights}
               </button>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-blue-500/20 rounded-xl transition-all text-left cursor-pointer"
               >
                 <Settings size={16} className="text-emerald-400" />
-                Settings
+                {t.headerSettings}
               </button>
               <div className="h-px bg-slate-800 my-1" />
               <button 
@@ -435,7 +437,7 @@ export function Header() {
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-left cursor-pointer"
               >
                 <LogOut size={16} />
-                Sign Out
+                {t.signOut}
               </button>
             </div>
           )}

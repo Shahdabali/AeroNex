@@ -3,7 +3,7 @@ import { api } from '../../services/api';
 import { useAppContext } from '../../context/AppProvider';
 
 export function WelcomeBanner() {
-  const { user } = useAppContext();
+  const { user, t } = useAppContext();
   const { data: freshness } = useQuery({
     queryKey: ['dataFreshness'],
     queryFn: api.getFreshness,
@@ -12,7 +12,7 @@ export function WelcomeBanner() {
 
   const now = new Date();
   const hour = now.getHours();
-  const timeGreeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+  const timeGreeting = hour < 12 ? t.goodMorning : hour < 18 ? t.goodAfternoon : t.goodEvening;
   const firstName = user?.name ? user.name.split(' ')[0] : 'Shadab';
 
   const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });

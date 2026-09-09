@@ -19,6 +19,8 @@ interface AppContextType {
   toggleTheme: () => void;
   language: Language;
   setLanguage: (lang: Language) => void;
+  currency: string;
+  setCurrency: (currency: string) => void;
   t: typeof translations['English'] | typeof translations['Hindi'];
   user: User | null;
   login: (userData: User, token?: string) => void;
@@ -88,9 +90,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeState(newTheme);
   };
 
+  const [currency, setCurrencyState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('currency');
+      if (saved) return saved;
+    }
+    return 'INR (₹)';
+  });
+
+  const setCurrency = (newCurrency: string) => {
+    setCurrencyState(newCurrency);
+    localStorage.setItem('currency', newCurrency);
+  };
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('language', lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang === 'Hindi' ? 'hi' : 'en';
+    }
   };
 
   const login = (userData: User, token?: string) => {
@@ -117,6 +135,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         toggleTheme, 
         language, 
         setLanguage, 
+        currency,
+        setCurrency,
         t, 
         user, 
         login, 

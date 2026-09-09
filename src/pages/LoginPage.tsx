@@ -5,10 +5,12 @@ import { LanguageSelector } from '../components/LanguageSelector';
 import { LoginCard } from '../components/LoginCard';
 import { FlightRadarVisualizer } from '../components/FlightRadarVisualizer';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useAppContext } from '../context/AppProvider';
 import { BarChart3, TrendingUp, Bell, Plane, MapPin, Building2, Activity, Sparkles } from 'lucide-react';
 
 export function LoginPage() {
   usePageTitle('Sign In — AERONEX');
+  const { t } = useAppContext();
 
   // Animation variants
   const containerVariants: Variants = {
@@ -112,7 +114,7 @@ export function LoginPage() {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-cyan-400/30 text-cyan-400 text-xs font-semibold mb-4 backdrop-blur-md"
             >
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-              <span>Next-Gen India Domestic Flight Intelligence</span>
+              <span>{t.heroBadge}</span>
               <span className="text-slate-400 font-mono text-[10px]">• 5s Ticker</span>
             </motion.div>
 
@@ -120,8 +122,8 @@ export function LoginPage() {
               variants={itemVariants}
               className="text-[34px] sm:text-[44px] xl:text-[50px] font-black text-white leading-[1.12] tracking-tight max-w-xl login-hero-headline"
             >
-              Track fares. Understand<br />
-              trends. <span className="bg-gradient-to-r from-cyan-400 via-[#3B82F6] to-[#818cf8] bg-clip-text text-transparent">Travel smarter.</span>
+              {t.heroHeadline1}<br />
+              {t.heroHeadline2} <span className="bg-gradient-to-r from-cyan-400 via-[#3B82F6] to-[#818cf8] bg-clip-text text-transparent">{t.heroHeadlineHighlight}</span>
             </motion.h1>
 
             {/* 3 Animated Feature Rows */}
@@ -138,10 +140,10 @@ export function LoginPage() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-[14px] leading-snug flex items-center gap-1.5">
-                    Real-Time Airfare Index
+                    {t.feature1Title}
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                   </h3>
-                  <p className="text-slate-400 text-xs mt-0.5">5s continuous polling across major Indian domestic corridors.</p>
+                  <p className="text-slate-400 text-xs mt-0.5">{t.feature1Desc}</p>
                 </div>
               </motion.div>
 
@@ -156,10 +158,10 @@ export function LoginPage() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-[14px] leading-snug flex items-center gap-1.5">
-                    Smart Price Prediction
+                    {t.feature2Title}
                     <Sparkles size={13} className="text-purple-400" />
                   </h3>
-                  <p className="text-slate-400 text-xs mt-0.5">Understand whether fares may rise or drop with AI analysis.</p>
+                  <p className="text-slate-400 text-xs mt-0.5">{t.feature2Desc}</p>
                 </div>
               </motion.div>
 
@@ -173,8 +175,8 @@ export function LoginPage() {
                   <Bell size={19} className="text-[#38BDF8]" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-[14px] leading-snug">Price Alerts & Tracking</h3>
-                  <p className="text-slate-400 text-xs mt-0.5">Get notified instantly when your target fare is reached.</p>
+                  <h3 className="text-white font-bold text-[14px] leading-snug">{t.feature3Title}</h3>
+                  <p className="text-slate-400 text-xs mt-0.5">{t.feature3Desc}</p>
                 </div>
               </motion.div>
 
@@ -192,7 +194,7 @@ export function LoginPage() {
               </div>
               <div>
                 <span className="text-sm sm:text-base font-bold text-white block leading-tight">125K+</span>
-                <span className="text-[10px] text-slate-400 leading-tight">Flights Tracked</span>
+                <span className="text-[10px] text-slate-400 leading-tight">{t.stat1}</span>
               </div>
             </div>
 
@@ -202,7 +204,7 @@ export function LoginPage() {
               </div>
               <div>
                 <span className="text-sm sm:text-base font-bold text-white block leading-tight">1.2K+</span>
-                <span className="text-[10px] text-slate-400 leading-tight">Routes Tracked</span>
+                <span className="text-[10px] text-slate-400 leading-tight">{t.stat2}</span>
               </div>
             </div>
 
@@ -212,7 +214,7 @@ export function LoginPage() {
               </div>
               <div>
                 <span className="text-sm sm:text-base font-bold text-white block leading-tight">50+</span>
-                <span className="text-[10px] text-slate-400 leading-tight">Indian Airports</span>
+                <span className="text-[10px] text-slate-400 leading-tight">{t.stat3}</span>
               </div>
             </div>
 
@@ -222,7 +224,7 @@ export function LoginPage() {
               </div>
               <div>
                 <span className="text-sm sm:text-base font-bold text-white block leading-tight">5s Sync</span>
-                <span className="text-[10px] text-slate-400 leading-tight">Real-time Data</span>
+                <span className="text-[10px] text-slate-400 leading-tight">{t.stat4}</span>
               </div>
             </div>
           </motion.div>

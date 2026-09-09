@@ -4,24 +4,26 @@ import {
   Bell, Map, Plane, Calculator, Ticket, Settings, Activity, Sparkles
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
-
-const navItems = [
-  { icon: Home, label: 'Dashboard', path: '/dashboard' },
-  { icon: Sparkles, label: 'AI Trip Suggester', path: '/ai-trip-suggester', badgeText: 'India' },
-  { icon: Search, label: 'Flight Search', path: '/search' },
-  { icon: LineChart, label: 'Airfare Index', path: '/airfare-index' },
-  { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
-  { icon: Lightbulb, label: 'Predictions', path: '/predictions' },
-  { icon: Bell, label: 'Price Alerts', path: '/price-alerts', badge: 2 },
-  { icon: Map, label: 'Routes', path: '/routes' },
-  { icon: Plane, label: 'Airlines', path: '/airlines' },
-  { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
-  { icon: Ticket, label: 'My Flights', path: '/my-flights' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
-];
+import { useAppContext } from '../../context/AppProvider';
 
 export function Sidebar() {
   const location = useLocation();
+  const { t } = useAppContext();
+
+  const navItems = [
+    { icon: Home, label: t.navDashboard, path: '/dashboard' },
+    { icon: Sparkles, label: t.navTripSuggester, path: '/ai-trip-suggester', badgeText: 'India' },
+    { icon: Search, label: t.navFlightSearch, path: '/search' },
+    { icon: LineChart, label: t.navAirfareIndex, path: '/airfare-index' },
+    { icon: TrendingUp, label: t.navPriceTrends, path: '/price-trends' },
+    { icon: Lightbulb, label: t.navPredictions, path: '/predictions' },
+    { icon: Bell, label: t.navPriceAlerts, path: '/price-alerts', badge: 2 },
+    { icon: Map, label: t.navRoutes, path: '/routes' },
+    { icon: Plane, label: t.navAirlines, path: '/airlines' },
+    { icon: Calculator, label: t.navCPIAnalytics, path: '/cpi-analytics' },
+    { icon: Ticket, label: t.navMyFlights, path: '/my-flights' },
+    { icon: Settings, label: t.navSettings, path: '/settings' },
+  ];
 
   return (
     <aside className="w-[280px] h-screen bg-[#040D24] border-r border-slate-800 flex flex-col fixed left-0 top-0 overflow-y-auto z-40">
@@ -66,15 +68,15 @@ export function Sidebar() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Live 5s Stream
+              {t.sidebarLiveStream}
             </span>
             <span className="text-[10px] text-slate-400 font-mono">5s</span>
           </div>
           <h4 className="text-white font-bold text-[13px] flex items-center gap-1.5">
-            <Activity size={14} className="text-[#1788FF]" /> Realtime Feed
+            <Activity size={14} className="text-[#1788FF]" /> {t.sidebarRealtimeFeed}
           </h4>
           <p className="text-slate-400 text-[11px] mt-1 leading-snug">
-            Realtime airfare indexes & flight routes updated continuously every 5 seconds.
+            {t.sidebarFeedDesc}
           </p>
         </div>
       </div>

@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import { useAppContext } from '../../context/AppProvider';
 
 export function RouteChangesTable() {
   const navigate = useNavigate();
+  const { t } = useAppContext();
   const { data, isLoading } = useQuery({
     queryKey: ['routeChanges'],
     queryFn: api.getRouteChanges,
@@ -14,7 +16,7 @@ export function RouteChangesTable() {
     <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[320px] flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-white text-[16px] font-bold">Top Routes by Price Change</h3>
+          <h3 className="text-white text-[16px] font-bold">{t.topRoutesTitle}</h3>
           <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             5s LIVE
@@ -24,7 +26,7 @@ export function RouteChangesTable() {
           onClick={() => navigate('/routes')}
           className="text-[#1788FF] hover:text-blue-400 text-[13px] font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
         >
-          View All <span className="text-[16px] leading-none mb-0.5">→</span>
+          {t.viewAllBtn} <span className="text-[16px] leading-none mb-0.5">→</span>
         </button>
       </div>
 
