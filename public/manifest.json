@@ -1,0 +1,16 @@
+{
+  "name": "AeroNex — Real-Time Airfare Intelligence",
+  "short_name": "AeroNex",
+  "description": "Real-Time Airfare Intelligence and aviation analytics platform.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#020A1D",
+  "theme_color": "#1788FF",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
