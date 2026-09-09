@@ -698,6 +698,24 @@ body, aside, header, main, .min-h-screen {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+/* ==========================================================================
+   AERONEX ADAPTIVE LOGO SYSTEM (DARK / LIGHT DUAL-VARIANT)
+   ========================================================================== */
+.aeronex-logo-dark {
+  display: block;
+}
+.aeronex-logo-light {
+  display: none;
+}
+html.light .aeronex-logo-dark,
+body.light .aeronex-logo-dark {
+  display: none !important;
+}
+html.light .aeronex-logo-light,
+body.light .aeronex-logo-light {
+  display: block !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -706,4 +724,5 @@ body, aside, header, main, .min-h-screen {
     scroll-behavior: auto !important;
   }
 }
+
 
