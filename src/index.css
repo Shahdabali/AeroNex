@@ -27,4 +27,258 @@ body {
   display: block;
   min-width: 320px;
   min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
+
+/* ==========================================================================
+   AERONEX DAY / LIGHT MODE COMPREHENSIVE SYSTEM OVERRIDES
+   Transforms the whole webpage when html.light or body.light is active
+   ========================================================================== */
+
+html.light,
+html.light body {
+  color-scheme: light !important;
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+/* Base Webpage & Main Container */
+html.light .min-h-screen,
+html.light .bg-\[\#020A1D\],
+html.light [class*="bg-[#020A1D]"] {
+  background-color: #F8FAFC !important;
+}
+
+/* Sidebar Navigation */
+html.light aside,
+html.light aside.bg-\[\#040D24\],
+html.light [class*="bg-[#040D24]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 1px 0 10px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light aside a.text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light aside a.text-slate-400:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Header Bar */
+html.light header,
+html.light header.bg-\[rgba\(2\,10\,29\,0\.8\)\] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Card Backgrounds (All Variants) */
+html.light .bg-\[rgba\(10\,24\,56\,0\.6\)\],
+html.light .bg-\[rgba\(5\,20\,52\,0\.75\)\],
+html.light .bg-\[rgba\(5\,15\,40\,0\.5\)\],
+html.light .bg-\[rgba\(10\,20\,50\,0\.4\)\],
+html.light .bg-\[rgba\(11\,27\,66\,0\.5\)\],
+html.light [class*="bg-[rgba(10,24,56"],
+html.light [class*="bg-[rgba(5,20,52"],
+html.light [class*="bg-[rgba(5,15,40"],
+html.light [class*="bg-[rgba(10,20,50"],
+html.light [class*="bg-[rgba(11,27,66"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Sub-containers, nested blocks, and dark panels */
+html.light .bg-\[\#0A1838\],
+html.light .bg-\[\#0C1F4A\],
+html.light .bg-\[\#0D1E45\],
+html.light .bg-\[\#132A60\],
+html.light .bg-\[\#06112a\],
+html.light .bg-\[\#061A42\],
+html.light .bg-\[\#0B1B42\],
+html.light [class*="bg-[#0A1838]"],
+html.light [class*="bg-[#06112a]"],
+html.light [class*="bg-[#061A42]"],
+html.light [class*="bg-[#0B1B42]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Pill tags and subtle backgrounds */
+html.light .bg-\[\#0A1838\]\/80,
+html.light .bg-\[\#0A1838\]\/50,
+html.light .bg-\[\#040D24\]\/80 {
+  background-color: #F8FAFC !important;
+}
+
+/* Input Fields, Selects, and Textareas */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+/* Typography Overrides */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: #0F172A !important;
+}
+
+html.light .text-white:not(button):not([class*="bg-"]):not([class*="from-"]):not([class*="badge"]) {
+  color: #0F172A !important;
+}
+
+/* Specific elements that need text-white preserved */
+html.light button[class*="from-"] .text-white,
+html.light button[class*="from-"],
+html.light button[class*="bg-[#1788FF]"],
+html.light [class*="bg-[#1788FF]"] .text-white,
+html.light .bg-red-500,
+html.light .bg-green-500,
+html.light .bg-emerald-500 {
+  color: #FFFFFF !important;
+}
+
+/* Subtext & Secondary Labels */
+html.light .text-slate-200,
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-400,
+html.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Borders */
+html.light .border-slate-800,
+html.light .border-slate-700,
+html.light [class*="border-slate-800"],
+html.light [class*="border-slate-700"],
+html.light [class*="border-blue-500/20"],
+html.light [class*="border-blue-500/30"] {
+  border-color: #E2E8F0 !important;
+}
+
+/* Tables in Light Mode */
+html.light table {
+  color: #0F172A !important;
+}
+
+html.light table thead,
+html.light thead[class*="bg-"] {
+  background-color: #F1F5F9 !important;
+  color: #475569 !important;
+}
+
+html.light table tbody tr {
+  border-bottom: 1px solid #F1F5F9 !important;
+}
+
+html.light table tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+html.light table td {
+  color: #1E293B !important;
+}
+
+/* Dropdown Menus and Popovers */
+html.light .top-\[48px\],
+html.light .top-\[50px\],
+html.light .top-\[55px\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06) !important;
+}
+
+html.light .top-\[55px\] button {
+  color: #334155 !important;
+}
+
+html.light .top-\[55px\] button:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Dashboard Welcome Banner in Light Mode */
+html.light .h-\[220px\].rounded-2xl {
+  background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 60%, #FFFFFF 100%) !important;
+  border-color: #BAE6FD !important;
+  box-shadow: 0 4px 20px -2px rgba(3, 105, 161, 0.08) !important;
+}
+
+html.light .h-\[220px\].rounded-2xl [class*="bg-gradient-to-"] {
+  display: none !important;
+}
+
+html.light .h-\[220px\].rounded-2xl h2 {
+  color: #0369A1 !important;
+}
+
+html.light .h-\[220px\].rounded-2xl p {
+  color: #334155 !important;
+}
+
+html.light .h-\[220px\].rounded-2xl .text-slate-300 {
+  color: #475569 !important;
+}
+
+html.light .h-\[220px\].rounded-2xl .bg-\[\#061A42\]\/80 {
+  background-color: #FFFFFF !important;
+  border-color: #86EFAC !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Gamification card in sidebar */
+html.light aside .from-\[\#132A60\] {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+  border-color: #BFDBFE !important;
+}
+
+html.light aside .from-\[\#132A60\] h4 {
+  color: #1D4ED8 !important;
+}
+
+html.light aside .from-\[\#132A60\] p {
+  color: #475569 !important;
+}
+
+/* Recharts Tooltips in Light Mode */
+html.light .recharts-default-tooltip {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .recharts-tooltip-label,
+html.light .recharts-tooltip-item {
+  color: #0F172A !important;
+}
+
+/* Hover effects */
+html.light .hover\:bg-white\/5:hover {
+  background-color: #F1F5F9 !important;
+}
+

@@ -1,10 +1,12 @@
 import { FlaskConical, User, BarChart3, Shield, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useAppContext } from '../context/AppProvider';
 
 export function DemoAccess() {
-  const { t } = useAppContext();
+  const navigate = useNavigate();
+  const { t, login } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(true);
 
   const demos = [
@@ -30,8 +32,14 @@ export function DemoAccess() {
 
   const handleDemoLogin = async (role: 'Passenger' | 'Researcher' | 'Admin') => {
     try {
-      await authService.demoLogin(role);
-      alert(`Demo login successful as ${role}`);
+      const res = (await authService.demoLogin(role)) as any;
+      login({
+        id: `demo_${role.toLowerCase()}`,
+        name: res.user?.name || `${role} Demo`,
+        email: `${role.toLowerCase()}@aeronex.com`,
+        role: role,
+      }, res.token);
+      navigate('/dashboard');
     } catch (e) {
       console.error(e);
     }

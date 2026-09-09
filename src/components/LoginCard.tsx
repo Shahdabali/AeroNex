@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { AeroNexLogo } from './AeroNexLogo';
 import { SocialLogin } from './SocialLogin';
@@ -7,7 +8,8 @@ import { authService } from '../services/authService';
 import { useAppContext } from '../context/AppProvider';
 
 export function LoginCard() {
-  const { t } = useAppContext();
+  const navigate = useNavigate();
+  const { t, login } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -21,9 +23,17 @@ export function LoginCard() {
     setError(null);
     setSuccess(null);
     try {
-      const response = await authService.login(email, password);
-      console.log('Login success', response);
-      setSuccess("Successfully logged in!");
+      const response = (await authService.login(email, password)) as any;
+      login({
+        id: response.user?.id || 'usr_1',
+        name: response.user?.name || email.split('@')[0] || 'AeroNex User',
+        email: response.user?.email || email,
+        role: 'Passenger',
+      }, response.token);
+      setSuccess("Successfully logged in! Redirecting...");
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 300);
     } catch (err: any) {
       setError(err.message || "Failed to login");
     } finally {

@@ -3,24 +3,61 @@ import type { ReactNode } from 'react';
 import { translations } from '../i18n/translations';
 import type { Language } from '../i18n/translations';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatarUrl?: string;
+}
 
 interface AppContextType {
   theme: Theme;
+  setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   t: typeof translations['English'] | typeof translations['Hindi'];
+  user: User | null;
+  login: (userData: User, token?: string) => void;
+  logout: () => void;
+  isAuthenticated: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const defaultUser: User = {
+  id: 'usr_default',
+  name: 'Shadab Ali',
+  email: 'shadab@aeronex.com',
+  role: 'Passenger',
+  avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
+  const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as Theme) || 'dark';
+      const saved = localStorage.getItem('theme') as Theme;
+      if (saved === 'light' || saved === 'dark') return saved;
     }
     return 'dark';
+  });
+
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aeronex_user');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return defaultUser;
+        }
+      }
+      return defaultUser;
+    }
+    return defaultUser;
   });
 
   const [language, setLanguageState] = useState<Language>(() => {
@@ -33,20 +70,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
+
     if (theme === 'light') {
       root.classList.remove('dark');
-      root.classList.add('light'); // add explicit light class if needed
+      root.classList.add('light');
+      body.classList.remove('dark');
+      body.classList.add('light');
       root.style.colorScheme = 'light';
     } else {
       root.classList.remove('light');
       root.classList.add('dark');
+      body.classList.remove('light');
+      body.classList.add('dark');
       root.style.colorScheme = 'dark';
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
   };
 
   const setLanguage = (lang: Language) => {
@@ -54,10 +101,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('language', lang);
   };
 
+  const login = (userData: User, token?: string) => {
+    setUser(userData);
+    localStorage.setItem('aeronex_user', JSON.stringify(userData));
+    if (token) {
+      localStorage.setItem('aeronex_token', token);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('aeronex_user');
+    localStorage.removeItem('aeronex_token');
+  };
+
   const t = translations[language];
 
   return (
-    <AppContext.Provider value={{ theme, toggleTheme, language, setLanguage, t }}>
+    <AppContext.Provider 
+      value={{ 
+        theme, 
+        setTheme, 
+        toggleTheme, 
+        language, 
+        setLanguage, 
+        t, 
+        user, 
+        login, 
+        logout, 
+        isAuthenticated: !!user 
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

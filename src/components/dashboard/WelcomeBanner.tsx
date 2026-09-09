@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { useAppContext } from '../../context/AppProvider';
 
 export function WelcomeBanner() {
+  const { user } = useAppContext();
   const { data: freshness } = useQuery({
     queryKey: ['dataFreshness'],
     queryFn: api.getFreshness,
@@ -9,6 +11,10 @@ export function WelcomeBanner() {
   });
 
   const now = new Date();
+  const hour = now.getHours();
+  const timeGreeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Shadab';
+
   const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
@@ -26,7 +32,7 @@ export function WelcomeBanner() {
             </span>
           </div>
           <h2 className="text-[30px] font-extrabold text-white flex items-center gap-2 tracking-tight">
-            Good Afternoon, Shadab! <span className="origin-bottom-right hover:rotate-12 transition-transform cursor-default text-2xl">👋</span>
+            {timeGreeting}, {firstName}! <span className="origin-bottom-right hover:rotate-12 transition-transform cursor-default text-2xl">👋</span>
           </h2>
           <p className="text-slate-300 text-[14px]">
             Here's what's happening with real-time airfare prices & predictive indexes across India.

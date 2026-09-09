@@ -526,9 +526,9 @@ export const api = {
       services: {
         db: 'ok',
         dbDetails: {
-          provider: 'supabase',
+          provider: 'cloud_engine',
           connected: true,
-          message: 'Connected to Supabase project scybybrkshwwldydnpmf',
+          message: 'Connected to AeroNex Realtime Engine',
         },
         worker: 'ok',
         ai: 'ok',

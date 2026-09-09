@@ -1,10 +1,21 @@
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useAppContext } from '../context/AppProvider';
 
 export function SocialLogin() {
+  const navigate = useNavigate();
+  const { login } = useAppContext();
+
   const handleSocial = async (provider: 'Google' | 'Microsoft') => {
     try {
-      const res = await authService.socialLogin(provider);
-      alert(`Successfully logged in with ${provider}: ${(res as any).user.name}`);
+      const res = (await authService.socialLogin(provider)) as any;
+      login({
+        id: `social_${provider.toLowerCase()}`,
+        name: res.user?.name || `${provider} User`,
+        email: res.user?.email || `user@${provider.toLowerCase()}.com`,
+        role: 'Passenger',
+      }, res.token);
+      navigate('/dashboard');
     } catch (e) {
       console.error(e);
     }

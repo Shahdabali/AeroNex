@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, User, Settings, LogOut, Bookmark, Check, Database } from 'lucide-react';
+import { Search, Bell, ChevronDown, User, Settings, LogOut, Bookmark, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle';
 import { api } from '../../services/api';
 import { useQuery } from '@tanstack/react-query';
+import { useAppContext } from '../../context/AppProvider';
 
 export function Header() {
   const navigate = useNavigate();
+  const { user, logout } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -156,17 +158,6 @@ export function Header() {
           )}
         </div>
 
-        {/* Supabase Status Pill */}
-        <div 
-          onClick={() => navigate('/settings')}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer text-xs font-mono"
-          title="Connected to Supabase project scybybrkshwwldydnpmf"
-        >
-          <Database size={13} className="text-emerald-400" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>Supabase</span>
-        </div>
-
         <ThemeToggle />
 
         {/* Profile Menu */}
@@ -176,11 +167,15 @@ export function Header() {
             className="flex items-center gap-3 cursor-pointer hover:bg-white/5 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-800"
           >
             <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-800 ring-2 ring-blue-500/20">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="User" className="w-full h-full object-cover" />
+              <img 
+                src={user?.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
+                alt={user?.name || "User"} 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[13px] font-semibold text-white leading-tight">Shadab Ali</span>
-              <span className="text-[11px] text-slate-400 leading-tight">Passenger</span>
+              <span className="text-[13px] font-semibold text-white leading-tight">{user?.name || 'Shadab Ali'}</span>
+              <span className="text-[11px] text-slate-400 leading-tight">{user?.role || 'Passenger'}</span>
             </div>
             <ChevronDown size={14} className={`text-slate-400 ml-1 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
           </div>
@@ -210,7 +205,11 @@ export function Header() {
               </button>
               <div className="h-px bg-slate-800 my-1" />
               <button 
-                onClick={() => { setShowProfileMenu(false); navigate('/login'); }}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  logout();
+                  navigate('/login');
+                }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-left cursor-pointer"
               >
                 <LogOut size={16} />
