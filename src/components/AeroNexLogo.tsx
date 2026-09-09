@@ -76,10 +76,10 @@ export function AeroNexLogo({
           AERO<span className="bg-gradient-to-r from-cyan-400 via-[#1788FF] to-[#4E55F5] bg-clip-text text-transparent">NEX</span>
         </h1>
         {showTagline && (
-          <p className="text-[10px] font-extrabold tracking-[0.22em] text-cyan-400 uppercase mt-1 flex items-center gap-1.5 leading-tight">
-            <span className="w-1.5 h-0.5 bg-cyan-400 inline-block rounded-full" />
+          <p className="text-[9px] font-bold tracking-[0.22em] text-cyan-400 uppercase mt-1 flex items-center gap-1.5 leading-tight">
+            <span className="w-3.5 h-[1px] bg-cyan-400/80 inline-block" />
             FLY BEYOND LIMITS
-            <span className="w-1.5 h-0.5 bg-cyan-400 inline-block rounded-full" />
+            <span className="w-3.5 h-[1px] bg-cyan-400/80 inline-block" />
           </p>
         )}
       </div>
