@@ -3,36 +3,28 @@ import { useAppContext } from '../context/AppProvider';
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useAppContext();
+  const isDark = theme === 'dark';
 
   return (
     <button
       onClick={toggleTheme}
-      className={`flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md border transition-all cursor-pointer ${
-        theme === 'light'
-          ? 'bg-slate-100 border-slate-300 shadow-sm text-slate-700 hover:border-slate-400'
-          : 'bg-[rgba(5,20,52,0.75)] border-blue-500/30 text-slate-300 hover:text-white shadow-[0_0_15px_rgba(23,136,255,0.15)]'
-      }`}
-      aria-label="Toggle theme"
-      title={theme === 'dark' ? 'Switch to Day Mode (Light)' : 'Switch to Cockpit Mode (Dark)'}
+      type="button"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0A1838]/85 hover:bg-[#0E204A] border border-slate-700/80 hover:border-slate-500 shadow-lg backdrop-blur-md transition-all cursor-pointer group"
+      aria-label="Toggle day and night mode"
+      title={isDark ? 'Switch to Day Mode (Light)' : 'Switch to Cockpit Mode (Dark)'}
     >
-      <div
-        className={`p-1.5 rounded-full transition-all flex items-center justify-center ${
-          theme === 'light' 
-            ? 'bg-amber-500 text-white shadow-md scale-105' 
-            : 'text-slate-400 hover:text-slate-200'
-        }`}
-      >
-        <Sun size={16} />
+      <Sun size={14} className={isDark ? "text-slate-400 group-hover:text-slate-200" : "text-amber-400"} />
+      
+      {/* Sliding track & blue circle knob */}
+      <div className="w-10 h-4 bg-[#030B1E] border border-slate-700 rounded-full relative p-0.5 flex items-center">
+        <div 
+          className={`w-3 h-3 rounded-full bg-[#1788FF] shadow-[0_0_10px_rgba(23,136,255,0.9)] ring-2 ring-[#1788FF]/30 transition-transform duration-200 ease-out ${
+            isDark ? 'translate-x-6' : 'translate-x-0 bg-amber-400 ring-amber-400/30'
+          }`}
+        />
       </div>
-      <div
-        className={`p-1.5 rounded-full transition-all flex items-center justify-center ${
-          theme === 'dark' 
-            ? 'bg-[#1788FF] text-white shadow-[0_0_10px_rgba(23,136,255,0.5)] scale-105' 
-            : 'text-slate-400 hover:text-slate-600'
-        }`}
-      >
-        <Moon size={16} />
-      </div>
+
+      <Moon size={14} className={isDark ? "text-[#1788FF]" : "text-slate-400 group-hover:text-slate-200"} />
     </button>
   );
 }

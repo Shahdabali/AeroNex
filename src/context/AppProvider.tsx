@@ -28,14 +28,6 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const defaultUser: User = {
-  id: 'usr_default',
-  name: 'Shadab Ali',
-  email: 'shadab@aeronex.com',
-  role: 'Passenger',
-  avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
-};
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
@@ -52,12 +44,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         try {
           return JSON.parse(saved);
         } catch {
-          return defaultUser;
+          return null;
         }
       }
-      return defaultUser;
+      return null;
     }
-    return defaultUser;
+    return null;
   });
 
   const [language, setLanguageState] = useState<Language>(() => {

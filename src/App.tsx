@@ -24,6 +24,13 @@ const queryClient = new QueryClient({
   },
 });
 
+import { useAppContext } from './context/AppProvider';
+
+function HomeRedirect() {
+  const { isAuthenticated } = useAppContext();
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -50,7 +57,7 @@ function App() {
             <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
             <Route path="/my-flights" element={<MyFlights />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<HomeRedirect />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
