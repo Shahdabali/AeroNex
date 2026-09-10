@@ -50,15 +50,15 @@ export function CheapestDates() {
   };
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[320px] flex flex-col">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[320px] flex flex-col transition-all shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-white text-[16px] font-bold">Cheapest Dates Finder</h3>
-          <p className="text-[12px] text-slate-400 mt-0.5">Delhi → Mumbai <span className="text-cyan-400 ml-1">({monthYearLabel})</span></p>
+          <p className="text-[12px] text-zinc-400 mt-0.5">Delhi → Mumbai <span className="text-cyan-400 ml-1">({monthYearLabel})</span></p>
         </div>
         <button 
           onClick={() => navigate('/search')}
-          className="text-[#1788FF] hover:text-blue-400 text-[13px] font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
+          className="text-cyan-400 hover:text-cyan-300 text-[13px] font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
         >
           View Calendar <span className="text-[16px] leading-none mb-0.5">→</span>
         </button>

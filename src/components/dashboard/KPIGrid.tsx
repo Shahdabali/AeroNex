@@ -62,14 +62,14 @@ export function KPIGrid() {
         <div 
           key={index} 
           onClick={() => navigate(kpi.path)}
-          className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 flex flex-col relative overflow-hidden group hover:border-blue-500/50 hover:bg-[#0C1F4A] hover:scale-[1.01] transition-all cursor-pointer shadow-lg hover:shadow-blue-500/10"
+          className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] p-6 flex flex-col relative overflow-hidden group hover:border-white/[0.18] hover:bg-[#161824] hover:scale-[1.01] transition-all cursor-pointer shadow-sm hover:shadow-lg"
         >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#1788FF]/5 rounded-bl-full pointer-events-none group-hover:bg-[#1788FF]/15 transition-colors" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.02] rounded-bl-full pointer-events-none group-hover:bg-cyan-500/[0.05] transition-colors" />
           <div className="flex items-center gap-4 mb-4 relative z-10">
-            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-[#132A60] flex items-center justify-center border border-blue-500/30 text-[#1788FF] group-hover:bg-[#1788FF] group-hover:text-white transition-all">
-              <kpi.icon size={24} />
+            <div className="w-12 h-12 rounded-xl bg-white/[0.04] flex items-center justify-center border border-white/[0.08] text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-400/40 group-hover:text-cyan-300 transition-all">
+              <kpi.icon size={22} />
             </div>
-            <span className="text-slate-600 dark:text-slate-400 font-medium text-[15px] group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{kpi.label}</span>
+            <span className="text-zinc-400 font-medium text-[14px] group-hover:text-zinc-200 transition-colors">{kpi.label}</span>
           </div>
           <div className="flex items-end justify-between relative z-10">
             <h3 className="text-slate-900 dark:text-white text-[32px] font-bold leading-none tracking-tight">

@@ -29,16 +29,16 @@ export function QuickInsights() {
   };
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[320px] flex flex-col">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[320px] flex flex-col transition-all shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400">
             <Sparkles size={18} />
           </div>
-          <h3 className="text-white text-[16px] font-bold">AeroNex AI Insights</h3>
+          <h3 className="text-white text-[16px] font-bold">AeroNex Market Insights</h3>
         </div>
         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-          Live Gemini
+          Live Realtime
         </span>
       </div>
 
@@ -51,8 +51,8 @@ export function QuickInsights() {
           (Array.isArray(data) ? data : []).map((insight: any, i: number) => (
             <div 
               key={i} 
-              onClick={() => navigate('/predictions')}
-              className="flex items-start gap-3 p-3 rounded-xl bg-[#06112a]/50 border border-slate-800/50 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all cursor-pointer group"
+              onClick={() => navigate('/airfare-index')}
+              className="flex items-start gap-3 p-3 rounded-xl bg-[#161824]/60 border border-white/[0.06] hover:bg-white/[0.04] hover:border-cyan-500/30 transition-all cursor-pointer group"
             >
               <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${getBg(insight.type)}`}>
                 {getIcon(insight.type)}

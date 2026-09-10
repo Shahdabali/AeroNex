@@ -4,7 +4,7 @@ import { Header } from './Header';
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#020A1D] flex font-['Inter',sans-serif]">
+    <div className="min-h-screen bg-[#090A0F] text-zinc-100 flex font-['Inter',sans-serif] tech-grid-bg transition-colors">
       <Sidebar />
       <div className="flex-1 flex flex-col ml-[280px]">
         <Header />

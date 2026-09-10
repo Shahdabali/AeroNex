@@ -3,8 +3,11 @@
 @theme {
   --color-brand-blue: #1788FF;
   --color-brand-purple: #4E55F5;
-  --color-navy-dark: #020A1D;
-  --color-navy-card: rgba(5, 20, 52, 0.75);
+  --color-navy-dark: #090A0F;
+  --color-navy-card: rgba(18, 20, 28, 0.85);
+  --color-matte-bg: #090A0F;
+  --color-matte-surface: #12141C;
+  --color-matte-card: #161822;
 }
 
 :root {
@@ -13,8 +16,8 @@
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #020A1D;
+  color: rgba(255, 255, 255, 0.92);
+  background-color: #090A0F;
   
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -933,4 +936,96 @@ html.light .integration-row {
 
 .interactive-scale:active {
   transform: scale(0.97);
+}
+
+/* ==========================================================================
+   AERONEX MATTE BLACK TECHNICAL THEME (STEALTH OBSIDIAN)
+   ========================================================================== */
+
+html:not(.light) {
+  background-color: #090A0F !important;
+  color: #F4F4F5 !important;
+}
+
+html:not(.light) .min-h-screen,
+html:not(.light) .bg-\[\#020A1D\],
+html:not(.light) [class*="bg-[#020A1D]"] {
+  background-color: #090A0F !important;
+}
+
+html:not(.light) aside,
+html:not(.light) aside.bg-\[\#040D24\],
+html:not(.light) [class*="bg-[#040D24]"] {
+  background-color: #090A0F !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light) header,
+html:not(.light) header.bg-\[rgba\(2\,10\,29\,0\.8\)\] {
+  background-color: rgba(9, 10, 15, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light) .bg-\[rgba\(10\,24\,56\,0\.6\)\],
+html:not(.light) .bg-\[rgba\(10\,24\,56\,0\.65\)\],
+html:not(.light) .bg-\[rgba\(10\,24\,56\,0\.7\)\],
+html:not(.light) .bg-\[rgba\(10\,24\,56\,0\.8\)\],
+html:not(.light) .bg-\[rgba\(5\,20\,52\,0\.75\)\],
+html:not(.light) .bg-\[rgba\(5\,20\,52\,0\.85\)\],
+html:not(.light) .bg-\[rgba\(5\,15\,40\,0\.5\)\],
+html:not(.light) .bg-\[rgba\(10\,20\,50\,0\.4\)\],
+html:not(.light) .bg-\[rgba\(11\,27\,66\,0\.5\)\],
+html:not(.light) .bg-\[rgba\(11\,27\,66\,0\.6\)\],
+html:not(.light) [class*="bg-[rgba(10,24,56"],
+html:not(.light) [class*="bg-[rgba(5,20,52"],
+html:not(.light) [class*="bg-[rgba(5,15,40"],
+html:not(.light) [class*="bg-[rgba(10,20,50"],
+html:not(.light) [class*="bg-[rgba(11,27,66"] {
+  background-color: rgba(18, 20, 28, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light) .bg-\[\#0A1838\],
+html:not(.light) .bg-\[\#0C1F4A\],
+html:not(.light) .bg-\[\#0D1E45\],
+html:not(.light) .bg-\[\#132A60\],
+html:not(.light) .bg-\[\#06112a\],
+html:not(.light) .bg-\[\#06112A\],
+html:not(.light) .bg-\[\#061A42\],
+html:not(.light) .bg-\[\#061434\],
+html:not(.light) .bg-\[\#07132e\] {
+  background-color: #12141C !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Matte Black Hover Effects & Fine Borders */
+html:not(.light) .card-interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px -2px rgba(0, 229, 255, 0.1) !important;
+}
+
+/* Subtle Technical Grid Background */
+.tech-grid-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Matte Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090A0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3F3F46;
 }

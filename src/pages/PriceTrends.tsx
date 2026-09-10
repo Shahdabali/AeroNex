@@ -266,10 +266,10 @@ export function PriceTrends() {
           </div>
 
           <button
-            onClick={() => navigate(`/predictions`)}
-            className="px-5 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-cyan-400 border border-blue-500/40 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+            onClick={() => navigate(`/airfare-index`)}
+            className="px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-cyan-400 border border-white/[0.12] hover:border-cyan-400/40 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
           >
-            Run AI Predictive Analysis →
+            Analyze National Airfare Index →
           </button>
         </div>
 

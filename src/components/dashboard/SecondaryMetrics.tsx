@@ -73,7 +73,7 @@ export function SecondaryMetrics() {
         <div 
           key={i} 
           onClick={() => navigate(m.path)}
-          className="bg-[#0A1838]/80 border border-slate-700/50 rounded-xl p-4 flex flex-col hover:border-blue-500/40 hover:bg-[#0D1F48] transition-all cursor-pointer group"
+          className="bg-[#12141C]/80 border border-white/[0.08] rounded-xl p-4 flex flex-col hover:border-white/[0.16] hover:bg-[#161824] transition-all cursor-pointer group shadow-sm"
         >
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${m.bg} ${m.color} group-hover:scale-110 transition-transform`}>

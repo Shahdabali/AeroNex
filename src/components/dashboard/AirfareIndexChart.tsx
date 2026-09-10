@@ -16,7 +16,7 @@ export function AirfareIndexChart() {
   const timeframes = ['24h', '7d', '30d', '6m', '1y'];
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[420px] flex flex-col">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[420px] flex flex-col transition-all shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
           <h3 className="text-white text-[18px] font-bold">{t.indiaAirfarePriceIndex}</h3>
@@ -25,15 +25,15 @@ export function AirfareIndexChart() {
             {t.liveTicker5s}
           </span>
         </div>
-        <div className="flex bg-[#06112a] rounded-lg p-1 border border-slate-800">
+        <div className="flex bg-[#161824] rounded-lg p-1 border border-white/[0.08]">
           {timeframes.map(tf => (
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
               className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${
                 timeframe === tf 
-                  ? 'bg-[#1788FF] text-white' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' 
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {tf}
@@ -71,23 +71,23 @@ export function AirfareIndexChart() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#0A1838',
-                  border: '1px solid rgba(23,136,255,0.3)',
+                  backgroundColor: '#12141C',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '12px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.8)'
                 }}
                 itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-                labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+                labelStyle={{ color: '#a1a1aa', marginBottom: '4px' }}
                 formatter={(value: any) => [`${value}`, 'Airfare Index']}
-                labelFormatter={(label) => `${label} (10 Sep)`}
+                labelFormatter={(label) => `${label}`}
               />
               <Line 
                 type="monotone" 
                 dataKey="value" 
-                stroke="#1788FF" 
-                strokeWidth={3} 
+                stroke="#00E5FF" 
+                strokeWidth={2.5} 
                 dot={false}
-                activeDot={{ r: 6, fill: '#1788FF', stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: '#00E5FF', stroke: '#fff', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>

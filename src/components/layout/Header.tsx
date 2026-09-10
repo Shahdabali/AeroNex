@@ -48,10 +48,10 @@ export function Header() {
 
   // Quick Feature Links
   const quickLinks = [
-    { label: 'AI Trip Suggester', path: '/ai-trip-suggester', icon: Sparkles, desc: 'Domestic India optimizer' },
     { label: 'Airfare Index', path: '/airfare-index', icon: BarChart3, desc: 'Live benchmark & regional map' },
-    { label: 'CPI Analytics', path: '/cpi-analytics', icon: Calculator, desc: 'Aviation vs CPI inflation' },
-    { label: 'AI Predictions', path: '/predictions', icon: Sparkles, desc: 'Gemini ML predictive model' },
+    { label: 'Flight Search', path: '/search', icon: Search, desc: 'Real-time fare lookup & comparison' },
+    { label: 'Price Trends', path: '/price-trends', icon: TrendingUp, desc: 'Corridor analytics & historical swings' },
+    { label: 'CPI Analytics', path: '/cpi-analytics', icon: Calculator, desc: 'Aviation vs CPI inflation benchmarks' },
   ];
 
   // Filtered results when user types
@@ -111,11 +111,11 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-[80px] w-full px-8 flex items-center justify-between sticky top-0 bg-[rgba(2,10,29,0.8)] backdrop-blur-xl border-b border-slate-800/50 z-30">
+    <header className="h-[80px] w-full px-8 flex items-center justify-between sticky top-0 bg-[#090A0F]/85 backdrop-blur-xl border-b border-white/[0.08] z-30 transition-colors">
       {/* Search Bar */}
       <div className="flex-1 max-w-[460px] relative" ref={searchRef}>
         <div className="relative flex items-center">
-          <Search size={18} className="absolute left-4 text-slate-400" />
+          <Search size={18} className="absolute left-4 text-zinc-400" />
           <input
             type="text"
             value={searchTerm}
@@ -127,12 +127,12 @@ export function Header() {
             onClick={() => setShowSearchDropdown(true)}
             onKeyDown={handleKeyDown}
             placeholder={t.searchPlaceholder}
-            className="w-full h-[42px] bg-[#0A1838] border border-slate-700/50 rounded-full pl-11 pr-10 text-[14px] text-white placeholder-slate-400 focus:outline-none focus:border-[#1788FF] focus:bg-[#0D1E45] transition-all shadow-inner"
+            className="w-full h-[42px] bg-[#12141C] border border-white/[0.08] rounded-full pl-11 pr-10 text-[14px] text-white placeholder-zinc-400 focus:outline-none focus:border-cyan-400/50 focus:bg-[#161824] transition-all shadow-inner"
           />
           {searchTerm && (
             <button 
               onClick={() => setSearchTerm('')} 
-              className="absolute right-3 p-1 text-slate-400 hover:text-white"
+              className="absolute right-3 p-1 text-zinc-400 hover:text-white"
             >
               <X size={14} />
             </button>
@@ -141,7 +141,7 @@ export function Header() {
 
         {/* Search Recommendations Popover */}
         {showSearchDropdown && (
-          <div className="absolute top-[50px] left-0 w-[500px] max-w-[90vw] bg-[#07132e]/95 backdrop-blur-2xl border border-blue-500/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[480px] overflow-y-auto divide-y divide-slate-800/60">
+          <div className="absolute top-[50px] left-0 w-[500px] max-w-[90vw] bg-[#0E1017]/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[480px] overflow-y-auto divide-y divide-white/[0.06]">
             
             {/* Blank State Recommendations */}
             {!searchTerm.trim() ? (

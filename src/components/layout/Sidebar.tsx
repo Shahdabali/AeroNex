@@ -1,11 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Home, Search, LineChart, TrendingUp, Lightbulb, 
-  Bell, Map, Plane, Calculator, Ticket, Settings, Activity, Sparkles
+  Home, Search, LineChart, TrendingUp, 
+  Bell, Map, Plane, Calculator, Settings, Activity
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { useAppContext } from '../../context/AppProvider';
-
 import { motion } from 'framer-motion';
 
 export function Sidebar() {
@@ -14,56 +13,60 @@ export function Sidebar() {
 
   const navItems = [
     { icon: Home, label: t.navDashboard, path: '/dashboard' },
-    { icon: Sparkles, label: t.navTripSuggester, path: '/ai-trip-suggester', badgeText: 'India' },
+    { icon: LineChart, label: t.navAirfareIndex, path: '/airfare-index', badgeText: 'Live' },
     { icon: Search, label: t.navFlightSearch, path: '/search' },
-    { icon: LineChart, label: t.navAirfareIndex, path: '/airfare-index' },
     { icon: TrendingUp, label: t.navPriceTrends, path: '/price-trends' },
-    { icon: Lightbulb, label: t.navPredictions, path: '/predictions' },
     { icon: Bell, label: t.navPriceAlerts, path: '/price-alerts', badge: 2 },
     { icon: Map, label: t.navRoutes, path: '/routes' },
     { icon: Plane, label: t.navAirlines, path: '/airlines' },
     { icon: Calculator, label: t.navCPIAnalytics, path: '/cpi-analytics' },
-    { icon: Ticket, label: t.navMyFlights, path: '/my-flights' },
     { icon: Settings, label: t.navSettings, path: '/settings' },
   ];
 
   return (
-    <aside className="w-[280px] h-screen bg-[#040D24] border-r border-slate-800 flex flex-col fixed left-0 top-0 overflow-y-auto z-40">
+    <aside className="w-[280px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col fixed left-0 top-0 overflow-y-auto z-40 transition-colors">
       <div className="p-5 pb-3">
         <AeroNexLogo size={44} showTagline={true} />
       </div>
 
-      <nav className="flex-1 px-4 flex flex-col gap-1 pb-6">
+      <nav className="flex-1 px-3.5 flex flex-col gap-1 pb-6 mt-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`relative flex items-center justify-between px-4 py-3 rounded-xl transition-colors select-none ${
+              className={`relative flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all select-none group ${
                 isActive 
-                  ? 'text-white' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5'
+                  ? 'text-white font-semibold' 
+                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeSidebarIndicator"
-                  className="absolute inset-0 bg-[#1788FF] rounded-xl shadow-[0_0_20px_rgba(23,136,255,0.4)]"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  className="absolute inset-0 bg-[#161822] border border-white/[0.12] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
               )}
               <div className="relative z-10 flex items-center gap-3">
-                <item.icon size={18} className={isActive ? 'text-white' : item.label.includes('AI') ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400'} />
-                <span className="text-[14px] font-medium">{item.label}</span>
+                <item.icon 
+                  size={17} 
+                  className={`transition-colors ${
+                    isActive 
+                      ? 'text-cyan-400' 
+                      : 'text-zinc-500 group-hover:text-zinc-300'
+                  }`} 
+                />
+                <span className="text-[13.5px] tracking-tight">{item.label}</span>
               </div>
               {item.badge && (
-                <div className="relative z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold text-white shadow-md">
+                <div className="relative z-10 w-4 h-4 rounded-full bg-rose-500/90 flex items-center justify-center text-[9px] font-bold text-white shadow-sm">
                   {item.badge}
                 </div>
               )}
               {item.badgeText && (
-                <div className="relative z-10 px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
+                <div className="relative z-10 px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9.5px] font-bold font-mono tracking-wider">
                   {item.badgeText}
                 </div>
               )}
@@ -73,18 +76,18 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 mt-auto">
-        <div className="w-full rounded-2xl bg-gradient-to-br from-[#061B42] to-[#030E26] p-4 border border-blue-500/25 relative overflow-hidden shadow-lg">
+        <div className="w-full rounded-2xl bg-[#12141C] p-4 border border-white/[0.08] relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               {t.sidebarLiveStream}
             </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">5s</span>
+            <span className="text-[10px] text-zinc-500 font-mono">5s TICK</span>
           </div>
-          <h4 className="text-slate-900 dark:text-white font-bold text-[13px] flex items-center gap-1.5">
-            <Activity size={14} className="text-[#1788FF]" /> {t.sidebarRealtimeFeed}
+          <h4 className="text-white font-bold text-[13px] flex items-center gap-1.5">
+            <Activity size={14} className="text-cyan-400" /> {t.sidebarRealtimeFeed}
           </h4>
-          <p className="text-slate-600 dark:text-slate-400 text-[11px] mt-1 leading-snug">
+          <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
             {t.sidebarFeedDesc}
           </p>
         </div>

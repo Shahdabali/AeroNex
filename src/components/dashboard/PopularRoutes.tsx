@@ -47,7 +47,7 @@ export function PopularRoutes() {
   ];
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[320px] flex flex-col shadow-lg">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[320px] flex flex-col transition-all shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-white text-[16px] font-bold">Popular Routes</h3>
@@ -55,7 +55,7 @@ export function PopularRoutes() {
         </div>
         <button 
           onClick={() => navigate('/routes')}
-          className="text-[#1788FF] hover:text-blue-400 text-[13px] font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
+          className="text-cyan-400 hover:text-cyan-300 text-[13px] font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
         >
           View All <span className="text-[16px] leading-none mb-0.5">→</span>
         </button>
@@ -68,7 +68,7 @@ export function PopularRoutes() {
             <div 
               key={i} 
               onClick={() => navigate('/price-trends')}
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-blue-500/10 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/30"
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.04] transition-colors group cursor-pointer border border-transparent hover:border-white/[0.1]"
             >
               <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 relative bg-slate-100 dark:bg-slate-800 ring-1 ring-blue-500/20">
                 <img 

@@ -49,24 +49,24 @@ export function RegionalMap() {
   const selectedMetrics = getRegionMetrics(selectedPoint.id);
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-5 h-[420px] flex flex-col relative overflow-hidden">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-5 h-[420px] flex flex-col relative overflow-hidden transition-all shadow-sm">
       <div className="flex items-center justify-between mb-2 z-10">
         <div>
           <h3 className="text-white text-[15px] font-bold flex items-center gap-2">
             <span>{viewMode === '3d' ? '3D Indian Airspace' : (t.regionalMapTitle || 'Airfare Index by Region')}</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           </h3>
-          <p className="text-slate-400 text-[11px]">{t.regionalMapSubtitle || 'Interactive Aviation Radar & Fare Corridors'}</p>
+          <p className="text-zinc-400 text-[11px]">{t.regionalMapSubtitle || 'Interactive Aviation Radar & Fare Corridors'}</p>
         </div>
         
         {/* 2D / 3D Mode Toggle Switch */}
-        <div className="flex items-center gap-1 bg-[#061433]/90 p-1 rounded-xl border border-slate-700/80 shadow-inner">
+        <div className="flex items-center gap-1 bg-[#161824] p-1 rounded-xl border border-white/[0.08] shadow-inner">
           <button
             onClick={() => setViewMode('2d')}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
               viewMode === '2d' 
-                ? 'bg-[#1788FF] text-white shadow-sm' 
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' 
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             <MapIcon size={12} />
@@ -76,8 +76,8 @@ export function RegionalMap() {
             onClick={() => setViewMode('3d')}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
               viewMode === '3d' 
-                ? 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white shadow-sm' 
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' 
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Globe size={12} />
@@ -222,9 +222,9 @@ export function RegionalMap() {
         </svg>
 
         {/* Selected Hub Floating Intelligence Card */}
-        <div className={`absolute bottom-1 left-2 right-2 p-2.5 rounded-xl ${isLight ? 'bg-white/95 border-slate-200 shadow-md text-slate-900' : 'bg-[#030E26]/90 border-blue-500/30 text-white shadow-xl'} backdrop-blur-md border flex items-center justify-between text-xs z-20`}>
+        <div className={`absolute bottom-1 left-2 right-2 p-2.5 rounded-xl ${isLight ? 'bg-white/95 border-slate-200 shadow-md text-slate-900' : 'bg-[#12141C]/95 border-white/[0.08] text-white shadow-xl'} backdrop-blur-md border flex items-center justify-between text-xs z-20`}>
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-blue-500/15 border-blue-500/30 text-[#1788FF]'} border flex items-center justify-center`}>
+            <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white/[0.04] border-white/[0.08] text-cyan-400'} border flex items-center justify-center`}>
               <Plane size={16} />
             </div>
             <div>

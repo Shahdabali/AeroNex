@@ -98,15 +98,15 @@ export function CinematicHeroBanner({ freshnessStatus = 'live' }: CinematicHeroP
   return (
     <div
       ref={containerRef}
-      className="card-interactive w-full min-h-[230px] rounded-3xl relative overflow-hidden flex flex-col justify-between p-7 md:p-9 border border-blue-500/25 shadow-2xl bg-gradient-to-r from-[#030C22] via-[#071942] to-[#0D2968]"
+      className="card-interactive w-full min-h-[230px] rounded-3xl relative overflow-hidden flex flex-col justify-between p-7 md:p-9 border border-white/[0.08] shadow-2xl bg-gradient-to-r from-[#090A0F] via-[#12141C] to-[#161924]"
     >
       {/* Background Ambience & Golden Sunset Backdrop */}
       <div 
-        className="absolute inset-0 bg-cover bg-right-top opacity-25 mix-blend-screen pointer-events-none"
+        className="absolute inset-0 bg-cover bg-right-top opacity-20 mix-blend-screen pointer-events-none"
         style={{ backgroundImage: "url('/assets/login-hero-clean.jpg')" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#030C22] via-[#030C22]/80 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030C22] via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/85 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#090A0F] via-transparent to-transparent pointer-events-none" />
 
       {/* SVG Canvas with Bezier Flight Corridor and Aircraft */}
       <svg
@@ -162,7 +162,7 @@ export function CinematicHeroBanner({ freshnessStatus = 'live' }: CinematicHeroP
           <div className="text-slate-300 text-xs font-mono flex items-center gap-2">
             <span>{dateStr}</span> <span className="text-slate-600">|</span> <span>{timeStr}</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#061A42]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-500/40 shadow-sm">
+          <div className="flex items-center gap-2 bg-[#12141C]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-emerald-400 text-xs font-semibold">
               {freshnessStatus === 'live' ? 'Live data streaming' : 'Data updated recently'}

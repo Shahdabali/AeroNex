@@ -11,10 +11,10 @@ export function AirfareVsCPI() {
   ];
 
   return (
-    <div className="bg-[rgba(10,24,56,0.6)] backdrop-blur-md rounded-[16px] border border-blue-500/20 p-6 h-[320px] flex flex-col">
+    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[320px] flex flex-col transition-all shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white text-[16px] font-bold">Airfare Index vs CPI</h3>
-        <select className="bg-[#0A1838] border border-slate-700 text-slate-300 text-[11px] rounded-md px-2 py-1 outline-none focus:border-[#1788FF]">
+        <select className="bg-[#161824] border border-white/[0.08] text-zinc-300 text-[11px] rounded-md px-2 py-1 outline-none focus:border-cyan-400/40">
           <option>Last 6 Months (2026)</option>
           <option>Last Year</option>
         </select>
@@ -22,22 +22,22 @@ export function AirfareVsCPI() {
 
       <div className="flex items-center gap-4 mb-4 px-2">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#1788FF]" />
-          <span className="text-[12px] text-slate-300">Airfare Index (2026)</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+          <span className="text-[12px] text-zinc-300">Airfare Index (2026)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#4E55F5]" />
-          <span className="text-[12px] text-slate-300">Retail CPI</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+          <span className="text-[12px] text-zinc-300">Retail CPI</span>
         </div>
       </div>
 
       <div className="flex-1 w-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-            <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={5} />
-            <YAxis domain={[110, 150]} stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+            <XAxis dataKey="month" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} dy={5} />
+            <YAxis domain={[110, 150]} stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip
-              contentStyle={{ backgroundColor: '#0A1838', border: '1px solid rgba(23,136,255,0.3)', borderRadius: '8px' }}
+              contentStyle={{ backgroundColor: '#12141C', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px' }}
               itemStyle={{ color: '#fff', fontSize: '12px' }}
               labelStyle={{ display: 'none' }}
             />

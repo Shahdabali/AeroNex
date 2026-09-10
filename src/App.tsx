@@ -3,15 +3,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginPage } from './pages/LoginPage';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { FlightSearch } from './pages/FlightSearch';
-import { AITripSuggester } from './pages/AITripSuggester';
 import { AirfareIndex } from './pages/AirfareIndex';
 import { PriceTrends } from './pages/PriceTrends';
-import { Predictions } from './pages/Predictions';
 import { PriceAlerts } from './pages/PriceAlerts';
 import { RoutesPage } from './pages/RoutesPage';
 import { AirlinesPage } from './pages/AirlinesPage';
 import { CPIAnalytics } from './pages/CPIAnalytics';
-import { MyFlights } from './pages/MyFlights';
 import { Settings } from './pages/Settings';
 import { AppProvider } from './context/AppProvider';
 
@@ -39,14 +36,14 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/ai-trip-suggester" element={<AITripSuggester />} />
-            <Route path="/trip-suggester" element={<Navigate to="/ai-trip-suggester" replace />} />
+            <Route path="/ai-trip-suggester" element={<Navigate to="/search" replace />} />
+            <Route path="/trip-suggester" element={<Navigate to="/search" replace />} />
             <Route path="/search" element={<FlightSearch />} />
             <Route path="/flights" element={<FlightSearch />} />
             <Route path="/airfare-index" element={<AirfareIndex />} />
             <Route path="/price-trends" element={<PriceTrends />} />
             <Route path="/trends" element={<PriceTrends />} />
-            <Route path="/predictions" element={<Predictions />} />
+            <Route path="/predictions" element={<Navigate to="/airfare-index" replace />} />
             <Route path="/price-alerts" element={<PriceAlerts />} />
             <Route path="/alerts" element={<PriceAlerts />} />
             <Route path="/routes" element={<RoutesPage />} />
@@ -55,7 +52,7 @@ function App() {
             <Route path="/cpi" element={<CPIAnalytics />} />
             <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
             <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/my-flights" element={<MyFlights />} />
+            <Route path="/my-flights" element={<Navigate to="/search" replace />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/" element={<HomeRedirect />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

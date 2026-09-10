@@ -4,7 +4,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { LoginCard } from '../components/LoginCard';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { Sparkles, Calendar, Repeat, Plane } from 'lucide-react';
+import { LineChart, Calendar, Repeat, Plane } from 'lucide-react';
 
 export function LoginPage() {
   usePageTitle('Sign In — AERONEX');
@@ -75,16 +75,16 @@ export function LoginPage() {
             transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
             className="grid grid-cols-3 gap-3 sm:gap-4 mt-8 max-w-lg"
           >
-            {/* 1. AI Trip Suggester */}
-            <div className="login-feature-card flex flex-col items-start p-3.5 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
-              <div className="login-feature-icon w-10 h-10 rounded-xl bg-[#0F2454] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
-                <Sparkles size={19} />
+            {/* 1. National Airfare Index */}
+            <div className="login-feature-card flex flex-col items-start p-3.5 rounded-2xl bg-[#0E1017]/80 backdrop-blur-md border border-white/[0.08] shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">
+              <div className="login-feature-icon w-10 h-10 rounded-xl bg-[#161822] border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:scale-105 transition-transform">
+                <LineChart size={19} />
               </div>
               <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
-                AI Trip Suggester
+                Airfare Index
               </span>
-              <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
-                Smart routes & flight options
+              <span className="login-feature-desc text-zinc-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
+                Real-time DGCA benchmarks
               </span>
             </div>
 

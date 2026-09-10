@@ -127,6 +127,7 @@ export function AviationGlobe3D({ className = '' }: { className?: string }) {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
+    renderer.setClearColor(0x090A0F, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
@@ -348,20 +349,20 @@ export function AviationGlobe3D({ className = '' }: { className?: string }) {
   }, [isRotating]);
 
   return (
-    <div className={`relative w-full h-[360px] bg-[#020817] rounded-2xl overflow-hidden border border-blue-500/20 shadow-xl select-none ${className}`}>
+    <div className={`relative w-full h-[360px] bg-[#090A0F] rounded-2xl overflow-hidden border border-white/[0.08] shadow-xl select-none ${className}`}>
       {/* Three.js Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Top Floating Controls */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-2 bg-[#040D24]/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-blue-500/30 pointer-events-auto">
+        <div className="flex items-center gap-2 bg-[#12141C]/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/[0.08] pointer-events-auto">
           <Radio size={14} className="text-cyan-400 animate-pulse" />
           <span className="text-[11px] font-bold text-white tracking-wide">3D Aviation Globe</span>
         </div>
 
         <button
           onClick={() => setIsRotating(!isRotating)}
-          className="p-2 rounded-xl bg-[#040D24]/80 backdrop-blur-md border border-slate-700 text-slate-300 hover:text-white hover:border-blue-500 pointer-events-auto transition-colors cursor-pointer"
+          className="p-2 rounded-xl bg-[#12141C]/85 backdrop-blur-md border border-white/[0.08] text-zinc-300 hover:text-white hover:border-cyan-500/40 pointer-events-auto transition-colors cursor-pointer"
           title={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
         >
           <RefreshCw size={13} className={isRotating ? 'animate-spin' : ''} />
@@ -377,8 +378,8 @@ export function AviationGlobe3D({ className = '' }: { className?: string }) {
               onClick={() => setSelectedHub(hub)}
               className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
                 selectedHub.code === hub.code
-                  ? 'bg-[#1788FF] text-white shadow-md'
-                  : 'bg-[#061433]/80 text-slate-400 hover:text-white border border-slate-800'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-md'
+                  : 'bg-[#12141C]/80 text-zinc-400 hover:text-white border border-white/[0.06]'
               }`}
             >
               {hub.code}
@@ -386,8 +387,8 @@ export function AviationGlobe3D({ className = '' }: { className?: string }) {
           ))}
         </div>
 
-        <div className="bg-[#040D24]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-cyan-500/30 text-right pointer-events-auto">
-          <div className="text-[10px] text-slate-400">{selectedHub.name}</div>
+        <div className="bg-[#12141C]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/[0.08] text-right pointer-events-auto">
+          <div className="text-[10px] text-zinc-400">{selectedHub.name}</div>
           <div className="text-xs font-bold text-cyan-300 flex items-center justify-end gap-1">
             <span>{selectedHub.fare}</span>
             <span className={selectedHub.trend.startsWith('+') ? 'text-emerald-400' : 'text-blue-400'}>
