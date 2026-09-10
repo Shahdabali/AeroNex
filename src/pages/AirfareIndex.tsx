@@ -8,7 +8,8 @@ import {
 import { 
   Activity, Info, TrendingUp,
   ArrowUpRight, ArrowDownRight, Layers, ShieldCheck,
-  ChevronDown, ChevronUp, FileSpreadsheet, FileJson
+  ChevronDown, ChevronUp, FileSpreadsheet, FileJson,
+  BookOpen, Database
 } from 'lucide-react';
 import { api } from '../services/api';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -156,8 +157,26 @@ export function AirfareIndex() {
             </p>
           </div>
 
-          {/* Quick Actions: Export & Timeframes */}
+          {/* Quick Actions: Export, Nav & Timeframes */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* Quick Links */}
+            <button 
+              onClick={() => navigate('/methodology')}
+              title="View Index Calculation Methodology"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#161824] border border-white/[0.08] hover:border-cyan-500/40 text-xs font-semibold text-zinc-300 hover:text-white transition-all cursor-pointer shadow-sm"
+            >
+              <BookOpen size={13} className="text-cyan-400" />
+              <span>Methodology</span>
+            </button>
+            <button 
+              onClick={() => navigate('/data-scraping')}
+              title="Inspect Live Data Scraping Cluster"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#161824] border border-white/[0.08] hover:border-emerald-500/40 text-xs font-semibold text-zinc-300 hover:text-white transition-all cursor-pointer shadow-sm"
+            >
+              <Database size={13} className="text-emerald-400" />
+              <span>Scrapers</span>
+            </button>
+
             {/* Export Menu */}
             <div className="flex items-center bg-[#161824] border border-white/[0.08] rounded-xl overflow-hidden p-1 shadow-sm">
               <button 
@@ -564,6 +583,24 @@ export function AirfareIndex() {
                   <p className="text-zinc-400 text-[11px]">
                     Normalized baseline indexed to FY 2023-24 average domestic passenger yields (fixed at base = 100.0).
                   </p>
+                </div>
+              </div>
+
+              <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.04]">
+                <span className="text-zinc-400 text-xs">Simulate custom corridor fares or inspect live crawler feeds:</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigate('/methodology')}
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Open Formula Simulator →
+                  </button>
+                  <button
+                    onClick={() => navigate('/data-scraping')}
+                    className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border border-white/[0.1] text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Scraper Pipeline →
+                  </button>
                 </div>
               </div>
             </div>

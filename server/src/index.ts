@@ -7,6 +7,7 @@ import { startIngestionWorker } from './workers/fareIngestionWorker';
 import { aiRouter } from './routes/aiRoutes';
 import { userRouter } from './routes/userRoutes';
 import { supportRouter } from './routes/supportRoutes';
+import { scraperRouter } from './routes/scraperRoutes';
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,7 @@ app.use(express.json({ limit: '25mb' }));
 app.use('/api/ai', aiRouter);
 app.use('/api/user', userRouter);
 app.use('/api/support', supportRouter);
+app.use('/api/scraper', scraperRouter);
 
 // Dashboard Analytics Routes
 app.get('/api/dashboard/metrics', async (req, res) => {

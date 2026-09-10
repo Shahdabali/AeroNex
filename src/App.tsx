@@ -9,6 +9,8 @@ import { PriceAlerts } from './pages/PriceAlerts';
 import { RoutesPage } from './pages/RoutesPage';
 import { AirlinesPage } from './pages/AirlinesPage';
 import { CPIAnalytics } from './pages/CPIAnalytics';
+import { MethodologyPage } from './pages/MethodologyPage';
+import { DataScrapingPage } from './pages/DataScrapingPage';
 import { Settings } from './pages/Settings';
 import { AppProvider } from './context/AppProvider';
 
@@ -50,6 +52,9 @@ function App() {
             <Route path="/airlines" element={<AirlinesPage />} />
             <Route path="/cpi-analytics" element={<CPIAnalytics />} />
             <Route path="/cpi" element={<CPIAnalytics />} />
+            <Route path="/methodology" element={<MethodologyPage />} />
+            <Route path="/data-scraping" element={<DataScrapingPage />} />
+            <Route path="/scraping" element={<Navigate to="/data-scraping" replace />} />
             <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
             <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
             <Route path="/my-flights" element={<Navigate to="/search" replace />} />

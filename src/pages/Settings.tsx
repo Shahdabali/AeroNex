@@ -27,8 +27,8 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-        checked ? 'bg-[#1788FF]' : 'bg-slate-700'
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 ease-in-out focus:outline-none ${
+        checked ? 'bg-cyan-500 shadow-[0_0_12px_rgba(0,229,255,0.4)]' : 'bg-[#1C1F2E]'
       }`}
     >
       <span
@@ -60,23 +60,23 @@ function ModalWrapper({ isOpen, onClose, title, subtitle, children, maxWidth = '
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/85 backdrop-blur-md"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 15 }}
             transition={{ type: 'spring', damping: 26, stiffness: 360 }}
-            className={`relative w-full ${maxWidth} bg-[#07132e] border border-blue-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden z-10`}
+            className={`relative w-full ${maxWidth} bg-[#0E1017] border border-white/[0.12] rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.95)] overflow-hidden z-10`}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#091A3E]/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#12141C]/90">
               <div>
                 <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
-                {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+                {subtitle && <p className="text-xs text-zinc-400 mt-0.5">{subtitle}</p>}
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -533,9 +533,9 @@ export function Settings() {
     '#1788FF', '#4E55F5', '#10B981', '#EAB308', '#F97316', '#EF4444', '#EC4899', '#8B5CF6',
   ];
 
-  const inputClass = 'settings-input w-full bg-[#081530] border border-slate-700/70 rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-[#1788FF] transition-all text-sm shadow-inner';
-  const selectClass = 'settings-select w-full bg-[#081530] border border-slate-700/70 rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-[#1788FF] transition-all appearance-none text-sm cursor-pointer shadow-inner';
-  const cardClass = 'settings-card bg-[#061433]/70 backdrop-blur-xl border border-blue-500/20 rounded-[20px] p-6 shadow-[0_12px_32px_rgba(0,0,0,0.35)] flex flex-col justify-between';
+  const inputClass = 'settings-input w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all text-sm shadow-inner';
+  const selectClass = 'settings-select w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all appearance-none text-sm cursor-pointer shadow-inner';
+  const cardClass = 'settings-card obsidian-card bg-[#12141C]/80 backdrop-blur-xl border border-white/[0.08] rounded-[20px] p-6 shadow-sm hover:border-white/[0.16] flex flex-col justify-between transition-all';
 
   const faqs = [
     {
@@ -584,30 +584,30 @@ export function Settings() {
       <div className="flex flex-col gap-6 max-w-[1400px] pb-12">
 
         {/* ── HERO BANNER ── */}
-        <div className="settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#071738] via-[#0B2352] to-[#12306C] border border-blue-500/20 p-6 md:p-8 shadow-xl">
+        <div className="settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#090A0F] via-[#12141C] to-[#161924] border border-white/[0.08] p-6 md:p-8 shadow-xl">
           {/* Subtle Sunset Airplane backdrop on right */}
           <div className="absolute right-0 top-0 h-full w-1/2 overflow-hidden pointer-events-none rounded-r-2xl">
             <img 
               src="/assets/login-hero-clean.jpg" 
               alt="AeroNex Aviation" 
-              className="w-full h-full object-cover object-right opacity-30 mix-blend-screen"
+              className="w-full h-full object-cover object-right opacity-20 mix-blend-screen"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#071738] via-[#071738]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/70 to-transparent" />
           </div>
 
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-[#5D4BF7] to-[#4537D6] flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white shrink-0">
+              <div className="w-13 h-13 rounded-2xl bg-[#161824] border border-white/[0.1] flex items-center justify-center shadow-lg text-cyan-400 shrink-0">
                 <SettingsIcon className="w-7 h-7" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{t.settingsPageTitle || 'Settings'}</h1>
-                <p className="text-xs md:text-sm text-slate-300 mt-1">{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
+                <p className="text-xs md:text-sm text-zinc-400 mt-1">{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
               </div>
             </div>
             <div className="hidden lg:flex flex-col items-end text-right pr-4">
               <span className="hero-tagline text-[11px] font-bold tracking-[0.25em] text-cyan-400 uppercase">{t.settingsHeroTagline || 'CUSTOMIZE YOUR EXPERIENCE'}</span>
-              <span className="text-[11px] text-slate-300 mt-1">{t.settingsHeroSubtitle || '— Settings for a smarter journey —'}</span>
+              <span className="text-[11px] text-zinc-400 mt-1">{t.settingsHeroSubtitle || '— Settings for a smarter journey —'}</span>
             </div>
           </div>
         </div>
@@ -624,18 +624,18 @@ export function Settings() {
                 className={`relative settings-tab flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer select-none ${
                   isActive
                     ? 'text-white'
-                    : 'bg-[#081530]/80 hover:bg-[#0E2452] border border-slate-800 text-slate-300 hover:text-white'
+                    : 'bg-[#12141C] hover:bg-[#161824] border border-white/[0.08] text-zinc-400 hover:text-white'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="settingsActiveTabIndicator"
-                    className="absolute inset-0 bg-[#1788FF] rounded-xl shadow-[0_0_20px_rgba(23,136,255,0.4)]"
+                    className="absolute inset-0 bg-[#161824] border border-white/[0.14] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-2">
-                  <Icon size={16} />
+                  <Icon size={16} className={isActive ? 'text-cyan-400' : 'text-zinc-500'} />
                   {tab.label}
                 </span>
               </button>

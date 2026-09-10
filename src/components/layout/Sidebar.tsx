@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
-  Bell, Map, Plane, Calculator, Settings, Activity
+  Bell, Map, Plane, Calculator, Settings, Activity,
+  BookOpen, Database
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { useAppContext } from '../../context/AppProvider';
@@ -14,6 +15,8 @@ export function Sidebar() {
   const navItems = [
     { icon: Home, label: t.navDashboard, path: '/dashboard' },
     { icon: LineChart, label: t.navAirfareIndex, path: '/airfare-index', badgeText: 'Live' },
+    { icon: BookOpen, label: (t as any).navMethodology || 'Index Methodology', path: '/methodology' },
+    { icon: Database, label: (t as any).navDataScraping || 'Data Scraping', path: '/data-scraping', badgeText: 'Sync' },
     { icon: Search, label: t.navFlightSearch, path: '/search' },
     { icon: TrendingUp, label: t.navPriceTrends, path: '/price-trends' },
     { icon: Bell, label: t.navPriceAlerts, path: '/price-alerts', badge: 2 },
