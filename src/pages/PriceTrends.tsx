@@ -94,15 +94,15 @@ export function PriceTrends() {
             </p>
           </div>
 
-          <div className="flex bg-[#0A1838] border border-slate-700 rounded-2xl p-1 shadow-lg">
+          <div className="flex bg-[#12141C] border border-white/[0.08] rounded-2xl p-1 shadow-lg">
             {(['30d', '90d', '180d'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   period === p
-                    ? 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 {p.toUpperCase()}
@@ -112,20 +112,20 @@ export function PriceTrends() {
         </div>
 
         {/* Route Selector Panel */}
-        <div className="bg-[rgba(10,24,56,0.65)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-xl">
+        <div className="bg-[#12141C] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6 shadow-2xl obsidian-card">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             {/* Origin */}
             <div className="flex-1 w-full">
-              <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">
+              <label className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-2 block font-mono">
                 Origin City
               </label>
               <select
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
-                className="w-full bg-[#0A1838] border border-slate-700 rounded-xl text-white px-4 py-3 text-sm focus:border-[#1788FF] outline-none cursor-pointer"
+                className="w-full bg-[#161824] border border-white/[0.08] rounded-xl text-white px-4 py-3 text-sm focus:border-cyan-500/60 outline-none cursor-pointer"
               >
                 {INDIAN_AIRPORTS.map((a) => (
-                  <option key={a.code} value={a.code} className="bg-[#0A1838]">
+                  <option key={a.code} value={a.code} className="bg-[#12141C]">
                     {a.code} — {a.city} ({a.name})
                   </option>
                 ))}
@@ -136,23 +136,23 @@ export function PriceTrends() {
             <button
               onClick={handleSwap}
               title="Swap origin & destination"
-              className="mt-6 w-10 h-10 rounded-full bg-[#0A1838] border border-slate-700 hover:border-blue-500 text-slate-400 hover:text-cyan-400 flex items-center justify-center transition-all cursor-pointer shrink-0"
+              className="mt-6 w-10 h-10 rounded-full bg-[#161824] border border-white/[0.08] hover:border-cyan-400 text-zinc-400 hover:text-cyan-400 flex items-center justify-center transition-all cursor-pointer shrink-0"
             >
               <ArrowLeftRight size={16} />
             </button>
 
             {/* Destination */}
             <div className="flex-1 w-full">
-              <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">
+              <label className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-2 block font-mono">
                 Destination City
               </label>
               <select
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                className="w-full bg-[#0A1838] border border-slate-700 rounded-xl text-white px-4 py-3 text-sm focus:border-[#1788FF] outline-none cursor-pointer"
+                className="w-full bg-[#161824] border border-white/[0.08] rounded-xl text-white px-4 py-3 text-sm focus:border-cyan-500/60 outline-none cursor-pointer"
               >
                 {INDIAN_AIRPORTS.map((a) => (
-                  <option key={a.code} value={a.code} className="bg-[#0A1838]">
+                  <option key={a.code} value={a.code} className="bg-[#12141C]">
                     {a.code} — {a.city} ({a.name})
                   </option>
                 ))}
@@ -163,7 +163,7 @@ export function PriceTrends() {
             <div className="mt-6 w-full md:w-auto">
               <button
                 onClick={() => navigate(`/search?from=${origin}&to=${destination}`)}
-                className="w-full bg-gradient-to-r from-cyan-500 via-[#1788FF] to-[#4E55F5] rounded-xl text-white px-6 py-3 font-semibold text-sm flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(23,136,255,0.4)] transition-all cursor-pointer whitespace-nowrap"
+                className="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 rounded-xl text-white px-6 py-3 font-semibold text-sm flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all cursor-pointer whitespace-nowrap shadow-lg"
               >
                 <Search size={16} /> Search Flights
               </button>
@@ -173,50 +173,51 @@ export function PriceTrends() {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-5 shadow-lg">
-            <span className="text-xs uppercase font-bold text-slate-400 block mb-1">Current Lowest Fare</span>
-            <div className="text-2xl font-black text-white">₹{currentPrice.toLocaleString('en-IN')}</div>
-            <div className="mt-2 text-xs flex items-center gap-1">
+          <div className="bg-gradient-to-br from-cyan-500/10 via-[#12141C] to-[#12141C] border border-cyan-500/20 rounded-2xl p-5 shadow-xl">
+            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Current Lowest Fare</span>
+            <div className="text-2xl font-black text-cyan-300 font-mono">₹{currentPrice.toLocaleString('en-IN')}</div>
+            <div className="mt-2 text-xs flex items-center gap-1 font-mono">
               <span className={`font-semibold flex items-center ${isDrop ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {isDrop ? <TrendingDown size={14} className="mr-0.5" /> : <TrendingUp size={14} className="mr-0.5" />}
                 {priceChangePercent}%
               </span>
-              <span className="text-slate-400">vs start of period</span>
+              <span className="text-zinc-500">vs start of period</span>
             </div>
           </div>
 
-          <div className="bg-[rgba(10,24,56,0.6)] border border-emerald-500/20 rounded-[20px] p-5 shadow-lg">
-            <span className="text-xs uppercase font-bold text-slate-400 block mb-1">Recorded Lowest</span>
-            <div className="text-2xl font-black text-emerald-400">₹{minPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-slate-400 mt-2 block">Optimal booking target</span>
+          <div className="bg-gradient-to-br from-emerald-500/10 via-[#12141C] to-[#12141C] border border-emerald-500/20 rounded-2xl p-5 shadow-xl">
+            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Recorded Lowest</span>
+            <div className="text-2xl font-black text-emerald-400 font-mono">₹{minPrice.toLocaleString('en-IN')}</div>
+            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Optimal booking target</span>
           </div>
 
-          <div className="bg-[rgba(10,24,56,0.6)] border border-rose-500/20 rounded-[20px] p-5 shadow-lg">
-            <span className="text-xs uppercase font-bold text-slate-400 block mb-1">Peak Recorded Fare</span>
-            <div className="text-2xl font-black text-rose-400">₹{maxPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-slate-400 mt-2 block">Holiday peak surge</span>
+          <div className="bg-gradient-to-br from-rose-500/10 via-[#12141C] to-[#12141C] border border-rose-500/20 rounded-2xl p-5 shadow-xl">
+            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Peak Recorded Fare</span>
+            <div className="text-2xl font-black text-rose-400 font-mono">₹{maxPrice.toLocaleString('en-IN')}</div>
+            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Holiday peak surge</span>
           </div>
 
-          <div className="bg-[rgba(10,24,56,0.6)] border border-purple-500/20 rounded-[20px] p-5 shadow-lg">
-            <span className="text-xs uppercase font-bold text-slate-400 block mb-1">Period Average Fare</span>
-            <div className="text-2xl font-black text-purple-400">₹{avgPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-slate-400 mt-2 block">Benchmark baseline</span>
+          <div className="bg-gradient-to-br from-purple-500/10 via-[#12141C] to-[#12141C] border border-purple-500/20 rounded-2xl p-5 shadow-xl">
+            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Period Average Fare</span>
+            <div className="text-2xl font-black text-purple-400 font-mono">₹{avgPrice.toLocaleString('en-IN')}</div>
+            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Benchmark baseline</span>
           </div>
         </div>
 
         {/* Primary Trend Chart */}
-        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-2xl">
-          <div className="flex justify-between items-center mb-6">
+        <div className="bg-[#12141C] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6 shadow-2xl obsidian-card">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 pb-4 border-b border-white/[0.06]">
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2 font-mono">
                 {originAirport.city} ({origin}) ➔ {destAirport.city} ({destination})
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Daily aggregated lowest nonstop fares over {period.toUpperCase()}
               </p>
             </div>
-            <span className="text-xs px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full font-medium">
-              Volatility: Moderate (14.2%)
+            <span className="text-xs px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full font-medium font-mono flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Volatility: Stable (14.2%)
             </span>
           </div>
 
@@ -224,27 +225,39 @@ export function PriceTrends() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
                 <defs>
-                  <linearGradient id="fareGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1788FF" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#1788FF" stopOpacity={0.0}/>
+                  <linearGradient id="vibrantTrendGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00E5FF" stopOpacity={0.45} />
+                    <stop offset="40%" stopColor="#8B5CF6" stopOpacity={0.2} />
+                    <stop offset="80%" stopColor="#3B82F6" stopOpacity={0.05} />
+                    <stop offset="100%" stopColor="#090A0F" stopOpacity={0.0} />
+                  </linearGradient>
+                  <linearGradient id="trendStrokeGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#00E5FF" />
+                    <stop offset="50%" stopColor="#818CF8" />
+                    <stop offset="100%" stopColor="#C084FC" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="date" stroke="#94a3b8" tickMargin={10} />
-                <YAxis stroke="#94a3b8" tickFormatter={(v) => `₹${v}`} domain={['auto', 'auto']} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272A" vertical={false} opacity={0.5} />
+                <XAxis dataKey="date" stroke="#71717A" fontSize={11} tickMargin={10} axisLine={false} tickLine={false} />
+                <YAxis stroke="#71717A" fontSize={11} tickFormatter={(v) => `₹${v}`} domain={['auto', 'auto']} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#07132e', borderColor: '#1e293b', borderRadius: '12px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0E1017', borderColor: 'rgba(255,255,255,0.12)', borderRadius: '16px', boxShadow: '0 16px 40px rgba(0,0,0,0.85)' }}
+                  itemStyle={{ color: '#fff', fontSize: '12px' }}
+                  labelStyle={{ color: '#A1A1AA', fontSize: '11px', marginBottom: '4px', fontWeight: 'bold' }}
                   formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Fare']}
                 />
-                <ReferenceLine y={avgPrice} stroke="#F59E0B" strokeDasharray="3 3" label={{ value: `Avg ₹${avgPrice}`, fill: '#F59E0B', fontSize: 11 }} />
+                <ReferenceLine y={avgPrice} stroke="#F59E0B" strokeDasharray="4 4" label={{ value: `Avg ₹${avgPrice}`, fill: '#F59E0B', fontSize: 11 }} />
                 <Area 
                   type="monotone" 
                   dataKey="price" 
-                  stroke="#1788FF" 
-                  strokeWidth={3} 
+                  stroke="url(#trendStrokeGrad)" 
+                  strokeWidth={3.5} 
                   fillOpacity={1} 
-                  fill="url(#fareGradient)" 
+                  fill="url(#vibrantTrendGrad)" 
+                  isAnimationActive={true}
+                  animationDuration={1100}
+                  animationEasing="ease-in-out"
+                  activeDot={{ r: 6, fill: '#00E5FF', stroke: '#fff', strokeWidth: 2.5 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -252,14 +265,14 @@ export function PriceTrends() {
         </div>
 
         {/* Strategic Timing Recommendation */}
-        <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-[#12141C] border border-cyan-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 obsidian-card">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+            <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
               <Zap size={22} />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white">Optimal Booking Advisory</h4>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Historical patterns show lowest fares for this route are released 14 to 21 days prior to departure.
               </p>
             </div>
@@ -267,7 +280,7 @@ export function PriceTrends() {
 
           <button
             onClick={() => navigate(`/airfare-index`)}
-            className="px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-cyan-400 border border-white/[0.12] hover:border-cyan-400/40 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+            className="px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
           >
             Analyze National Airfare Index →
           </button>
