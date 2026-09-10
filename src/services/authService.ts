@@ -6,6 +6,9 @@ export interface AuthUser {
   email: string;
   role: string;
   avatarUrl?: string;
+  organization?: string;
+  phone?: string;
+  bio?: string;
 }
 
 export interface AuthResponse {
@@ -252,4 +255,85 @@ export const authService = {
       message: `Password reset instructions have been dispatched to ${email}.`,
     };
   },
+
+  /**
+   * Update Profile in Local Storage Registry
+   */
+  updateProfile: (emailInput: string, updates: Partial<AuthUser>): AuthUser => {
+    const email = emailInput.trim().toLowerCase();
+    const accounts = getStoredAccounts();
+    const index = accounts.findIndex((acc) => acc.email.toLowerCase() === email);
+
+    let updatedUser: AuthUser;
+    if (index >= 0) {
+      accounts[index].user = { ...accounts[index].user, ...updates };
+      updatedUser = accounts[index].user;
+      saveStoredAccounts(accounts);
+    } else {
+      updatedUser = {
+        id: `usr_${Date.now()}`,
+        name: updates.name || 'AeroNex Member',
+        email,
+        role: updates.role || 'Passenger',
+        ...updates,
+      };
+      accounts.push({ email, password: 'password123', user: updatedUser });
+      saveStoredAccounts(accounts);
+    }
+
+    // Sync active session if logged in as this user
+    try {
+      const activeRaw = localStorage.getItem('aeronex_user');
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        if (active.email?.toLowerCase() === email) {
+          localStorage.setItem('aeronex_user', JSON.stringify(updatedUser));
+        }
+      }
+    } catch {}
+
+    return updatedUser;
+  },
+
+  /**
+   * Change Password
+   */
+  changePassword: async (emailInput: string, currentPassword: string, newPassword: string): Promise<boolean> => {
+    const email = emailInput.trim().toLowerCase();
+    const accounts = getStoredAccounts();
+    const account = accounts.find((acc) => acc.email.toLowerCase() === email);
+
+    if (account && account.password !== currentPassword) {
+      throw new Error('Current password does not match.');
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('New password must be at least 6 characters long.');
+    }
+
+    if (account) {
+      account.password = newPassword;
+      saveStoredAccounts(accounts);
+    }
+
+    // Attempt Supabase Password update if active session exists
+    try {
+      await supabase.auth.updateUser({ password: newPassword });
+    } catch {}
+
+    return true;
+  },
+
+  /**
+   * Delete Account
+   */
+  deleteAccount: async (emailInput: string): Promise<boolean> => {
+    const email = emailInput.trim().toLowerCase();
+    const accounts = getStoredAccounts().filter((acc) => acc.email.toLowerCase() !== email);
+    saveStoredAccounts(accounts);
+
+    localStorage.removeItem('aeronex_user');
+    localStorage.removeItem('aeronex_token');
+    return true;
+  },
 };
+

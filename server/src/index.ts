@@ -5,13 +5,17 @@ import { config } from './config';
 import { liveDataStore } from './liveDataStore';
 import { startIngestionWorker } from './workers/fareIngestionWorker';
 import { aiRouter } from './routes/aiRoutes';
+import { userRouter } from './routes/userRoutes';
+import { supportRouter } from './routes/supportRoutes';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
 
-// AeroNex Server-Side AI Subsystem
+// AeroNex Subsystems
 app.use('/api/ai', aiRouter);
+app.use('/api/user', userRouter);
+app.use('/api/support', supportRouter);
 
 // Dashboard Analytics Routes
 app.get('/api/dashboard/metrics', async (req, res) => {

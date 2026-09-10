@@ -11,12 +11,19 @@ export interface User {
   email: string;
   role: string;
   avatarUrl?: string;
+  organization?: string;
+  phone?: string;
+  bio?: string;
 }
 
 interface AppContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  accentColor: string;
+  setAccentColor: (color: string) => void;
+  fontSize: 'small' | 'medium' | 'large';
+  setFontSize: (size: 'small' | 'medium' | 'large') => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   currency: string;
@@ -25,6 +32,7 @@ interface AppContextType {
   user: User | null;
   login: (userData: User, token?: string) => void;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
   isAuthenticated: boolean;
 }
 
@@ -90,6 +98,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeState(newTheme);
   };
 
+  const [accentColor, setAccentColorState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aeronex_accent_color');
+      if (saved) return saved;
+    }
+    return '#1788FF';
+  });
+
+  const setAccentColor = (color: string) => {
+    setAccentColorState(color);
+    localStorage.setItem('aeronex_accent_color', color);
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--color-brand-blue', color);
+    }
+  };
+
+  const [fontSize, setFontSizeState] = useState<'small' | 'medium' | 'large'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aeronex_font_size') as any;
+      if (saved === 'small' || saved === 'medium' || saved === 'large') return saved;
+    }
+    return 'medium';
+  });
+
+  const setFontSize = (size: 'small' | 'medium' | 'large') => {
+    setFontSizeState(size);
+    localStorage.setItem('aeronex_font_size', size);
+  };
+
   const [currency, setCurrencyState] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('currency');
@@ -125,6 +162,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('aeronex_token');
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('aeronex_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const t = getSafeTranslations(language);
 
   return (
@@ -133,6 +179,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         theme, 
         setTheme, 
         toggleTheme, 
+        accentColor,
+        setAccentColor,
+        fontSize,
+        setFontSize,
         language, 
         setLanguage, 
         currency,
@@ -141,6 +191,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         user, 
         login, 
         logout, 
+        updateUser,
         isAuthenticated: !!user 
       }}
     >

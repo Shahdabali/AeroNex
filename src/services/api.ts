@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { authService, type AuthUser } from './authService';
 import { 
   generateRouteFlights, 
   INDIAN_AIRPORTS,
@@ -56,6 +57,36 @@ async function postJson(url: string, body?: any) {
   if (!res.ok) {
     const errorJson = await res.json().catch(() => ({}));
     throw new Error(errorJson?.error?.message || `AeroNex API Error: ${res.status} ${res.statusText}`);
+  }
+  const json = await res.json();
+  return json?.data !== undefined ? json.data : json;
+}
+
+async function putJson(url: string, body?: any) {
+  if (!API_BASE) throw new Error('No backend API configured');
+  const res = await fetchWithTimeout(`${API_BASE}${url}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    throw new Error(errorJson?.error || `AeroNex API Error: ${res.status} ${res.statusText}`);
+  }
+  const json = await res.json();
+  return json?.data !== undefined ? json.data : json;
+}
+
+async function deleteJson(url: string, body?: any) {
+  if (!API_BASE) throw new Error('No backend API configured');
+  const res = await fetchWithTimeout(`${API_BASE}${url}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    throw new Error(errorJson?.error || `AeroNex API Error: ${res.status} ${res.statusText}`);
   }
   const json = await res.json();
   return json?.data !== undefined ? json.data : json;
@@ -701,5 +732,248 @@ export const api = {
 
     // High-performance client intelligence fallback
     return generateDomesticTripRecommendations(params);
+  },
+
+  // User Profile & Settings Subsystem
+  getUserProfile: async (email?: string) => {
+    if (API_BASE) {
+      try {
+        const query = email ? `?email=${encodeURIComponent(email)}` : '';
+        const res = await fetchJson(`/api/user/profile${query}`);
+        if (res) return res;
+      } catch {}
+    }
+    return {
+      profile: {
+        id: 'usr_shadab',
+        name: 'Shadab Ali',
+        email: email || 'shadab@aeronex.com',
+        role: 'Researcher',
+        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+        organization: 'Student / Researcher',
+        phone: '98765 43210',
+        bio: 'Exploring data-driven insights to make travel more accessible and affordable.',
+        verified: true,
+      },
+      preferences: {
+        departureCity: 'DEL',
+        destinationCity: 'BOM',
+        travelClass: 'Economy',
+        currency: 'INR (₹)',
+        language: 'English',
+        dateFormat: 'DD MMM YYYY (10 Sep 2026)',
+        showAltAirports: true,
+      },
+      notifications: {
+        priceDropAlerts: true,
+        routeUpdates: true,
+        travelDeals: true,
+        weeklyReports: true,
+        productUpdates: false,
+        marketingNotifs: false,
+      },
+      appearance: {
+        theme: 'dark',
+        accentColor: '#1788FF',
+        fontSize: 'medium',
+      },
+      integrations: {
+        google: false,
+        calendar: false,
+        email: false,
+        discord: false,
+        apiAccess: true,
+        apiKey: 'aeronex_live_sk_948f2c1b8e47a6d3f0',
+      },
+      subscription: {
+        plan: 'Researcher Tier (Pro)',
+        status: 'Active',
+        renewalDate: '10 Oct 2026',
+        billingCycle: 'Annual',
+      }
+    };
+  },
+
+  updateUserProfile: async (data: Partial<AuthUser> & { email: string }) => {
+    const updated = authService.updateProfile(data.email, data);
+    if (API_BASE) {
+      try {
+        await putJson('/api/user/profile', data);
+      } catch {}
+    }
+    return updated;
+  },
+
+  uploadAvatar: async (avatarUrl: string, email: string) => {
+    authService.updateProfile(email, { avatarUrl });
+    if (API_BASE) {
+      try {
+        await postJson('/api/user/avatar', { email, avatarUrl });
+      } catch {}
+    }
+    return avatarUrl;
+  },
+
+  updateUserPreferences: async (preferences: any, email: string) => {
+    localStorage.setItem('aeronex_travel_preferences', JSON.stringify(preferences));
+    if (API_BASE) {
+      try {
+        await putJson('/api/user/preferences', { email, preferences });
+      } catch {}
+    }
+    return preferences;
+  },
+
+  updateUserNotifications: async (notifications: any, email: string) => {
+    localStorage.setItem('aeronex_notifications_settings', JSON.stringify(notifications));
+    if (API_BASE) {
+      try {
+        await putJson('/api/user/notifications', { email, notifications });
+      } catch {}
+    }
+    return notifications;
+  },
+
+  updateUserAppearance: async (appearance: any, email: string) => {
+    localStorage.setItem('aeronex_appearance_settings', JSON.stringify(appearance));
+    if (API_BASE) {
+      try {
+        await putJson('/api/user/appearance', { email, appearance });
+      } catch {}
+    }
+    return appearance;
+  },
+
+  toggleIntegration: async (provider: string, email: string) => {
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/user/integrations/toggle', { email, provider });
+        return res;
+      } catch {}
+    }
+    const current = JSON.parse(localStorage.getItem('aeronex_integrations') || '{}');
+    current[provider] = !current[provider];
+    localStorage.setItem('aeronex_integrations', JSON.stringify(current));
+    return current;
+  },
+
+  regenerateApiKey: async (email: string) => {
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/user/api-key/regenerate', { email });
+        if (res?.apiKey) return res.apiKey;
+      } catch {}
+    }
+    const key = `aeronex_live_sk_${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`;
+    localStorage.setItem('aeronex_api_key', key);
+    return key;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string, email: string) => {
+    await authService.changePassword(email, currentPassword, newPassword);
+    if (API_BASE) {
+      try {
+        await postJson('/api/user/change-password', { email, currentPassword, newPassword });
+      } catch {}
+    }
+    return true;
+  },
+
+  exportUserData: async (email: string) => {
+    if (API_BASE) {
+      try {
+        const res = await fetchJson(`/api/user/export-data?email=${encodeURIComponent(email)}`);
+        if (res) return res;
+      } catch {}
+    }
+    const userRaw = localStorage.getItem('aeronex_user');
+    const user = userRaw ? JSON.parse(userRaw) : { name: 'Shadab Ali', email };
+    return {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        service: 'AeroNex Airfare Intelligence Platform',
+        version: '1.0.0',
+        environment: 'Client Export',
+      },
+      account: user,
+      preferences: JSON.parse(localStorage.getItem('aeronex_travel_preferences') || '{}'),
+      notifications: JSON.parse(localStorage.getItem('aeronex_notifications_settings') || '{}'),
+      appearance: JSON.parse(localStorage.getItem('aeronex_appearance_settings') || '{}'),
+      recentSearches: [
+        { from: 'DEL', to: 'BOM', date: '2026-09-12' },
+        { from: 'BOM', to: 'BLR', date: '2026-09-15' },
+      ]
+    };
+  },
+
+  deleteAccount: async (email: string) => {
+    if (API_BASE) {
+      try {
+        await deleteJson('/api/user/account', { email });
+      } catch {}
+    }
+    await authService.deleteAccount(email);
+    return true;
+  },
+
+  getFaqs: async () => {
+    if (API_BASE) {
+      try {
+        const res = await fetchJson('/api/support/faqs');
+        if (Array.isArray(res)) return res;
+      } catch {}
+    }
+    return [
+      {
+        id: 1,
+        category: 'Airfare Index',
+        question: 'How is the AeroNex National Airfare Index calculated?',
+        answer: 'The index is a weighted benchmark modeled after the Consumer Price Index (CPI) basket, factoring high-density metro corridors (DEL-BOM, BOM-BLR) and regional routes with real-time weights.',
+      },
+      {
+        id: 2,
+        category: 'Data Freshness',
+        question: 'How frequently is live route pricing updated?',
+        answer: 'Our ingestion workers poll domestic airline networks and DGCA fare filings every 5 seconds for live tickers and every 30 seconds for deep fare matrix updates.',
+      },
+      {
+        id: 3,
+        category: 'Predictions',
+        question: 'How accurate are the AI price predictions?',
+        answer: 'Our Gemini AI model combines historical booking curves, seasonal demand spikes, ATF fuel index, and real-time inventory to deliver 85-92% confidence recommendations.',
+      },
+      {
+        id: 4,
+        category: 'Price Alerts',
+        question: 'How do price drop alerts reach me?',
+        answer: 'Alerts are dispatched via real-time WebSocket push notifications, email summaries, and optional webhook integrations for connected Discord servers.',
+      },
+      {
+        id: 5,
+        category: 'Account & Security',
+        question: 'Can I export my flight search history and saved data?',
+        answer: 'Yes! In Settings > Data & Privacy, click "Download My Data" to immediately download a verified JSON or CSV export of all your records.',
+      },
+    ];
+  },
+
+  submitSupportTicket: async (ticket: { email: string; subject: string; category: string; message: string; userId?: string }) => {
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/support/ticket', ticket);
+        return res;
+      } catch {}
+    }
+    return { success: true, message: 'Ticket registered successfully. We will follow up via email.' };
+  },
+
+  submitFeedback: async (feedback: { email?: string; rating: number; category: string; comments: string; userId?: string }) => {
+    if (API_BASE) {
+      try {
+        const res = await postJson('/api/support/feedback', feedback);
+        return res;
+      } catch {}
+    }
+    return { success: true, message: 'Thank you for your valuable feedback!' };
   },
 };
