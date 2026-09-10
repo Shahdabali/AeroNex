@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AeroNexLogo } from '../components/AeroNexLogo';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { LanguageSelector } from '../components/LanguageSelector';
@@ -7,9 +8,21 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useAppContext } from '../context/AppProvider';
 import { LineChart, Calendar, Repeat, Plane } from 'lucide-react';
 
-export function LoginPage() {
-  usePageTitle('Sign In — AERONEX');
-  const { t } = useAppContext();
+interface LoginPageProps {
+  initialMode?: 'signin' | 'signup';
+}
+
+export function LoginPage({ initialMode = 'signin' }: LoginPageProps) {
+  const { t, isAuthenticated, authLoading } = useAppContext();
+  const location = useLocation();
+  const isSignupPath = location.pathname === '/signup' || initialMode === 'signup';
+
+  usePageTitle(isSignupPath ? 'Create Account — AERONEX' : 'Sign In — AERONEX');
+
+  // If already authenticated and not loading session, direct to dashboard
+  if (!authLoading && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="login-page-bg min-h-screen w-full bg-[#020A1D] relative overflow-hidden flex flex-col font-['Inter',sans-serif] select-none transition-colors duration-300">
@@ -139,7 +152,7 @@ export function LoginPage() {
 
         {/* RIGHT COLUMN: LOGIN CARD (approx 50%) */}
         <div className="w-full lg:w-[48%] flex justify-center lg:justify-end relative z-30">
-          <LoginCard />
+          <LoginCard initialMode={isSignupPath ? 'signup' : 'signin'} />
         </div>
 
       </div>

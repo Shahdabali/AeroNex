@@ -10,6 +10,18 @@ export const SUPABASE_ANON_KEY =
   import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   'sb_publishable_SsYWk1O5yk3zP28ssCz4xw_XCdP7x92';
 
+/**
+ * Resolves the active site URL for OAuth redirects and email links across
+ * local development and Vercel production deployments.
+ */
+export function getSiteUrl(): string {
+  const envUrl =
+    import.meta.env.VITE_SITE_URL ||
+    import.meta.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : '');
+  return envUrl ? envUrl.replace(/\/$/, '') : 'http://localhost:5173';
+}
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,

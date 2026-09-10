@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { translations, getSafeTranslations } from '../i18n/translations';
 import type { Language } from '../i18n/translations';
+import { supabase } from '../lib/supabase';
+import { authService } from '../services/authService';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -34,6 +36,7 @@ interface AppContextType {
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   isAuthenticated: boolean;
+  authLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -61,6 +64,66 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
+
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Sync Supabase authentication session on mount and subscribe to real-time auth events
+  useEffect(() => {
+    let isMounted = true;
+
+    // 1. Verify active session on page load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        const supaUser = session.user;
+        const meta = supaUser.user_metadata || {};
+        const mappedUser: User = {
+          id: supaUser.id,
+          name: meta.full_name || meta.name || supaUser.email?.split('@')[0] || 'AeroNex Member',
+          email: supaUser.email || '',
+          role: meta.role || 'Passenger',
+          avatarUrl: meta.avatar_url || meta.picture,
+        };
+        setUser(mappedUser);
+        localStorage.setItem('aeronex_user', JSON.stringify(mappedUser));
+        localStorage.setItem('aeronex_token', session.access_token);
+      }
+      setAuthLoading(false);
+    }).catch(() => {
+      if (isMounted) setAuthLoading(false);
+    });
+
+    // 2. Real-time auth subscription
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        if (session?.user) {
+          const supaUser = session.user;
+          const meta = supaUser.user_metadata || {};
+          const mappedUser: User = {
+            id: supaUser.id,
+            name: meta.full_name || meta.name || supaUser.email?.split('@')[0] || 'AeroNex Member',
+            email: supaUser.email || '',
+            role: meta.role || 'Passenger',
+            avatarUrl: meta.avatar_url || meta.picture,
+          };
+          setUser(mappedUser);
+          localStorage.setItem('aeronex_user', JSON.stringify(mappedUser));
+          localStorage.setItem('aeronex_token', session.access_token);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        localStorage.removeItem('aeronex_user');
+        localStorage.removeItem('aeronex_token');
+      }
+      setAuthLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
@@ -196,6 +259,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    authService.logout().catch(() => {});
     setUser(null);
     localStorage.removeItem('aeronex_user');
     localStorage.removeItem('aeronex_token');
@@ -231,7 +295,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         login, 
         logout, 
         updateUser,
-        isAuthenticated: !!user 
+        isAuthenticated: !!user,
+        authLoading
       }}
     >
       {children}

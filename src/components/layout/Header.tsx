@@ -390,16 +390,21 @@ export function Header() {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-3 cursor-pointer hover:bg-white/5 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-800"
           >
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-800 ring-2 ring-blue-500/20">
-              <img 
-                src={user?.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"} 
-                alt={user?.name || "User"} 
-                className="w-full h-full object-cover" 
-              />
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr from-[#1788FF] to-[#00A3FF] flex items-center justify-center ring-2 ring-blue-500/30 text-white text-xs font-bold shrink-0">
+              {user?.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt={user.name || "User"} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                />
+              ) : (
+                <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AN'}</span>
+              )}
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight">{user?.name || 'Shadab Ali'}</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{user?.role || 'Passenger'}</span>
+              <span className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight truncate max-w-[140px]">{user?.name || 'AeroNex Member'}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate max-w-[140px]">{user?.role || 'Passenger'}</span>
             </div>
             <ChevronDown size={14} className={`text-slate-400 ml-1 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
           </div>
@@ -429,10 +434,10 @@ export function Header() {
               </button>
               <div className="h-px bg-slate-200 dark:bg-slate-800 my-1" />
               <button 
-                onClick={() => {
+                onClick={async () => {
                   setShowProfileMenu(false);
-                  logout();
-                  navigate('/login');
+                  await logout();
+                  navigate('/login', { replace: true });
                 }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-left cursor-pointer"
               >
