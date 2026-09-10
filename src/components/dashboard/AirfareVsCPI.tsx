@@ -2,12 +2,12 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 
 export function AirfareVsCPI() {
   const data = [
-    { month: 'Apr', airfare: 105, cpi: 102 },
-    { month: 'May', airfare: 112, cpi: 104 },
-    { month: 'Jun', airfare: 108, cpi: 106 },
-    { month: 'Jul', airfare: 115, cpi: 110 },
-    { month: 'Aug', airfare: 120, cpi: 114 },
-    { month: 'Sep', airfare: 124.8, cpi: 118.2 },
+    { month: 'Apr', airfare: 124.8, cpi: 118.2 },
+    { month: 'May', airfare: 129.5, cpi: 119.1 },
+    { month: 'Jun', airfare: 137.2, cpi: 120.4 },
+    { month: 'Jul', airfare: 142.8, cpi: 121.2 },
+    { month: 'Aug', airfare: 139.1, cpi: 121.9 },
+    { month: 'Sep', airfare: 138.4, cpi: 122.7 },
   ];
 
   return (
@@ -15,7 +15,7 @@ export function AirfareVsCPI() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white text-[16px] font-bold">Airfare Index vs CPI</h3>
         <select className="bg-[#0A1838] border border-slate-700 text-slate-300 text-[11px] rounded-md px-2 py-1 outline-none focus:border-[#1788FF]">
-          <option>Last 6 Months</option>
+          <option>Last 6 Months (2026)</option>
           <option>Last Year</option>
         </select>
       </div>
@@ -23,11 +23,11 @@ export function AirfareVsCPI() {
       <div className="flex items-center gap-4 mb-4 px-2">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-[#1788FF]" />
-          <span className="text-[12px] text-slate-300">Airfare Index</span>
+          <span className="text-[12px] text-slate-300">Airfare Index (2026)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-[#4E55F5]" />
-          <span className="text-[12px] text-slate-300">CPI</span>
+          <span className="text-[12px] text-slate-300">Retail CPI</span>
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export function AirfareVsCPI() {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
             <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={5} />
-            <YAxis domain={[90, 140]} stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis domain={[110, 150]} stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip
               contentStyle={{ backgroundColor: '#0A1838', border: '1px solid rgba(23,136,255,0.3)', borderRadius: '8px' }}
               itemStyle={{ color: '#fff', fontSize: '12px' }}
@@ -50,15 +50,15 @@ export function AirfareVsCPI() {
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
         <div>
           <div className="text-[11px] text-slate-400 mb-0.5">Airfare Index</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">124.8 <span className="text-green-400 text-[11px]">↑ 3.7%</span></div>
+          <div className="text-[15px] font-bold text-white flex items-center gap-2">138.4 <span className="text-green-400 text-[11px]">↑ 4.2%</span></div>
         </div>
         <div>
           <div className="text-[11px] text-slate-400 mb-0.5">CPI</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">118.2 <span className="text-green-400 text-[11px]">↑ 2.1%</span></div>
+          <div className="text-[15px] font-bold text-white flex items-center gap-2">122.7 <span className="text-green-400 text-[11px]">↑ 2.4%</span></div>
         </div>
         <div>
           <div className="text-[11px] text-slate-400 mb-0.5">Contribution to CPI</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">4.8% <span className="text-slate-500 text-[10px] font-normal">(airfare)</span></div>
+          <div className="text-[15px] font-bold text-white flex items-center gap-2">5.2% <span className="text-slate-500 text-[10px] font-normal">(airfare)</span></div>
         </div>
       </div>
     </div>

@@ -69,38 +69,42 @@ const localAlerts: any[] = [
 
 // Autonomous 1-Second High-Frequency Real-Time Airfare Engine
 class LiveAirfareEngine {
-  public currentIndex = 124.8;
-  public prevIndex = 120.3;
-  public averageFare = 5840;
-  public flightsTracked = 1420;
-  public routesTracked = 184;
+  public currentIndex = 138.4;
+  public prevIndex = 135.2;
+  public averageFare = 6450;
+  public flightsTracked = 2840;
+  public routesTracked = 246;
   public ticksCount = 0;
   public lastUpdated = new Date().toISOString();
 
   public routes = [
-    { route: 'DEL → BOM', currentFare: 5420, change: 4.8 },
-    { route: 'BOM → BLR', currentFare: 4280, change: -3.2 },
-    { route: 'DEL → BLR', currentFare: 6850, change: 1.5 },
-    { route: 'MAA → DEL', currentFare: 4950, change: -2.1 },
-    { route: 'HYD → DEL', currentFare: 4320, change: 0.8 },
-    { route: 'CCU → DEL', currentFare: 5120, change: 2.4 },
+    { route: 'DEL → BOM', currentFare: 5680, change: 4.2 },
+    { route: 'BOM → BLR', currentFare: 4450, change: -2.1 },
+    { route: 'DEL → BLR', currentFare: 7120, change: 1.8 },
+    { route: 'MAA → DEL', currentFare: 5350, change: -1.4 },
+    { route: 'HYD → DEL', currentFare: 4680, change: 1.2 },
+    { route: 'CCU → DEL', currentFare: 5490, change: 2.8 },
+    { route: 'BOM → GOI', currentFare: 3620, change: -3.5 },
+    { route: 'DEL → GOI', currentFare: 6750, change: 5.4 },
+    { route: 'BLR → HYD', currentFare: 3450, change: 0.8 },
+    { route: 'JAI → BOM', currentFare: 4950, change: 2.2 },
   ];
 
   public regional = [
-    { region: 'North', value: 118.6, change: 2.3 },
-    { region: 'West', value: 124.2, change: 3.1 },
-    { region: 'East', value: 112.7, change: 1.8 },
-    { region: 'South', value: 131.5, change: 4.2 },
+    { region: 'North', value: 134.8, change: 2.4 },
+    { region: 'West', value: 138.2, change: 1.9 },
+    { region: 'East', value: 126.5, change: 1.5 },
+    { region: 'South', value: 142.1, change: 3.6 },
   ];
 
   public liveChart: Array<{ time: string; value: number }> = [
-    { time: '00:00', value: 121.2 },
-    { time: '04:00', value: 120.4 },
-    { time: '08:00', value: 123.5 },
-    { time: '12:00', value: 126.2 },
-    { time: '16:00', value: 124.7 },
-    { time: '20:00', value: 125.2 },
-    { time: 'LIVE', value: 124.8 },
+    { time: '00:00', value: 135.4 },
+    { time: '04:00', value: 134.8 },
+    { time: '08:00', value: 137.6 },
+    { time: '12:00', value: 139.8 },
+    { time: '16:00', value: 138.2 },
+    { time: '20:00', value: 139.1 },
+    { time: 'LIVE', value: 138.4 },
   ];
 
   tick() {
@@ -109,19 +113,19 @@ class LiveAirfareEngine {
 
     // High frequency micro-fluctuations every second (+/- 0.05 to 0.22)
     const deltaIndex = (Math.random() - 0.49) * 0.22;
-    this.currentIndex = parseFloat(Math.max(121.5, Math.min(127.8, this.currentIndex + deltaIndex)).toFixed(2));
+    this.currentIndex = parseFloat(Math.max(134.5, Math.min(143.5, this.currentIndex + deltaIndex)).toFixed(2));
 
-    // Average fare fluctuates by ₹4 - ₹20
-    const deltaFare = Math.round((Math.random() - 0.49) * 20);
-    this.averageFare = Math.max(5450, Math.min(6180, this.averageFare + deltaFare));
+    // Average fare fluctuates by ₹5 - ₹25
+    const deltaFare = Math.round((Math.random() - 0.49) * 25);
+    this.averageFare = Math.max(5950, Math.min(6980, this.averageFare + deltaFare));
 
     // Flights tracked fluctuates slightly
     this.flightsTracked += Math.random() > 0.6 ? 1 : Math.random() < 0.35 ? -1 : 0;
 
     // Mutate route fares every second
     this.routes = this.routes.map((r) => {
-      const fareDelta = Math.round((Math.random() - 0.49) * 16);
-      const newFare = Math.max(3200, r.currentFare + fareDelta);
+      const fareDelta = Math.round((Math.random() - 0.49) * 18);
+      const newFare = Math.max(3400, r.currentFare + fareDelta);
       const newChange = parseFloat((r.change + (Math.random() - 0.5) * 0.1).toFixed(1));
       return { ...r, currentFare: newFare, change: newChange };
     });
@@ -197,14 +201,14 @@ export const api = {
 
     return {
       airfareIndex: { value: currentVal, change },
-      averageFare: { value: liveAirfareEngine.averageFare, change: -1.2 },
-      flightsTracked: { value: liveAirfareEngine.flightsTracked, change: 5.4 },
-      routesTracked: { value: liveAirfareEngine.routesTracked, change: 2.1 },
+      averageFare: { value: liveAirfareEngine.averageFare, change: 1.8 },
+      flightsTracked: { value: liveAirfareEngine.flightsTracked, change: 6.2 },
+      routesTracked: { value: liveAirfareEngine.routesTracked, change: 3.4 },
       secondary: {
         lowestFare: { fare: Math.min(...liveAirfareEngine.routes.map(r => r.currentFare)), route: 'BOM → GOI' },
         highestFare: { fare: Math.max(...liveAirfareEngine.routes.map(r => r.currentFare)), route: 'DEL → BLR' },
-        biggestIncrease: { change: 12.4, route: 'DEL → BOM' },
-        biggestDecrease: { change: -8.6, route: 'MAA → DEL' },
+        biggestIncrease: { change: 14.2, route: 'DEL → GOI' },
+        biggestDecrease: { change: -7.8, route: 'MAA → DEL' },
       }
     };
   },
@@ -270,36 +274,64 @@ export const api = {
       }
     } catch {}
 
-    // Dynamic live stream curve
+    // Dynamic 2026 live stream curves
     if (timeframe === '7d') {
       return [
-        { time: 'Day 1', value: 121.5 },
-        { time: 'Day 2', value: 122.8 },
-        { time: 'Day 3', value: 121.9 },
-        { time: 'Day 4', value: 124.0 },
-        { time: 'Day 5', value: 125.6 },
-        { time: 'Day 6', value: 124.2 },
+        { time: 'Day 1', value: 134.8 },
+        { time: 'Day 2', value: 136.2 },
+        { time: 'Day 3', value: 135.5 },
+        { time: 'Day 4', value: 137.8 },
+        { time: 'Day 5', value: 139.4 },
+        { time: 'Day 6', value: 137.9 },
         { time: 'Day 7', value: liveAirfareEngine.currentIndex },
       ];
     }
 
     if (timeframe === '30d') {
       return [
-        { time: 'Week 1', value: 118.4 },
-        { time: 'Week 2', value: 120.2 },
-        { time: 'Week 3', value: 123.1 },
+        { time: 'Week 1', value: 132.4 },
+        { time: 'Week 2', value: 134.8 },
+        { time: 'Week 3', value: 137.2 },
         { time: 'Week 4', value: liveAirfareEngine.currentIndex },
       ];
     }
 
-    // 24h Real-Time Stream
+    if (timeframe === '6m') {
+      return [
+        { time: 'Apr 26', value: 124.8 },
+        { time: 'May 26', value: 129.5 },
+        { time: 'Jun 26', value: 137.2 },
+        { time: 'Jul 26', value: 142.8 },
+        { time: 'Aug 26', value: 139.1 },
+        { time: 'Sep 26', value: liveAirfareEngine.currentIndex },
+      ];
+    }
+
+    if (timeframe === '1y') {
+      return [
+        { time: 'Oct 25', value: 119.2 },
+        { time: 'Nov 25', value: 125.4 },
+        { time: 'Dec 25', value: 131.8 },
+        { time: 'Jan 26', value: 121.4 },
+        { time: 'Feb 26', value: 123.8 },
+        { time: 'Mar 26', value: 127.5 },
+        { time: 'Apr 26', value: 124.8 },
+        { time: 'May 26', value: 129.5 },
+        { time: 'Jun 26', value: 137.2 },
+        { time: 'Jul 26', value: 142.8 },
+        { time: 'Aug 26', value: 139.1 },
+        { time: 'Sep 26', value: liveAirfareEngine.currentIndex },
+      ];
+    }
+
+    // 24h Real-Time Stream (2026 intraday curve)
     const basePoints = [
-      { time: '00:00', value: 121.2 },
-      { time: '04:00', value: 120.4 },
-      { time: '08:00', value: 123.5 },
-      { time: '12:00', value: 126.2 },
-      { time: '16:00', value: 124.7 },
-      { time: '20:00', value: 125.2 },
+      { time: '00:00', value: 135.4 },
+      { time: '04:00', value: 134.8 },
+      { time: '08:00', value: 137.6 },
+      { time: '12:00', value: 139.8 },
+      { time: '16:00', value: 138.2 },
+      { time: '20:00', value: 139.1 },
     ];
 
     const now = new Date();
@@ -341,20 +373,20 @@ export const api = {
       {
         id: '1',
         type: 'volatility',
-        title: 'Mumbai-Delhi Trunk Surge',
-        content: 'High business travel demand has driven trunk sector fares up +4.8% over the last 24h cycle.'
+        title: 'Mumbai–Delhi Trunk Capacity Dynamics (2026)',
+        content: 'Post-monsoon travel demand and corporate movement have driven trunk sector spot fares to ₹5,680 (+4.2%).'
       },
       {
         id: '2',
         type: 'prediction',
-        title: 'Optimal Booking: Bengaluru to Goa',
-        content: 'Fares projected to drop by ~8% over the next 5 days. Strategic recommendation: WAIT.'
+        title: 'Optimal Booking: Bengaluru to Goa Leisure Corridor',
+        content: 'Yield management algorithms show weekend premiums easing mid-week. Fares projected to drop ~8% for Tuesday departures.'
       },
       {
         id: '3',
         type: 'regional',
-        title: 'Southern Airspace Stability',
-        content: 'South India regional index steady at 131.5 with healthy load factors across major carriers.'
+        title: 'Southern Airspace Growth & Tech Corridor Demand',
+        content: 'South India regional index leads nationally at 142.1 with strong load factors on BLR-HYD and MAA-DEL sectors.'
       }
     ];
   },
@@ -380,14 +412,14 @@ export const api = {
       } catch {}
     }
 
-    // High fidelity predictive model fallback
+    // High fidelity predictive model fallback (2026 calibrated)
     return {
       route: routeStr,
-      currentFare: 5420,
-      predictedFare: 5150,
-      predictedChangePercent: -5.0,
+      currentFare: 5680,
+      predictedFare: 5240,
+      predictedChangePercent: -7.7,
       direction: 'decrease',
-      confidence: 84,
+      confidence: 86,
       recommendedAction: 'WAIT',
       reason: 'Historical booking window analysis indicates fares on this corridor soften 10-14 days prior to departure.',
       predictionHorizon: '7 days',
@@ -505,16 +537,18 @@ export const api = {
     }
 
     return [
-      { route: 'DEL-BOM', currentFare: 5420, previousFare: 5180, lastUpdated: new Date().toISOString() },
-      { route: 'BOM-DEL', currentFare: 5390, previousFare: 5420, lastUpdated: new Date().toISOString() },
-      { route: 'BOM-BLR', currentFare: 4280, previousFare: 4420, lastUpdated: new Date().toISOString() },
-      { route: 'BLR-BOM', currentFare: 4310, previousFare: 4290, lastUpdated: new Date().toISOString() },
-      { route: 'DEL-BLR', currentFare: 6850, previousFare: 6750, lastUpdated: new Date().toISOString() },
-      { route: 'BLR-DEL', currentFare: 6810, previousFare: 6790, lastUpdated: new Date().toISOString() },
-      { route: 'MAA-DEL', currentFare: 4950, previousFare: 5060, lastUpdated: new Date().toISOString() },
-      { route: 'HYD-DEL', currentFare: 4320, previousFare: 4290, lastUpdated: new Date().toISOString() },
-      { route: 'CCU-DEL', currentFare: 5120, previousFare: 5200, lastUpdated: new Date().toISOString() },
-      { route: 'GOI-BOM', currentFare: 3250, previousFare: 3310, lastUpdated: new Date().toISOString() },
+      { route: 'DEL-BOM', currentFare: 5680, previousFare: 5450, lastUpdated: new Date().toISOString() },
+      { route: 'BOM-DEL', currentFare: 5620, previousFare: 5680, lastUpdated: new Date().toISOString() },
+      { route: 'BOM-BLR', currentFare: 4450, previousFare: 4540, lastUpdated: new Date().toISOString() },
+      { route: 'BLR-BOM', currentFare: 4480, previousFare: 4420, lastUpdated: new Date().toISOString() },
+      { route: 'DEL-BLR', currentFare: 7120, previousFare: 6990, lastUpdated: new Date().toISOString() },
+      { route: 'BLR-DEL', currentFare: 7080, previousFare: 7050, lastUpdated: new Date().toISOString() },
+      { route: 'MAA-DEL', currentFare: 5350, previousFare: 5420, lastUpdated: new Date().toISOString() },
+      { route: 'HYD-DEL', currentFare: 4680, previousFare: 4620, lastUpdated: new Date().toISOString() },
+      { route: 'CCU-DEL', currentFare: 5490, previousFare: 5340, lastUpdated: new Date().toISOString() },
+      { route: 'GOI-BOM', currentFare: 3620, previousFare: 3750, lastUpdated: new Date().toISOString() },
+      { route: 'DEL-GOI', currentFare: 6750, previousFare: 6400, lastUpdated: new Date().toISOString() },
+      { route: 'BLR-HYD', currentFare: 3450, previousFare: 3420, lastUpdated: new Date().toISOString() },
     ];
   },
 

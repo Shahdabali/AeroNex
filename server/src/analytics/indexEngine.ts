@@ -31,12 +31,12 @@ export class AirfareIndexEngine {
     'HYD-BLR': 3000,
   };
   
-  private lastIndexValue: number = 100;
+  private lastIndexValue: number = 135.2;
   private lastRegionalIndices: Record<string, number> = {
-    North: 100,
-    South: 100,
-    East: 100,
-    West: 100
+    North: 134.8,
+    South: 142.1,
+    East: 126.5,
+    West: 138.2
   };
 
   public calculateIndex(currentFares: FareDataInput[]): IndexCalculationResult {

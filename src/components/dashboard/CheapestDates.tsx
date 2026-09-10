@@ -2,22 +2,42 @@ import { useNavigate } from 'react-router-dom';
 
 export function CheapestDates() {
   const navigate = useNavigate();
-  const dates = [
-    { day: 'Mon', date: 13, price: 4200, level: 'low' },
-    { day: 'Tue', date: 14, price: 3850, level: 'cheapest' },
-    { day: 'Wed', date: 15, price: 3620, level: 'cheapest' },
-    { day: 'Thu', date: 16, price: 4100, level: 'low' },
-    { day: 'Fri', date: 17, price: 5200, level: 'high' },
-    { day: 'Sat', date: 18, price: 4750, level: 'average' },
-    { day: 'Sun', date: 19, price: 5600, level: 'high' },
-    { day: 'Mon', date: 20, price: 4420, level: 'average' },
-    { day: 'Tue', date: 21, price: 3980, level: 'low' },
-    { day: 'Wed', date: 22, price: 3760, level: 'cheapest' },
-    { day: 'Thu', date: 23, price: 4300, level: 'average' },
-    { day: 'Fri', date: 24, price: 5150, level: 'high' },
-    { day: 'Sat', date: 25, price: 4820, level: 'average' },
-    { day: 'Sun', date: 26, price: 5480, level: 'high' },
-  ];
+
+  const today = new Date();
+  const monthYearLabel = today.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+
+  // Generate 14 days starting from tomorrow in 2026
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dates = Array.from({ length: 14 }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i + 1);
+    const dayOfWeek = d.getDay();
+    const dayName = daysOfWeek[dayOfWeek];
+    const isMidweek = dayOfWeek === 2 || dayOfWeek === 3; // Tue/Wed lowest
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6; // Fri/Sat/Sun highest
+    
+    let price = 4850;
+    let level = 'average';
+    if (isMidweek) {
+      price = 3980 + (i % 3) * 120;
+      level = 'cheapest';
+    } else if (isWeekend) {
+      price = 5680 + (i % 4) * 190;
+      level = 'high';
+    } else {
+      price = 4450 + (i % 2) * 150;
+      level = 'low';
+    }
+
+    const fullDate = d.toISOString().split('T')[0];
+    return {
+      day: dayName,
+      date: d.getDate(),
+      price,
+      level,
+      fullDate
+    };
+  });
 
   const getColor = (level: string) => {
     switch (level) {
@@ -34,7 +54,7 @@ export function CheapestDates() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-white text-[16px] font-bold">Cheapest Dates Finder</h3>
-          <p className="text-[12px] text-slate-400 mt-0.5">Delhi → Mumbai <span className="text-slate-500 ml-1">(Oct 2025)</span></p>
+          <p className="text-[12px] text-slate-400 mt-0.5">Delhi → Mumbai <span className="text-cyan-400 ml-1">({monthYearLabel})</span></p>
         </div>
         <button 
           onClick={() => navigate('/search')}
@@ -45,17 +65,17 @@ export function CheapestDates() {
       </div>
 
       <div className="flex-1 grid grid-cols-7 gap-2 mt-2">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
           <div key={d} className="text-center text-[11px] font-medium text-slate-400 mb-2">{d}</div>
         ))}
         {dates.map((d, i) => (
           <div 
             key={i} 
-            onClick={() => navigate(`/search?from=DEL&to=BOM&date=2025-10-${d.date}`)}
+            onClick={() => navigate(`/search?from=DEL&to=BOM&date=${d.fullDate}`)}
             className={`flex flex-col items-center justify-center rounded-lg border ${getColor(d.level)} p-1 cursor-pointer hover:scale-105 hover:brightness-125 transition-all`}
           >
             <span className="text-[14px] font-bold text-white leading-none mb-1">{d.date}</span>
-            <span className="text-[10px] font-medium">₹{d.price}</span>
+            <span className="text-[10px] font-medium">₹{d.price.toLocaleString('en-IN')}</span>
           </div>
         ))}
       </div>

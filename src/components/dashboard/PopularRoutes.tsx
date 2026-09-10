@@ -8,40 +8,40 @@ export function PopularRoutes() {
       origin: 'Delhi', 
       dest: 'Mumbai', 
       code: 'DEL → BOM', 
-      price: 5420, 
-      change: 12.4, 
+      price: 5680, 
+      change: 4.2, 
       img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=200&h=200&fit=crop&auto=format' // Mumbai Gateway of India
     },
     { 
       origin: 'Mumbai', 
       dest: 'Bengaluru', 
       code: 'BOM → BLR', 
-      price: 4860, 
-      change: 8.7, 
+      price: 4450, 
+      change: -2.1, 
       img: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=200&h=200&fit=crop&auto=format' // Bengaluru Vidhana Soudha
     },
     { 
       origin: 'Delhi', 
       dest: 'Bengaluru', 
       code: 'DEL → BLR', 
-      price: 6230, 
-      change: 6.1, 
+      price: 7120, 
+      change: 1.8, 
       img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=200&h=200&fit=crop&auto=format' // Delhi India Gate
     },
     { 
       origin: 'Chennai', 
       dest: 'Delhi', 
       code: 'MAA → DEL', 
-      price: 4150, 
-      change: -5.3, 
+      price: 5350, 
+      change: -1.4, 
       img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=200&h=200&fit=crop&auto=format' // Chennai Central
     },
     { 
       origin: 'Hyderabad', 
       dest: 'Delhi', 
       code: 'HYD → DEL', 
-      price: 5780, 
-      change: -3.9, 
+      price: 4680, 
+      change: 1.2, 
       img: 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=200&h=200&fit=crop&auto=format' // Hyderabad Charminar
     },
   ];

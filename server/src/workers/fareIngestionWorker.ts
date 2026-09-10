@@ -38,6 +38,8 @@ export async function startIngestionWorker() {
           change: result.change_percent
         };
       });
+      liveDataStore.setRegionalIndices(regionalIndices);
+      
       // 5. Persist to Supabase if connected
       await dbService.saveAirfareIndex(indexResult);
       await dbService.saveLiveFares(validFares);

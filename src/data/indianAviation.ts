@@ -126,29 +126,31 @@ export function generateRouteFlights(from: string, to: string, date?: string, ca
   const f = from.trim().toUpperCase().substring(0, 3) || 'DEL';
   const t = to.trim().toUpperCase().substring(0, 3) || 'BOM';
 
-  // Seed baseline price based on route distance simulation
-  let basePrice = 4600;
-  if ((f === 'DEL' && t === 'BLR') || (f === 'BLR' && t === 'DEL')) basePrice = 6400;
-  else if ((f === 'DEL' && t === 'GOI') || (f === 'GOI' && t === 'DEL')) basePrice = 5800;
-  else if ((f === 'BOM' && t === 'BLR') || (f === 'BLR' && t === 'BOM')) basePrice = 4200;
-  else if ((f === 'MAA' && t === 'DEL') || (f === 'DEL' && t === 'MAA')) basePrice = 5100;
-  else if ((f === 'HYD' && t === 'DEL') || (f === 'DEL' && t === 'HYD')) basePrice = 4500;
-  else if ((f === 'CCU' && t === 'DEL') || (f === 'DEL' && t === 'CCU')) basePrice = 5200;
-  else if ((f === 'GOI' && t === 'BOM') || (f === 'BOM' && t === 'GOI')) basePrice = 3400;
-  else if ((f === 'JAI' && t === 'GOI') || (f === 'GOI' && t === 'JAI')) basePrice = 6200;
-  else if ((f === 'JAI' && t === 'BOM') || (f === 'BOM' && t === 'JAI')) basePrice = 4600;
-  else if ((f === 'COK' && t === 'BOM') || (f === 'BOM' && t === 'COK')) basePrice = 4100;
-  else if ((f === 'DEL' && t === 'COK') || (f === 'COK' && t === 'DEL')) basePrice = 6900;
-  else if ((f === 'SXR' && t === 'DEL') || (f === 'DEL' && t === 'SXR')) basePrice = 4900;
-  else if ((f === 'GAU' && t === 'DEL') || (f === 'DEL' && t === 'GAU')) basePrice = 5700;
+  // Seed baseline price based on 2026 realistic Indian domestic route yields
+  let basePrice = 5200;
+  if ((f === 'DEL' && t === 'BLR') || (f === 'BLR' && t === 'DEL')) basePrice = 6950;
+  else if ((f === 'DEL' && t === 'BOM') || (f === 'BOM' && t === 'DEL')) basePrice = 5650;
+  else if ((f === 'DEL' && t === 'GOI') || (f === 'GOI' && t === 'DEL')) basePrice = 6450;
+  else if ((f === 'BOM' && t === 'BLR') || (f === 'BLR' && t === 'BOM')) basePrice = 4450;
+  else if ((f === 'MAA' && t === 'DEL') || (f === 'DEL' && t === 'MAA')) basePrice = 5350;
+  else if ((f === 'HYD' && t === 'DEL') || (f === 'DEL' && t === 'HYD')) basePrice = 4650;
+  else if ((f === 'CCU' && t === 'DEL') || (f === 'DEL' && t === 'CCU')) basePrice = 5480;
+  else if ((f === 'GOI' && t === 'BOM') || (f === 'BOM' && t === 'GOI')) basePrice = 3600;
+  else if ((f === 'JAI' && t === 'GOI') || (f === 'GOI' && t === 'JAI')) basePrice = 6800;
+  else if ((f === 'JAI' && t === 'BOM') || (f === 'BOM' && t === 'JAI')) basePrice = 4950;
+  else if ((f === 'COK' && t === 'BOM') || (f === 'BOM' && t === 'COK')) basePrice = 4380;
+  else if ((f === 'DEL' && t === 'COK') || (f === 'COK' && t === 'DEL')) basePrice = 7450;
+  else if ((f === 'SXR' && t === 'DEL') || (f === 'DEL' && t === 'SXR')) basePrice = 5350;
+  else if ((f === 'GAU' && t === 'DEL') || (f === 'DEL' && t === 'GAU')) basePrice = 6150;
+  else if ((f === 'BLR' && t === 'HYD') || (f === 'HYD' && t === 'BLR')) basePrice = 3450;
 
   // Day of week modifier
   let dayVariance = 0;
   if (date) {
     const d = new Date(date);
     const day = d.getDay();
-    if (day === 5 || day === 0) dayVariance = 450; // Fri/Sun surge
-    if (day === 2 || day === 3) dayVariance = -350; // Tue/Wed savings
+    if (day === 5 || day === 0) dayVariance = 550; // Fri/Sun peak weekend surge
+    if (day === 2 || day === 3) dayVariance = -420; // Tue/Wed mid-week savings
   }
 
   // Multipliers for cabin class
@@ -156,9 +158,9 @@ export function generateRouteFlights(from: string, to: string, date?: string, ca
   const targetBase = Math.round((basePrice + dayVariance) * classMultiplier);
 
   const schedules = [
-    { code: '6E', num: '204', dep: '06:00', arr: '08:15', dur: '2h 15m', stops: 'Non-stop', priceDelta: -450, aircraft: 'Airbus A320neo', badge: 'Cheapest' as const, seats: 14 },
-    { code: 'AI', num: '805', dep: '07:30', arr: '09:40', dur: '2h 10m', stops: 'Non-stop', priceDelta: 250, aircraft: 'Boeing 787-8 Dreamliner', badge: 'Fastest' as const, seats: 8 },
-    { code: 'UK', num: '992', dep: '09:15', arr: '11:35', dur: '2h 20m', stops: 'Non-stop', priceDelta: 680, aircraft: 'Airbus A321neo', badge: 'Recommended' as const, seats: 6 },
+    { code: '6E', num: '204', dep: '06:00', arr: '08:15', dur: '2h 15m', stops: 'Non-stop', priceDelta: -450, aircraft: 'Airbus A321neo', badge: 'Cheapest' as const, seats: 14 },
+    { code: 'AI', num: '805', dep: '07:30', arr: '09:40', dur: '2h 10m', stops: 'Non-stop', priceDelta: 280, aircraft: 'Airbus A350-900', badge: 'Fastest' as const, seats: 8 },
+    { code: 'UK', num: '992', dep: '09:15', arr: '11:35', dur: '2h 20m', stops: 'Non-stop', priceDelta: 650, aircraft: 'Boeing 787-8 Dreamliner', badge: 'Recommended' as const, seats: 6 },
     { code: 'QP', num: '1102', dep: '11:45', arr: '14:05', dur: '2h 20m', stops: 'Non-stop', priceDelta: -320, aircraft: 'Boeing 737 MAX 8', badge: 'Best Value' as const, seats: 19 },
     { code: '6E', num: '5311', dep: '14:20', arr: '16:40', dur: '2h 20m', stops: 'Non-stop', priceDelta: 120, aircraft: 'Airbus A320neo', seats: 11 },
     { code: 'SG', num: '8169', dep: '16:50', arr: '19:15', dur: '2h 25m', stops: 'Non-stop', priceDelta: -280, aircraft: 'Boeing 737-800', seats: 5 },
@@ -641,51 +643,51 @@ export interface CPIDataPoint {
 
 export const CPI_DATA_SERIES: Record<string, CPIDataPoint[]> = {
   '6M': [
-    { month: 'Apr 24', airfare: 122.4, cpi: 112.1, transportCpi: 118.2, atfIndex: 135.0, spread: 10.3, momAirfareChange: 1.8 },
-    { month: 'May 24', airfare: 128.6, cpi: 112.8, transportCpi: 119.4, atfIndex: 138.2, spread: 15.8, momAirfareChange: 5.1 },
-    { month: 'Jun 24', airfare: 136.2, cpi: 113.6, transportCpi: 121.0, atfIndex: 142.5, spread: 22.6, momAirfareChange: 5.9 },
-    { month: 'Jul 24', airfare: 141.5, cpi: 114.2, transportCpi: 121.8, atfIndex: 145.8, spread: 27.3, momAirfareChange: 3.9 },
-    { month: 'Aug 24', airfare: 137.9, cpi: 114.9, transportCpi: 122.1, atfIndex: 144.2, spread: 23.0, momAirfareChange: -2.5 },
-    { month: 'Sep 24', airfare: 138.4, cpi: 115.4, transportCpi: 122.7, atfIndex: 146.1, spread: 23.0, momAirfareChange: 0.4 }
+    { month: 'Apr 26', airfare: 124.8, cpi: 118.2, transportCpi: 122.4, atfIndex: 136.2, spread: 6.6, momAirfareChange: 1.8 },
+    { month: 'May 26', airfare: 129.5, cpi: 119.1, transportCpi: 123.6, atfIndex: 139.4, spread: 10.4, momAirfareChange: 3.8 },
+    { month: 'Jun 26', airfare: 137.2, cpi: 120.4, transportCpi: 125.1, atfIndex: 143.8, spread: 16.8, momAirfareChange: 5.9 },
+    { month: 'Jul 26', airfare: 142.8, cpi: 121.2, transportCpi: 126.0, atfIndex: 147.2, spread: 21.6, momAirfareChange: 4.1 },
+    { month: 'Aug 26', airfare: 139.1, cpi: 121.9, transportCpi: 126.5, atfIndex: 145.6, spread: 17.2, momAirfareChange: -2.6 },
+    { month: 'Sep 26', airfare: 138.4, cpi: 122.7, transportCpi: 127.1, atfIndex: 146.8, spread: 15.7, momAirfareChange: -0.5 }
   ],
   'YTD': [
-    { month: 'Jan 24', airfare: 114.2, cpi: 110.2, transportCpi: 115.8, atfIndex: 128.4, spread: 4.0, momAirfareChange: -1.2 },
-    { month: 'Feb 24', airfare: 116.5, cpi: 110.9, transportCpi: 116.4, atfIndex: 130.1, spread: 5.6, momAirfareChange: 2.0 },
-    { month: 'Mar 24', airfare: 120.3, cpi: 111.4, transportCpi: 117.2, atfIndex: 132.8, spread: 8.9, momAirfareChange: 3.3 },
-    { month: 'Apr 24', airfare: 122.4, cpi: 112.1, transportCpi: 118.2, atfIndex: 135.0, spread: 10.3, momAirfareChange: 1.7 },
-    { month: 'May 24', airfare: 128.6, cpi: 112.8, transportCpi: 119.4, atfIndex: 138.2, spread: 15.8, momAirfareChange: 5.1 },
-    { month: 'Jun 24', airfare: 136.2, cpi: 113.6, transportCpi: 121.0, atfIndex: 142.5, spread: 22.6, momAirfareChange: 5.9 },
-    { month: 'Jul 24', airfare: 141.5, cpi: 114.2, transportCpi: 121.8, atfIndex: 145.8, spread: 27.3, momAirfareChange: 3.9 },
-    { month: 'Aug 24', airfare: 137.9, cpi: 114.9, transportCpi: 122.1, atfIndex: 144.2, spread: 23.0, momAirfareChange: -2.5 },
-    { month: 'Sep 24', airfare: 138.4, cpi: 115.4, transportCpi: 122.7, atfIndex: 146.1, spread: 23.0, momAirfareChange: 0.4 }
+    { month: 'Jan 26', airfare: 121.4, cpi: 116.8, transportCpi: 119.5, atfIndex: 131.2, spread: 4.6, momAirfareChange: -1.2 },
+    { month: 'Feb 26', airfare: 123.8, cpi: 117.4, transportCpi: 120.3, atfIndex: 133.0, spread: 6.4, momAirfareChange: 2.0 },
+    { month: 'Mar 26', airfare: 127.5, cpi: 117.9, transportCpi: 121.1, atfIndex: 135.2, spread: 9.6, momAirfareChange: 3.0 },
+    { month: 'Apr 26', airfare: 124.8, cpi: 118.2, transportCpi: 122.4, atfIndex: 136.2, spread: 6.6, momAirfareChange: -2.1 },
+    { month: 'May 26', airfare: 129.5, cpi: 119.1, transportCpi: 123.6, atfIndex: 139.4, spread: 10.4, momAirfareChange: 3.8 },
+    { month: 'Jun 26', airfare: 137.2, cpi: 120.4, transportCpi: 125.1, atfIndex: 143.8, spread: 16.8, momAirfareChange: 5.9 },
+    { month: 'Jul 26', airfare: 142.8, cpi: 121.2, transportCpi: 126.0, atfIndex: 147.2, spread: 21.6, momAirfareChange: 4.1 },
+    { month: 'Aug 26', airfare: 139.1, cpi: 121.9, transportCpi: 126.5, atfIndex: 145.6, spread: 17.2, momAirfareChange: -2.6 },
+    { month: 'Sep 26', airfare: 138.4, cpi: 122.7, transportCpi: 127.1, atfIndex: 146.8, spread: 15.7, momAirfareChange: -0.5 }
   ],
   '1Y': [
-    { month: 'Oct 23', airfare: 112.0, cpi: 108.5, transportCpi: 113.4, atfIndex: 124.0, spread: 3.5, momAirfareChange: 4.2 },
-    { month: 'Nov 23', airfare: 118.2, cpi: 109.1, transportCpi: 114.2, atfIndex: 127.5, spread: 9.1, momAirfareChange: 5.5 },
-    { month: 'Dec 23', airfare: 124.0, cpi: 109.8, transportCpi: 115.0, atfIndex: 131.0, spread: 14.2, momAirfareChange: 4.9 },
-    { month: 'Jan 24', airfare: 114.2, cpi: 110.2, transportCpi: 115.8, atfIndex: 128.4, spread: 4.0, momAirfareChange: -7.9 },
-    { month: 'Feb 24', airfare: 116.5, cpi: 110.9, transportCpi: 116.4, atfIndex: 130.1, spread: 5.6, momAirfareChange: 2.0 },
-    { month: 'Mar 24', airfare: 120.3, cpi: 111.4, transportCpi: 117.2, atfIndex: 132.8, spread: 8.9, momAirfareChange: 3.3 },
-    { month: 'Apr 24', airfare: 122.4, cpi: 112.1, transportCpi: 118.2, atfIndex: 135.0, spread: 10.3, momAirfareChange: 1.7 },
-    { month: 'May 24', airfare: 128.6, cpi: 112.8, transportCpi: 119.4, atfIndex: 138.2, spread: 15.8, momAirfareChange: 5.1 },
-    { month: 'Jun 24', airfare: 136.2, cpi: 113.6, transportCpi: 121.0, atfIndex: 142.5, spread: 22.6, momAirfareChange: 5.9 },
-    { month: 'Jul 24', airfare: 141.5, cpi: 114.2, transportCpi: 121.8, atfIndex: 145.8, spread: 27.3, momAirfareChange: 3.9 },
-    { month: 'Aug 24', airfare: 137.9, cpi: 114.9, transportCpi: 122.1, atfIndex: 144.2, spread: 23.0, momAirfareChange: -2.5 },
-    { month: 'Sep 24', airfare: 138.4, cpi: 115.4, transportCpi: 122.7, atfIndex: 146.1, spread: 23.0, momAirfareChange: 0.4 }
+    { month: 'Oct 25', airfare: 119.2, cpi: 114.6, transportCpi: 117.8, atfIndex: 128.5, spread: 4.6, momAirfareChange: 3.8 },
+    { month: 'Nov 25', airfare: 125.4, cpi: 115.3, transportCpi: 118.5, atfIndex: 132.0, spread: 10.1, momAirfareChange: 5.2 },
+    { month: 'Dec 25', airfare: 131.8, cpi: 116.0, transportCpi: 119.2, atfIndex: 135.5, spread: 15.8, momAirfareChange: 5.1 },
+    { month: 'Jan 26', airfare: 121.4, cpi: 116.8, transportCpi: 119.5, atfIndex: 131.2, spread: 4.6, momAirfareChange: -7.9 },
+    { month: 'Feb 26', airfare: 123.8, cpi: 117.4, transportCpi: 120.3, atfIndex: 133.0, spread: 6.4, momAirfareChange: 2.0 },
+    { month: 'Mar 26', airfare: 127.5, cpi: 117.9, transportCpi: 121.1, atfIndex: 135.2, spread: 9.6, momAirfareChange: 3.0 },
+    { month: 'Apr 26', airfare: 124.8, cpi: 118.2, transportCpi: 122.4, atfIndex: 136.2, spread: 6.6, momAirfareChange: -2.1 },
+    { month: 'May 26', airfare: 129.5, cpi: 119.1, transportCpi: 123.6, atfIndex: 139.4, spread: 10.4, momAirfareChange: 3.8 },
+    { month: 'Jun 26', airfare: 137.2, cpi: 120.4, transportCpi: 125.1, atfIndex: 143.8, spread: 16.8, momAirfareChange: 5.9 },
+    { month: 'Jul 26', airfare: 142.8, cpi: 121.2, transportCpi: 126.0, atfIndex: 147.2, spread: 21.6, momAirfareChange: 4.1 },
+    { month: 'Aug 26', airfare: 139.1, cpi: 121.9, transportCpi: 126.5, atfIndex: 145.6, spread: 17.2, momAirfareChange: -2.6 },
+    { month: 'Sep 26', airfare: 138.4, cpi: 122.7, transportCpi: 127.1, atfIndex: 146.8, spread: 15.7, momAirfareChange: -0.5 }
   ],
   '3Y': [
-    { month: '2021', airfare: 92.5, cpi: 95.2, transportCpi: 98.1, atfIndex: 90.0, spread: -2.7, momAirfareChange: 0 },
-    { month: '2022', airfare: 108.4, cpi: 101.6, transportCpi: 107.4, atfIndex: 118.2, spread: 6.8, momAirfareChange: 17.2 },
-    { month: '2023', airfare: 121.8, cpi: 108.3, transportCpi: 113.9, atfIndex: 129.5, spread: 13.5, momAirfareChange: 12.4 },
-    { month: '2024', airfare: 138.4, cpi: 115.4, transportCpi: 122.7, atfIndex: 146.1, spread: 23.0, momAirfareChange: 13.6 }
+    { month: '2023', airfare: 118.2, cpi: 108.3, transportCpi: 112.5, atfIndex: 125.4, spread: 9.9, momAirfareChange: 11.2 },
+    { month: '2024', airfare: 128.6, cpi: 112.8, transportCpi: 118.2, atfIndex: 136.5, spread: 15.8, momAirfareChange: 8.8 },
+    { month: '2025', airfare: 134.2, cpi: 117.5, transportCpi: 122.4, atfIndex: 141.8, spread: 16.7, momAirfareChange: 4.4 },
+    { month: '2026', airfare: 138.4, cpi: 122.7, transportCpi: 127.1, atfIndex: 146.8, spread: 15.7, momAirfareChange: 3.1 }
   ],
   '5Y': [
-    { month: '2019', airfare: 84.2, cpi: 88.0, transportCpi: 90.2, atfIndex: 82.0, spread: -3.8, momAirfareChange: 0 },
-    { month: '2020', airfare: 76.8, cpi: 91.5, transportCpi: 93.4, atfIndex: 68.5, spread: -14.7, momAirfareChange: -8.8 },
-    { month: '2021', airfare: 92.5, cpi: 95.2, transportCpi: 98.1, atfIndex: 90.0, spread: -2.7, momAirfareChange: 20.4 },
+    { month: '2021', airfare: 92.5, cpi: 95.2, transportCpi: 98.1, atfIndex: 90.0, spread: -2.7, momAirfareChange: 0 },
     { month: '2022', airfare: 108.4, cpi: 101.6, transportCpi: 107.4, atfIndex: 118.2, spread: 6.8, momAirfareChange: 17.2 },
-    { month: '2023', airfare: 121.8, cpi: 108.3, transportCpi: 113.9, atfIndex: 129.5, spread: 13.5, momAirfareChange: 12.4 },
-    { month: '2024', airfare: 138.4, cpi: 115.4, transportCpi: 122.7, atfIndex: 146.1, spread: 23.0, momAirfareChange: 13.6 }
+    { month: '2023', airfare: 118.2, cpi: 108.3, transportCpi: 112.5, atfIndex: 125.4, spread: 9.9, momAirfareChange: 9.0 },
+    { month: '2024', airfare: 128.6, cpi: 112.8, transportCpi: 118.2, atfIndex: 136.5, spread: 15.8, momAirfareChange: 8.8 },
+    { month: '2025', airfare: 134.2, cpi: 117.5, transportCpi: 122.4, atfIndex: 141.8, spread: 16.7, momAirfareChange: 4.4 },
+    { month: '2026', airfare: 138.4, cpi: 122.7, transportCpi: 127.1, atfIndex: 146.8, spread: 15.7, momAirfareChange: 3.1 }
   ]
 };
 

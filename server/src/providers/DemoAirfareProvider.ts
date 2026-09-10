@@ -3,56 +3,58 @@ import { FareDataInput } from '../utils/validation';
 
 export class DemoAirfareProvider implements AirfareProvider {
   private basePrices: Record<string, number> = {
-    'DEL-BOM': 5000,
-    'BOM-DEL': 5000,
-    'BOM-BLR': 4500,
-    'BLR-BOM': 4500,
-    'DEL-BLR': 6000,
-    'BLR-DEL': 6000,
-    'MAA-DEL': 4000,
-    'DEL-MAA': 4000,
-    'HYD-DEL': 5500,
-    'DEL-HYD': 5500,
-    'CCU-DEL': 4800,
-    'DEL-CCU': 4800,
-    'GOI-BOM': 3500,
-    'BOM-GOI': 3500,
-    'DEL-GOI': 6500,
-    'GOI-DEL': 6500,
-    'BLR-CCU': 5200,
-    'CCU-BLR': 5200,
-    'BLR-HYD': 3000,
-    'HYD-BLR': 3000,
+    'DEL-BOM': 5680,
+    'BOM-DEL': 5620,
+    'BOM-BLR': 4450,
+    'BLR-BOM': 4480,
+    'DEL-BLR': 7120,
+    'BLR-DEL': 7080,
+    'MAA-DEL': 5350,
+    'DEL-MAA': 5350,
+    'HYD-DEL': 4680,
+    'DEL-HYD': 4680,
+    'CCU-DEL': 5490,
+    'DEL-CCU': 5490,
+    'GOI-BOM': 3620,
+    'BOM-GOI': 3620,
+    'DEL-GOI': 6750,
+    'GOI-DEL': 6750,
+    'BLR-CCU': 5850,
+    'CCU-BLR': 5850,
+    'BLR-HYD': 3450,
+    'HYD-BLR': 3450,
   };
 
   async fetchLatestFares(): Promise<FareDataInput[]> {
     const results: FareDataInput[] = [];
+    const airlines = ['6E', 'AI', 'QP', 'UK', 'SG'];
     
-    // Simulate real-time volatility
+    // Simulate real-time volatility with 2026 dynamic drift
     for (const [route, base] of Object.entries(this.basePrices)) {
       const [origin, dest] = route.split('-');
-      // Random fluctuation between -5% and +5% (to include +/- 1-5%)
+      // Random fluctuation between -4% and +4%
       const sign = Math.random() > 0.5 ? 1 : -1;
-      const pct = (1 + Math.random() * 4) / 100; // 1% to 5%
+      const pct = (1 + Math.random() * 3.5) / 100;
       const fluctuation = 1 + (sign * pct);
       const newFare = Math.round(base * fluctuation);
       
-      // Update base for next tick so it drifts naturally
+      // Update base for next tick so it drifts naturally around 2026 levels
       this.basePrices[route] = newFare;
 
       const now = new Date();
       const arrival = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours later
+      const airlineCode = airlines[Math.floor(Math.random() * airlines.length)];
 
       results.push({
-        flight_number: `6E-${Math.floor(Math.random() * 900) + 100}`,
-        airline_code: '6E',
+        flight_number: `${airlineCode}-${Math.floor(Math.random() * 900) + 100}`,
+        airline_code: airlineCode,
         origin_iata: origin,
         destination_iata: dest,
         fare_amount: newFare,
         currency: 'INR',
         departure_time: now.toISOString(),
         arrival_time: arrival.toISOString(),
-        source: 'DemoAirfareProvider',
+        source: 'DemoAirfareProvider-2026',
       });
     }
 

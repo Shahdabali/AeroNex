@@ -23,8 +23,8 @@ export function AirfareIndex() {
     queryFn: () => api.getChartData('24h')
   });
 
-  const currentIndex = indexMetrics?.airfareIndex?.value ?? 124.8;
-  const currentChange = indexMetrics?.airfareIndex?.change ?? 3.7;
+  const currentIndex = indexMetrics?.airfareIndex?.value ?? 138.4;
+  const currentChange = indexMetrics?.airfareIndex?.change ?? 4.2;
 
   return (
     <DashboardLayout>
