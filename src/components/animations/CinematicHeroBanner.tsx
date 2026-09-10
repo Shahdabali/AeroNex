@@ -20,7 +20,7 @@ export function CinematicHeroBanner({ freshnessStatus = 'live' }: CinematicHeroP
   const now = new Date();
   const hour = now.getHours();
   const timeGreeting = hour < 12 ? t.goodMorning : hour < 18 ? t.goodAfternoon : t.goodEvening;
-  const firstName = user?.name ? user.name.split(' ')[0] : 'Shadab';
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Traveler';
 
   const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });

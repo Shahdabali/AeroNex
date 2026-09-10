@@ -16,6 +16,7 @@ export interface User {
   organization?: string;
   phone?: string;
   bio?: string;
+  isGuest?: boolean;
 }
 
 interface AppContextType {
@@ -87,6 +88,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUser(mappedUser);
         localStorage.setItem('aeronex_user', JSON.stringify(mappedUser));
         localStorage.setItem('aeronex_token', session.access_token);
+      } else {
+        // Retain guest session if present in localStorage
+        const saved = localStorage.getItem('aeronex_user');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed?.isGuest) {
+              setUser(parsed);
+            } else {
+              setUser(null);
+            }
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
       }
       setAuthLoading(false);
     }).catch(() => {
@@ -112,9 +130,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('aeronex_token', session.access_token);
         }
       } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        localStorage.removeItem('aeronex_user');
-        localStorage.removeItem('aeronex_token');
+        const saved = localStorage.getItem('aeronex_user');
+        try {
+          const parsed = saved ? JSON.parse(saved) : null;
+          if (!parsed?.isGuest) {
+            setUser(null);
+            localStorage.removeItem('aeronex_user');
+            localStorage.removeItem('aeronex_token');
+          }
+        } catch {
+          setUser(null);
+        }
       }
       setAuthLoading(false);
     });

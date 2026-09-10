@@ -399,18 +399,28 @@ export function Header() {
                   onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                 />
               ) : (
-                <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AN'}</span>
+                <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (user?.isGuest ? 'G' : 'AN')}</span>
               )}
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight truncate max-w-[140px]">{user?.name || 'AeroNex Member'}</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate max-w-[140px]">{user?.role || 'Passenger'}</span>
+              <span className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight truncate max-w-[140px]">{user?.name || (user?.isGuest ? 'Guest' : 'AeroNex Member')}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate max-w-[140px]">{user?.isGuest ? 'Guest Passenger' : (user?.role || 'Passenger')}</span>
             </div>
             <ChevronDown size={14} className={`text-slate-400 ml-1 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
           </div>
 
           {showProfileMenu && (
-            <div className="absolute right-0 top-[55px] w-56 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1">
+            <div className="absolute right-0 top-[55px] w-60 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-2.5 z-50 flex flex-col gap-1">
+              {/* Active User Card */}
+              <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
+                <div className="text-xs font-bold text-white truncate">{user?.name || 'AeroNex Member'}</div>
+                <div className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'Active Session'}</div>
+                {user?.isGuest && (
+                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[9px] font-semibold">
+                    Guest Account
+                  </span>
+                )}
+              </div>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white hover:bg-blue-500/15 rounded-xl transition-all text-left cursor-pointer"

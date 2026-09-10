@@ -138,12 +138,12 @@ export function Settings() {
   };
 
   /* ─── Profile state ─── */
-  const [fullName, setFullName] = useState(user?.name || 'Shadab Ali');
-  const [email] = useState(user?.email || 'shadab@aeronex.com');
-  const [organization, setOrganization] = useState(user?.organization || 'Student / Researcher');
+  const [fullName, setFullName] = useState(user?.name || '');
+  const [email] = useState(user?.email || '');
+  const [organization, setOrganization] = useState(user?.organization || 'AeroNex Platform User');
   const [phone, setPhone] = useState(user?.phone || '98765 43210');
   const [bio, setBio] = useState(user?.bio || 'Exploring data-driven insights to make travel more accessible and affordable.');
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   /* ─── Travel Preferences ─── */
@@ -162,14 +162,22 @@ export function Settings() {
   const [marketingNotifs, setMarketingNotifs] = useState(false);
 
   /* ─── Integrations state ─── */
-  const [integrations, setIntegrations] = useState<Record<string, boolean>>({
-    google: false,
-    calendar: false,
-    email: false,
-    discord: false,
-    apiAccess: true,
+  const [integrations, setIntegrations] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('aeronex_integrations');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      google: false,
+      calendar: false,
+      email: false,
+      discord: false,
+      apiAccess: true,
+    };
   });
-  const [apiKey, setApiKey] = useState('aeronex_live_sk_948f2c1b8e47a6d3f0');
+  const [apiKey, setApiKey] = useState(() => {
+    return localStorage.getItem('aeronex_api_key') || 'aeronex_live_sk_948f2c1b8e47a6d3f0';
+  });
   const [copiedKey, setCopiedKey] = useState(false);
 
   /* ─── Modals State ─── */
@@ -219,7 +227,7 @@ export function Settings() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const data = await api.getUserProfile(user?.email || 'shadab@aeronex.com');
+        const data = await api.getUserProfile(user?.email || '');
         if (data?.profile) {
           if (data.profile.name) setFullName(data.profile.name);
           if (data.profile.organization) setOrganization(data.profile.organization);
@@ -243,12 +251,16 @@ export function Settings() {
           setMarketingNotifs(!!data.notifications.marketingNotifs);
         }
         if (data?.integrations) {
-          setIntegrations({
-            google: !!data.integrations.google,
-            calendar: !!data.integrations.calendar,
-            email: !!data.integrations.email,
-            discord: !!data.integrations.discord,
-            apiAccess: !!data.integrations.apiAccess,
+          setIntegrations(prev => {
+            const merged = {
+              google: typeof data.integrations.google === 'boolean' ? data.integrations.google : prev.google,
+              calendar: typeof data.integrations.calendar === 'boolean' ? data.integrations.calendar : prev.calendar,
+              email: typeof data.integrations.email === 'boolean' ? data.integrations.email : prev.email,
+              discord: typeof data.integrations.discord === 'boolean' ? data.integrations.discord : prev.discord,
+              apiAccess: typeof data.integrations.apiAccess === 'boolean' ? data.integrations.apiAccess : prev.apiAccess,
+            };
+            localStorage.setItem('aeronex_integrations', JSON.stringify(merged));
+            return merged;
           });
           if (data.integrations.apiKey) setApiKey(data.integrations.apiKey);
         }
@@ -362,13 +374,29 @@ export function Settings() {
 
   // 6. Integrations Toggle
   const handleToggleIntegration = async (provider: string) => {
+    const isCurrentlyConnected = !!integrations[provider];
+    const willConnect = !isCurrentlyConnected;
+
+    const nextState = { ...integrations, [provider]: willConnect };
+    setIntegrations(nextState);
     try {
-      setIntegrations(prev => ({ ...prev, [provider]: !prev[provider] }));
+      localStorage.setItem('aeronex_integrations', JSON.stringify(nextState));
+    } catch {}
+
+    const providerNames: Record<string, string> = {
+      google: 'Google Account',
+      calendar: 'Google Calendar',
+      email: 'Email Integration',
+      discord: 'Discord Webhook',
+      apiAccess: 'API Access',
+    };
+    const displayName = providerNames[provider] || provider.toUpperCase();
+
+    try {
       await api.toggleIntegration(provider, email);
-      const isNowConnected = !integrations[provider];
-      triggerToast(`${provider.toUpperCase()} ${isNowConnected ? 'connected successfully' : 'disconnected'}`);
-    } catch (err: any) {
-      triggerToast(err.message || 'Failed to update integration');
+      triggerToast(`${displayName} ${willConnect ? 'connected successfully!' : 'disconnected.'}`);
+    } catch {
+      triggerToast(`${displayName} state updated.`);
     }
   };
 
@@ -665,12 +693,17 @@ export function Settings() {
               <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-800/80">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative shrink-0">
-                    <div className="w-18 h-18 rounded-full overflow-hidden bg-slate-800 ring-2 ring-blue-500/30 shadow-md">
-                      <img
-                        src={avatarUrl}
-                        alt={fullName}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-18 h-18 rounded-full overflow-hidden bg-gradient-to-tr from-[#1788FF] to-[#00A3FF] ring-2 ring-blue-500/30 shadow-md flex items-center justify-center text-white text-xl font-bold">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={fullName || 'User'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span>{fullName ? fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (user?.isGuest ? 'G' : 'AN')}</span>
+                      )}
                     </div>
                     <button 
                       aria-label="Upload photo"
@@ -681,12 +714,12 @@ export function Settings() {
                     </button>
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-white font-bold text-base leading-tight truncate">{fullName}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 leading-tight">{user?.role || 'Researcher'}</p>
+                    <h3 className="text-white font-bold text-base leading-tight truncate">{fullName || (user?.isGuest ? 'Guest Traveler' : 'AeroNex Member')}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5 leading-tight">{user?.isGuest ? 'Guest Passenger' : (user?.role || 'Passenger')}</p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      <span className="text-xs text-slate-400 truncate">{email}</span>
+                      <span className="text-xs text-slate-400 truncate">{email || 'Active Session'}</span>
                       <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-semibold flex items-center gap-1 shrink-0">
-                        <BadgeCheck size={11} /> {t.verified || 'Verified'}
+                        <BadgeCheck size={11} /> {user?.isGuest ? 'Guest Session' : (t.verified || 'Verified')}
                       </span>
                     </div>
                   </div>
@@ -1257,16 +1290,25 @@ export function Settings() {
                 ].map((item) => {
                   const isConnected = !!integrations[item.id];
                   return (
-                    <div key={item.id} className="integration-row flex items-center justify-between py-2 border-b border-slate-800/80 last:border-0">
+                    <div key={item.id} className="integration-row flex items-center justify-between py-2.5 border-b border-slate-800/80 last:border-0">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8.5 h-8.5 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
+                        <div className={`w-9 h-9 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
                           {item.icon}
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             <h4 className="text-white text-xs font-semibold leading-tight">{item.label}</h4>
-                            {isConnected && item.action === 'connect' && (
-                              <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">Connected</span>
+                            {item.action === 'connect' && (
+                              isConnected ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                  Connected
+                                </span>
+                              ) : (
+                                <span className="px-1.5 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400 text-[9px] font-medium">
+                                  Not Connected
+                                </span>
+                              )
                             )}
                           </div>
                           <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{item.desc}</p>
@@ -1282,10 +1324,10 @@ export function Settings() {
                         }}
                         className={`settings-action-btn px-4 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                           item.action === 'manage'
-                            ? 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/15 hover:border-blue-500/60 hover:text-white'
+                            ? 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
                             : isConnected 
-                              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-400' 
-                              : 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/15 hover:border-blue-500/60 hover:text-white'
+                              ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50' 
+                              : 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
                         }`}
                       >
                         {item.action === 'manage' ? (t.manageBtn || 'Manage') : isConnected ? 'Disconnect' : (t.connectBtn || 'Connect')}

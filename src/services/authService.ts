@@ -9,70 +9,12 @@ export interface AuthUser {
   organization?: string;
   phone?: string;
   bio?: string;
+  isGuest?: boolean;
 }
 
 export interface AuthResponse {
   user: AuthUser;
   token: string;
-}
-
-const STORAGE_KEY = 'aeronex_registered_accounts';
-
-// Pre-seeded authentic accounts with verified credentials for instant evaluator demo access
-const SEED_ACCOUNTS: Array<{ email: string; password: string; user: AuthUser }> = [
-  {
-    email: 'shadab@aeronex.com',
-    password: 'password123',
-    user: {
-      id: 'usr_shadab',
-      name: 'Shadab Ali',
-      email: 'shadab@aeronex.com',
-      role: 'Passenger',
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    },
-  },
-  {
-    email: 'admin@aeronex.com',
-    password: 'adminpassword',
-    user: {
-      id: 'usr_admin',
-      name: 'Operations Admin',
-      email: 'admin@aeronex.com',
-      role: 'Admin',
-      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-    },
-  },
-  {
-    email: 'analyst@aeronex.com',
-    password: 'analystpassword',
-    user: {
-      id: 'usr_analyst',
-      name: 'AeroNex Analyst',
-      email: 'analyst@aeronex.com',
-      role: 'Researcher',
-      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop',
-    },
-  },
-];
-
-function getStoredAccounts(): Array<{ email: string; password: string; user: AuthUser }> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ACCOUNTS));
-      return SEED_ACCOUNTS;
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : SEED_ACCOUNTS;
-  } catch {
-    return SEED_ACCOUNTS;
-  }
-}
-
-function saveStoredAccounts(accounts: Array<{ email: string; password: string; user: AuthUser }>) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-  } catch {}
 }
 
 /**
@@ -83,7 +25,7 @@ export function formatAuthError(error: any): string {
   const msg = typeof error === 'string' ? error : error.message || '';
 
   if (msg.includes('Invalid login credentials')) {
-    return 'Email or password is incorrect.';
+    return 'Invalid email or password. Please verify your credentials.';
   }
   if (msg.includes('User already registered') || msg.includes('already exists')) {
     return 'An account with this email already exists. Please sign in instead.';
@@ -98,13 +40,14 @@ export function formatAuthError(error: any): string {
     return 'Too many attempts. Please wait a moment and try again.';
   }
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network')) {
-    return 'Unable to connect. Please check your internet connection and try again.';
+    return 'Unable to connect to the authentication server. Please check your internet connection.';
   }
   return msg || 'Authentication failed. Please try again.';
 }
 
 /**
- * Synchronizes a Supabase user with the `profiles` database table
+ * Rapidly creates an AuthUser from Supabase session metadata,
+ * dispatching profile table upsert asynchronously without blocking login.
  */
 export async function syncUserProfile(supabaseUser: any, roleOverride?: string): Promise<AuthUser> {
   const metadata = supabaseUser.user_metadata || {};
@@ -112,46 +55,41 @@ export async function syncUserProfile(supabaseUser: any, roleOverride?: string):
   const role = roleOverride || metadata.role || 'Passenger';
   const avatarUrl = metadata.avatar_url || metadata.picture;
 
-  let profileRecord: any = null;
-  try {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', supabaseUser.id)
-      .single();
-    profileRecord = data;
-  } catch {}
+  const user: AuthUser = {
+    id: supabaseUser.id,
+    name: fullName,
+    email: supabaseUser.email || '',
+    role,
+    avatarUrl,
+  };
 
-  if (!profileRecord) {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .upsert({
-          id: supabaseUser.id,
-          full_name: fullName,
-          email: supabaseUser.email,
-          role,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      if (data) profileRecord = data;
-    } catch {}
+  // Perform background profile upsert without blocking UI/login flow
+  if (supabaseUser.id && supabaseUser.email) {
+    (async () => {
+      try {
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              id: supabaseUser.id,
+              full_name: fullName,
+              email: supabaseUser.email,
+              role,
+              avatar_url: avatarUrl,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+          );
+      } catch {}
+    })();
   }
 
-  return {
-    id: supabaseUser.id,
-    name: profileRecord?.full_name || fullName,
-    email: supabaseUser.email || '',
-    role: profileRecord?.role || role,
-    avatarUrl: profileRecord?.avatar_url || avatarUrl,
-  };
+  return user;
 }
 
 export const authService = {
   /**
-   * Real Email + Password Sign In via Supabase Auth
+   * Real Email + Password Sign In via Supabase Auth (Strict & Fast)
    */
   login: async (emailInput: string, passwordInput: string): Promise<AuthResponse> => {
     const email = emailInput.trim().toLowerCase();
@@ -164,43 +102,44 @@ export const authService = {
       throw new Error('Please enter your password.');
     }
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        // If Supabase credentials failed, check verified demo accounts for quick evaluator testing
-        const demoAccounts = getStoredAccounts();
-        const demoMatch = demoAccounts.find((acc) => acc.email.toLowerCase() === email && acc.password === password);
-        if (demoMatch) {
-          return {
-            user: demoMatch.user,
-            token: `aeronex_jwt_${Date.now()}_${demoMatch.user.id}`,
-          };
-        }
-        throw new Error(formatAuthError(error));
-      }
-
-      if (data?.user && data?.session) {
-        const user = await syncUserProfile(data.user);
-        return { user, token: data.session.access_token };
-      }
-    } catch (err: any) {
-      // Demo fallback check if offline / network error
-      const demoAccounts = getStoredAccounts();
-      const demoMatch = demoAccounts.find((acc) => acc.email.toLowerCase() === email && acc.password === password);
-      if (demoMatch) {
-        return {
-          user: demoMatch.user,
-          token: `aeronex_jwt_${Date.now()}_${demoMatch.user.id}`,
-        };
-      }
-      throw new Error(formatAuthError(err));
+    if (error) {
+      throw new Error(formatAuthError(error));
     }
 
-    throw new Error('Authentication failed. Please verify your credentials.');
+    if (!data?.user || !data?.session) {
+      throw new Error('Authentication failed. Please verify your credentials.');
+    }
+
+    const user = await syncUserProfile(data.user);
+    return { user, token: data.session.access_token };
+  },
+
+  /**
+   * Instant Guest Login: creates a personalized guest session
+   */
+  guestLogin: async (nameInput: string): Promise<AuthResponse> => {
+    const cleanName = nameInput.trim();
+    if (!cleanName || cleanName.length < 2) {
+      throw new Error('Please enter your name (minimum 2 characters).');
+    }
+
+    const guestId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const guestUser: AuthUser = {
+      id: guestId,
+      name: cleanName,
+      email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'guest'}@guest.aeronex.com`,
+      role: 'Guest Passenger',
+      avatarUrl: undefined,
+      isGuest: true,
+    };
+
+    const token = `aeronex_guest_${guestId}`;
+    return { user: guestUser, token };
   },
 
   /**
@@ -226,31 +165,27 @@ export const authService = {
       throw new Error('Password must be at least 6 characters long.');
     }
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-            name,
-            role: roleInput,
-          },
-          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+          name,
+          role: roleInput,
         },
-      });
+        emailRedirectTo: `${getSiteUrl()}/auth/callback`,
+      },
+    });
 
-      if (error) {
-        throw new Error(formatAuthError(error));
-      }
+    if (error) {
+      throw new Error(formatAuthError(error));
+    }
 
-      if (data?.user) {
-        const user = await syncUserProfile(data.user, roleInput);
-        const token = data.session?.access_token || `aeronex_jwt_${Date.now()}_${user.id}`;
-        return { user, token };
-      }
-    } catch (err: any) {
-      throw new Error(formatAuthError(err));
+    if (data?.user) {
+      const user = await syncUserProfile(data.user, roleInput);
+      const token = data.session?.access_token || `aeronex_jwt_${Date.now()}_${user.id}`;
+      return { user, token };
     }
 
     throw new Error('Could not complete registration. Please try again.');
@@ -285,14 +220,14 @@ export const authService = {
   },
 
   /**
-   * General Social Login with prepared provider architecture
+   * Social login dispatcher for external provider buttons
    */
-  socialLogin: async (provider: 'Google' | 'Apple' | 'Microsoft'): Promise<AuthResponse> => {
+  socialLogin: async (provider: 'Google' | 'Microsoft' | 'Apple'): Promise<AuthResponse> => {
     if (provider.toLowerCase() === 'google') {
       await authService.signInWithGoogle();
       return new Promise(() => {});
     }
-    throw new Error(`${provider} sign-in is not yet configured. Please use "Continue with Google" or Email.`);
+    throw new Error(`${provider} login is not configured.`);
   },
 
   /**
@@ -333,7 +268,7 @@ export const authService = {
   },
 
   /**
-   * Real Sign Out terminating Supabase session and clearing stored tokens
+   * Sign Out: terminates Supabase session and clears stored tokens
    */
   logout: async (): Promise<void> => {
     try {
@@ -344,39 +279,40 @@ export const authService = {
   },
 
   /**
-   * Update Profile in Database and Local State
+   * Update Profile in Local State and Supabase
    */
   updateProfile: (emailInput: string, updates: Partial<AuthUser>): AuthUser => {
-    const email = emailInput.trim().toLowerCase();
-    const accounts = getStoredAccounts();
-    const index = accounts.findIndex((acc) => acc.email.toLowerCase() === email);
+    const activeRaw = localStorage.getItem('aeronex_user');
+    const active: AuthUser = activeRaw ? JSON.parse(activeRaw) : {
+      id: `usr_${Date.now()}`,
+      name: updates.name || 'AeroNex Member',
+      email: emailInput,
+      role: updates.role || 'Passenger'
+    };
 
-    let updatedUser: AuthUser;
-    if (index >= 0) {
-      accounts[index].user = { ...accounts[index].user, ...updates };
-      updatedUser = accounts[index].user;
-      saveStoredAccounts(accounts);
-    } else {
-      updatedUser = {
-        id: `usr_${Date.now()}`,
-        name: updates.name || 'AeroNex Member',
-        email,
-        role: updates.role || 'Passenger',
-        ...updates,
-      };
-      accounts.push({ email, password: 'password123', user: updatedUser });
-      saveStoredAccounts(accounts);
+    const updatedUser: AuthUser = {
+      ...active,
+      ...updates,
+    };
+
+    localStorage.setItem('aeronex_user', JSON.stringify(updatedUser));
+
+    // Async sync with Supabase profiles table if not guest
+    if (!updatedUser.isGuest && updatedUser.id && !updatedUser.id.startsWith('guest_')) {
+      (async () => {
+        try {
+          await supabase
+            .from('profiles')
+            .upsert({
+              id: updatedUser.id,
+              full_name: updatedUser.name,
+              role: updatedUser.role,
+              avatar_url: updatedUser.avatarUrl,
+              updated_at: new Date().toISOString(),
+            });
+        } catch {}
+      })();
     }
-
-    try {
-      const activeRaw = localStorage.getItem('aeronex_user');
-      if (activeRaw) {
-        const active = JSON.parse(activeRaw);
-        if (active.email?.toLowerCase() === email) {
-          localStorage.setItem('aeronex_user', JSON.stringify(updatedUser));
-        }
-      }
-    } catch {}
 
     return updatedUser;
   },
@@ -384,26 +320,18 @@ export const authService = {
   /**
    * Change Password (for settings modal)
    */
-  changePassword: async (emailInput: string, currentPassword: string, newPassword: string): Promise<boolean> => {
-    const email = emailInput.trim().toLowerCase();
-    const accounts = getStoredAccounts();
-    const account = accounts.find((acc) => acc.email.toLowerCase() === email);
-
-    if (account && account.password !== currentPassword) {
-      throw new Error('Current password does not match.');
+  changePassword: async (_emailInput: string, currentPassword: string, newPassword: string): Promise<boolean> => {
+    if (!currentPassword) {
+      throw new Error('Please enter your current password.');
     }
     if (!newPassword || newPassword.length < 6) {
       throw new Error('New password must be at least 6 characters long.');
     }
 
-    if (account) {
-      account.password = newPassword;
-      saveStoredAccounts(accounts);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      throw new Error(formatAuthError(error));
     }
-
-    try {
-      await supabase.auth.updateUser({ password: newPassword });
-    } catch {}
 
     return true;
   },
@@ -411,11 +339,7 @@ export const authService = {
   /**
    * Delete Account
    */
-  deleteAccount: async (emailInput: string): Promise<boolean> => {
-    const email = emailInput.trim().toLowerCase();
-    const accounts = getStoredAccounts().filter((acc) => acc.email.toLowerCase() !== email);
-    saveStoredAccounts(accounts);
-
+  deleteAccount: async (_emailInput: string): Promise<boolean> => {
     localStorage.removeItem('aeronex_user');
     localStorage.removeItem('aeronex_token');
     try {

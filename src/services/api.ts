@@ -743,16 +743,26 @@ export const api = {
         if (res) return res;
       } catch {}
     }
+    const userRaw = typeof window !== 'undefined' ? localStorage.getItem('aeronex_user') : null;
+    const activeUser = userRaw ? JSON.parse(userRaw) : null;
+    const activeName = activeUser?.name || (email ? email.split('@')[0] : 'AeroNex Member');
+    const activeEmail = activeUser?.email || email || '';
+    const activeRole = activeUser?.role || 'Passenger';
+    const activeAvatar = activeUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop';
+
+    const savedIntegrations = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('aeronex_integrations') || '{}') : {};
+    const savedApiKey = typeof window !== 'undefined' ? localStorage.getItem('aeronex_api_key') || 'aeronex_live_sk_948f2c1b8e47a6d3f0' : 'aeronex_live_sk_948f2c1b8e47a6d3f0';
+
     return {
       profile: {
-        id: 'usr_shadab',
-        name: 'Shadab Ali',
-        email: email || 'shadab@aeronex.com',
-        role: 'Researcher',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-        organization: 'Student / Researcher',
-        phone: '98765 43210',
-        bio: 'Exploring data-driven insights to make travel more accessible and affordable.',
+        id: activeUser?.id || `usr_${Date.now()}`,
+        name: activeName,
+        email: activeEmail,
+        role: activeRole,
+        avatarUrl: activeAvatar,
+        organization: activeUser?.organization || 'AeroNex Platform User',
+        phone: activeUser?.phone || '98765 43210',
+        bio: activeUser?.bio || 'Exploring data-driven aviation intelligence.',
         verified: true,
       },
       preferences: {
@@ -778,15 +788,15 @@ export const api = {
         fontSize: 'medium',
       },
       integrations: {
-        google: false,
-        calendar: false,
-        email: false,
-        discord: false,
-        apiAccess: true,
-        apiKey: 'aeronex_live_sk_948f2c1b8e47a6d3f0',
+        google: !!savedIntegrations.google,
+        calendar: !!savedIntegrations.calendar,
+        email: !!savedIntegrations.email,
+        discord: !!savedIntegrations.discord,
+        apiAccess: typeof savedIntegrations.apiAccess === 'boolean' ? savedIntegrations.apiAccess : true,
+        apiKey: savedApiKey,
       },
       subscription: {
-        plan: 'Researcher Tier (Pro)',
+        plan: 'AeroNex Pro',
         status: 'Active',
         renewalDate: '10 Oct 2026',
         billingCycle: 'Annual',
@@ -887,7 +897,7 @@ export const api = {
       } catch {}
     }
     const userRaw = localStorage.getItem('aeronex_user');
-    const user = userRaw ? JSON.parse(userRaw) : { name: 'Shadab Ali', email };
+    const user = userRaw ? JSON.parse(userRaw) : { name: 'AeroNex User', email };
     return {
       metadata: {
         exportedAt: new Date().toISOString(),
