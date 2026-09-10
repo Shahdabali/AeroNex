@@ -610,32 +610,198 @@ export const api = {
     return generateRouteFlights(from, to, date, cabinClass);
   },
 
-  // Price alerts
+  // Price alerts & Real-time monitors
+  getEstimatedRouteFare: (origin: string, destination: string): number => {
+    const route = `${origin}-${destination}`.toUpperCase();
+    const reverse = `${destination}-${origin}`.toUpperCase();
+    const knownFares: Record<string, number> = {
+      'DEL-BOM': 5420,
+      'BOM-BLR': 4280,
+      'DEL-BLR': 6850,
+      'DEL-GOI': 6150,
+      'BOM-GOI': 3650,
+      'CCU-DEL': 5240,
+      'MAA-DEL': 5350,
+      'HYD-DEL': 4680,
+      'BLR-HYD': 3450,
+      'BLR-MAA': 2950,
+      'PNQ-DEL': 4980,
+      'AMD-DEL': 3850,
+      'COK-DEL': 7100,
+      'JAI-BOM': 4420,
+      'DEL-CCU': 5490,
+      'BLR-BOM': 4480,
+      'GOI-DEL': 6220,
+    };
+    if (knownFares[route]) return knownFares[route];
+    if (knownFares[reverse]) return knownFares[reverse];
+    return 4850;
+  },
+
   getAlerts: async () => {
     if (API_BASE) {
       try {
-        return await fetchJson('/api/alerts');
+        const res = await fetchJson('/api/alerts');
+        if (Array.isArray(res) && res.length > 0) return res;
       } catch {}
     }
-    return localAlerts;
+    try {
+      const saved = localStorage.getItem('aeronex_price_alerts');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+
+    const seedAlerts: any[] = [
+      {
+        id: 'alert_del_bom',
+        origin: 'DEL',
+        destination: 'BOM',
+        route: 'DEL-BOM',
+        targetPrice: 4800,
+        currentFare: 5420,
+        previousFare: 5650,
+        airline: 'IndiGo (6E)',
+        date: '2026-09-24',
+        cabinClass: 'Economy',
+        channels: ['Email', 'Push Notification'],
+        status: 'Active',
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        lastCheckedAt: new Date().toISOString(),
+      },
+      {
+        id: 'alert_bom_blr',
+        origin: 'BOM',
+        destination: 'BLR',
+        route: 'BOM-BLR',
+        targetPrice: 4400,
+        currentFare: 4280,
+        previousFare: 4520,
+        airline: 'Akasa Air (QP)',
+        date: '2026-09-18',
+        cabinClass: 'Economy',
+        channels: ['Email', 'WhatsApp'],
+        status: 'Triggered',
+        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        lastCheckedAt: new Date().toISOString(),
+      },
+      {
+        id: 'alert_del_goi',
+        origin: 'DEL',
+        destination: 'GOI',
+        route: 'DEL-GOI',
+        targetPrice: 5300,
+        currentFare: 6150,
+        previousFare: 6400,
+        airline: 'Air India (AI)',
+        date: '2026-10-02',
+        cabinClass: 'Economy',
+        channels: ['Push Notification', 'Discord Webhook'],
+        status: 'Active',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+        lastCheckedAt: new Date().toISOString(),
+      },
+      {
+        id: 'alert_ccu_del',
+        origin: 'CCU',
+        destination: 'DEL',
+        route: 'CCU-DEL',
+        targetPrice: 4900,
+        currentFare: 5240,
+        previousFare: 5380,
+        airline: 'Any Airline',
+        date: '2026-09-28',
+        cabinClass: 'Economy',
+        channels: ['Email'],
+        status: 'Active',
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+        lastCheckedAt: new Date().toISOString(),
+      },
+    ];
+    try {
+      localStorage.setItem('aeronex_price_alerts', JSON.stringify(seedAlerts));
+    } catch {}
+    return seedAlerts;
   },
 
-  createAlert: async (alert: { route: string; targetPrice: number }) => {
+  createAlert: async (alert: any) => {
+    const origin = alert.origin || alert.route?.split('-')[0] || 'DEL';
+    const destination = alert.destination || alert.route?.split('-')[1] || 'BOM';
+    const estimatedFare = api.getEstimatedRouteFare(origin, destination);
+
+    const newAlert = {
+      id: `alert_${Date.now()}`,
+      origin,
+      destination,
+      route: `${origin}-${destination}`,
+      targetPrice: Number(alert.targetPrice) || Math.round(estimatedFare * 0.9),
+      currentFare: Number(alert.currentFare) || estimatedFare,
+      previousFare: estimatedFare + 120,
+      airline: alert.airline || 'Any Airline',
+      date: alert.date || '',
+      cabinClass: alert.cabinClass || 'Economy',
+      channels: alert.channels && alert.channels.length > 0 ? alert.channels : ['Email', 'Push Notification'],
+      status: alert.status || 'Active',
+      createdAt: new Date().toISOString(),
+      lastCheckedAt: new Date().toISOString(),
+    };
+
     if (API_BASE) {
       try {
-        return await postJson('/api/alerts', alert);
+        await postJson('/api/alerts', newAlert);
       } catch {}
     }
-    const newAlert = {
-      id: Date.now().toString(),
-      route: alert.route,
-      targetPrice: alert.targetPrice,
-      currentFare: 5400,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('aeronex_price_alerts') || '[]');
+      const updated = [newAlert, ...existing.filter((a: any) => a.id !== newAlert.id)];
+      localStorage.setItem('aeronex_price_alerts', JSON.stringify(updated));
+    } catch {}
+
     localAlerts.unshift(newAlert);
     return newAlert;
+  },
+
+  toggleAlertStatus: async (id: string) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem('aeronex_price_alerts') || '[]');
+      const target = existing.find((a: any) => a.id === id);
+      if (target) {
+        target.status = target.status === 'Active' ? 'Paused' : 'Active';
+        localStorage.setItem('aeronex_price_alerts', JSON.stringify(existing));
+        return target;
+      }
+    } catch {}
+    return null;
+  },
+
+  triggerAlertSimulation: async (id: string, simulatedDropPrice?: number) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem('aeronex_price_alerts') || '[]');
+      const target = existing.find((a: any) => a.id === id);
+      if (target) {
+        const dropFare = simulatedDropPrice || Math.round(target.targetPrice * 0.95);
+        target.previousFare = target.currentFare;
+        target.currentFare = dropFare;
+        target.status = 'Triggered';
+        target.lastCheckedAt = new Date().toISOString();
+        localStorage.setItem('aeronex_price_alerts', JSON.stringify(existing));
+
+        // Push to notifications list
+        const notifs = JSON.parse(localStorage.getItem('aeronex_notifications') || '[]');
+        notifs.unshift({
+          id: Date.now(),
+          message: `🎯 Target reached for ${target.origin} → ${target.destination}! Fare dropped to ₹${dropFare.toLocaleString('en-IN')}.`,
+          read: false,
+          timestamp: new Date().toISOString(),
+        });
+        localStorage.setItem('aeronex_notifications', JSON.stringify(notifs.slice(0, 20)));
+
+        return target;
+      }
+    } catch {}
+    return null;
   },
 
   deleteAlert: async (id: string) => {
@@ -645,6 +811,11 @@ export const api = {
         if (res.ok) return await res.json();
       } catch {}
     }
+    try {
+      const existing = JSON.parse(localStorage.getItem('aeronex_price_alerts') || '[]');
+      const updated = existing.filter((a: any) => a.id !== id);
+      localStorage.setItem('aeronex_price_alerts', JSON.stringify(updated));
+    } catch {}
     const idx = localAlerts.findIndex(a => a.id === id);
     if (idx >= 0) localAlerts.splice(idx, 1);
     return { success: true };

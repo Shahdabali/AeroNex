@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { 
   Search, Calendar, Users, Briefcase, ArrowLeftRight, Plane, 
-  Check, Bookmark, Clock, ChevronDown 
+  Check, Bookmark, Clock, ChevronDown, Bell
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -174,6 +174,7 @@ export function FlightSearch() {
       return 0;
     });
 
+  const lowestPrice = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.price)) : 4500;
   const fromInfo = getAirportInfo(fromCode);
   const toInfo = getAirportInfo(toCode);
 
@@ -517,6 +518,31 @@ export function FlightSearch() {
               <option value="SG">SpiceJet</option>
             </select>
           </div>
+        </div>
+
+        {/* Route Fare Alert Callout */}
+        <div className="bg-gradient-to-r from-blue-950/40 via-cyan-950/20 to-purple-950/30 border border-cyan-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-cyan-400">
+              <Bell className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-white">Track fares for {fromCode} ➔ {toCode}</span>
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-500/30">AI Autonomous</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Target drops below ₹{Math.round(lowestPrice * 0.9).toLocaleString('en-IN')} (-10%) with multi-channel alerts (WhatsApp, Discord, Email).
+              </p>
+            </div>
+          </div>
+          <Link
+            to={`/price-alerts?from=${fromCode}&to=${toCode}&target=${Math.round(lowestPrice * 0.9)}`}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+          >
+            <Bell size={14} />
+            Set Price Alert (-10%)
+          </Link>
         </div>
 
         {/* Flight Cards Grid */}
