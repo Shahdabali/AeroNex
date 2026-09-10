@@ -4,10 +4,12 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { LoginCard } from '../components/LoginCard';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useAppContext } from '../context/AppProvider';
 import { LineChart, Calendar, Repeat, Plane } from 'lucide-react';
 
 export function LoginPage() {
   usePageTitle('Sign In — AERONEX');
+  const { t } = useAppContext();
 
   return (
     <div className="login-page-bg min-h-screen w-full bg-[#020A1D] relative overflow-hidden flex flex-col font-['Inter',sans-serif] select-none transition-colors duration-300">
@@ -54,17 +56,17 @@ export function LoginPage() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
             <h1 className="login-hero-headline text-[38px] sm:text-[48px] lg:text-[54px] font-black text-white leading-[1.08] tracking-tight">
-              Track fares.<br />
-              Understand<br />
-              trends. <span className="text-[#00D2FF]">Travel</span><br />
+              {t.loginHeroLine1 || "Track fares."}<br />
+              {t.loginHeroLine2 || "Understand"}<br />
+              {t.loginHeroLine3 || "trends."} <span className="text-[#00D2FF]">{t.loginHeroLine4 || "Travel"}</span><br />
               <span className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#818CF8] bg-clip-text text-transparent login-headline-gradient">
-                smarter.
+                {t.loginHeroLine5 || "smarter."}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="login-hero-subtitle text-slate-300 text-[15px] sm:text-[16px] leading-relaxed max-w-md mt-4 transition-colors duration-300">
-              AI-powered flight suggestions, best time to book, and return flight insights — all in one place.
+              {t.loginHeroSubtitle || "AI-powered flight suggestions, best time to book, and return flight insights — all in one place."}
             </p>
           </motion.div>
 
@@ -81,10 +83,10 @@ export function LoginPage() {
                 <LineChart size={19} />
               </div>
               <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
-                Airfare Index
+                {t.loginFeatureIndexTitle || "Airfare Index"}
               </span>
               <span className="login-feature-desc text-zinc-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
-                Real-time DGCA benchmarks
+                {t.loginFeatureIndexDesc || "Real-time DGCA benchmarks"}
               </span>
             </div>
 
@@ -94,10 +96,10 @@ export function LoginPage() {
                 <Calendar size={19} />
               </div>
               <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
-                Best Time to Book
+                {t.loginFeatureBookingTitle || "Best Time to Book"}
               </span>
               <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
-                Save more with AI insights
+                {t.loginFeatureBookingDesc || "Save more with AI insights"}
               </span>
             </div>
 
@@ -107,10 +109,10 @@ export function LoginPage() {
                 <Repeat size={19} />
               </div>
               <span className="login-feature-title text-white font-bold text-xs sm:text-[13px] mt-3 leading-tight block">
-                Return Flight Optimizer
+                {t.loginFeatureReturnTitle || "Return Flight Optimizer"}
               </span>
               <span className="login-feature-desc text-slate-400 text-[10px] sm:text-[11px] mt-1 leading-snug block">
-                Get the best time & price
+                {t.loginFeatureReturnDesc || "Get the best time & price"}
               </span>
             </div>
           </motion.div>
@@ -123,7 +125,7 @@ export function LoginPage() {
             className="mt-8 flex items-center gap-3 select-none"
           >
             <span className="login-script-text font-['Caveat',cursive] text-[28px] sm:text-[32px] text-[#38BDF8] font-bold leading-[1.05] drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-              Your Next Trip<br />Starts Here
+              {t.loginScriptLine1 || "Your Next Trip"}<br />{t.loginScriptLine2 || "Starts Here"}
             </span>
             <div className="relative w-16 h-8 flex items-center -ml-1">
               <svg className="login-script-arrow w-16 h-8 text-[#38BDF8]" viewBox="0 0 70 30" fill="none">

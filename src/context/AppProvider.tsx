@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { translations, getSafeTranslations } from '../i18n/translations';
 import type { Language } from '../i18n/translations';
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'system';
 
 export interface User {
   id: string;
@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme') as Theme;
-      if (saved === 'light' || saved === 'dark') return saved;
+      if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
     }
     return 'dark';
   });
@@ -70,24 +70,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return 'English';
   });
 
+  // Apply Theme reactively (supports 'light', 'dark', 'system')
   useEffect(() => {
     const root = window.document.documentElement;
     const body = window.document.body;
 
-    if (theme === 'light') {
-      root.classList.remove('dark');
-      root.classList.add('light');
-      body.classList.remove('dark');
-      body.classList.add('light');
-      root.style.colorScheme = 'light';
-    } else {
-      root.classList.remove('light');
-      root.classList.add('dark');
-      body.classList.remove('light');
-      body.classList.add('dark');
-      root.style.colorScheme = 'dark';
-    }
+    const applyTheme = () => {
+      let effectiveTheme: 'light' | 'dark' = 'dark';
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        effectiveTheme = prefersDark ? 'dark' : 'light';
+      } else {
+        effectiveTheme = theme;
+      }
+
+      if (effectiveTheme === 'light') {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        body.classList.remove('dark');
+        body.classList.add('light');
+        root.style.colorScheme = 'light';
+      } else {
+        root.classList.remove('light');
+        root.classList.add('dark');
+        body.classList.remove('light');
+        body.classList.add('dark');
+        root.style.colorScheme = 'dark';
+      }
+    };
+
+    applyTheme();
     localStorage.setItem('theme', theme);
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme();
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -106,12 +126,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return '#1788FF';
   });
 
+  // Apply Accent Color reactively
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--color-brand-blue', accentColor);
+      document.documentElement.style.setProperty('--accent-color', accentColor);
+    }
+    localStorage.setItem('aeronex_accent_color', accentColor);
+  }, [accentColor]);
+
   const setAccentColor = (color: string) => {
     setAccentColorState(color);
-    localStorage.setItem('aeronex_accent_color', color);
-    if (typeof document !== 'undefined') {
-      document.documentElement.style.setProperty('--color-brand-blue', color);
-    }
   };
 
   const [fontSize, setFontSizeState] = useState<'small' | 'medium' | 'large'>(() => {
@@ -122,9 +147,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return 'medium';
   });
 
+  // Apply Font Size scaling reactively to root document
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-font-size', fontSize);
+      if (fontSize === 'small') {
+        document.documentElement.style.fontSize = '14.5px';
+      } else if (fontSize === 'large') {
+        document.documentElement.style.fontSize = '17.5px';
+      } else {
+        document.documentElement.style.fontSize = '16px';
+      }
+    }
+    localStorage.setItem('aeronex_font_size', fontSize);
+  }, [fontSize]);
+
   const setFontSize = (size: 'small' | 'medium' | 'large') => {
     setFontSizeState(size);
-    localStorage.setItem('aeronex_font_size', size);
   };
 
   const [currency, setCurrencyState] = useState<string>(() => {

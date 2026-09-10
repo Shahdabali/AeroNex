@@ -12,7 +12,7 @@ import { useAppContext } from '../context/AppProvider';
 
 export function LoginCard() {
   const navigate = useNavigate();
-  const { login } = useAppContext();
+  const { login, t } = useAppContext();
   
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -179,12 +179,12 @@ export function LoginCard() {
       {/* 2. Welcome Headline & Subtitle matching reference image */}
       <div className="text-center mb-5">
         <h2 className="login-card-title text-[26px] font-bold text-white tracking-tight">
-          {isSignUpMode ? 'Create Account' : 'Welcome Back'}
+          {isSignUpMode ? (t.createAccountTab || 'Create Account') : (t.welcomeBack || 'Welcome Back')}
         </h2>
         <p className="login-card-subtitle text-slate-400 text-xs mt-1.5 max-w-xs mx-auto leading-relaxed">
           {isSignUpMode 
-            ? 'Join AeroNex and explore real-time airfare intelligence.' 
-            : 'Sign in to your account and continue your journey with us.'
+            ? (t.signUpSubtitle || 'Join AeroNex and explore real-time airfare intelligence.') 
+            : (t.signInSubtitle || 'Sign in to your account and continue your journey with us.')
           }
         </p>
       </div>
@@ -200,7 +200,7 @@ export function LoginCard() {
               : 'login-tab-inactive text-slate-400 hover:text-white'
           }`}
         >
-          Sign In
+          {t.loginTabSignIn || 'Sign In'}
         </button>
 
         <button
@@ -212,7 +212,7 @@ export function LoginCard() {
               : 'login-tab-inactive text-slate-400 hover:text-white'
           }`}
         >
-          Create Account
+          {t.loginTabCreateAccount || 'Create Account'}
         </button>
       </div>
 
@@ -254,7 +254,7 @@ export function LoginCard() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder={t.loginEmailPlaceholder || "Email address"}
               className="login-input-field text-xs sm:text-sm text-white placeholder-slate-500 bg-transparent outline-none w-full"
             />
           </div>
@@ -267,7 +267,7 @@ export function LoginCard() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder={t.loginPasswordPlaceholder || "Password"}
               className="login-input-field text-xs sm:text-sm text-white placeholder-slate-500 bg-transparent outline-none w-full"
             />
             <button
@@ -288,14 +288,14 @@ export function LoginCard() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 rounded bg-[#03091B] border-slate-700 text-[#00A3FF] focus:ring-0 cursor-pointer accent-[#00A3FF]" 
               />
-              <span className="login-remember-text text-slate-300 text-xs">Remember me</span>
+              <span className="login-remember-text text-slate-300 text-xs">{t.rememberMe || "Remember me"}</span>
             </label>
             <a 
               href="#" 
               onClick={handleForgotPassword}
               className="text-[#00A3FF] hover:underline font-medium text-xs"
             >
-              Forgot password?
+              {t.forgotPassword || "Forgot password?"}
             </a>
           </div>
 
@@ -311,7 +311,7 @@ export function LoginCard() {
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <span className="flex items-center gap-2">
-                Sign In
+                {t.loginSignInBtn || "Sign In"}
                 <ArrowRight size={17} />
               </span>
             )}
@@ -327,7 +327,7 @@ export function LoginCard() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Full name"
+              placeholder={t.loginFullNamePlaceholder || "Full name"}
               className="login-input-field text-xs text-white placeholder-slate-500 bg-transparent outline-none w-full"
             />
           </div>
@@ -339,7 +339,7 @@ export function LoginCard() {
               required
               value={signupEmail}
               onChange={(e) => setSignupEmail(e.target.value)}
-              placeholder="Email address"
+              placeholder={t.loginEmailPlaceholder || "Email address"}
               className="login-input-field text-xs text-white placeholder-slate-500 bg-transparent outline-none w-full"
             />
           </div>
@@ -350,9 +350,9 @@ export function LoginCard() {
               onChange={(e) => setRole(e.target.value)}
               className="login-input-field text-xs text-white bg-transparent outline-none w-full cursor-pointer"
             >
-              <option value="Passenger" className="login-select-option bg-[#061126] text-white">Passenger / Traveler</option>
-              <option value="Researcher" className="login-select-option bg-[#061126] text-white">Aviation Analyst / Researcher</option>
-              <option value="Admin" className="login-select-option bg-[#061126] text-white">Operations Admin</option>
+              <option value="Passenger" className="login-select-option bg-[#061126] text-white">{t.rolePassenger || "Passenger / Traveler"}</option>
+              <option value="Researcher" className="login-select-option bg-[#061126] text-white">{t.roleResearcher || "Aviation Analyst / Researcher"}</option>
+              <option value="Admin" className="login-select-option bg-[#061126] text-white">{t.roleAdmin || "Operations Admin"}</option>
             </select>
           </div>
 
@@ -363,7 +363,7 @@ export function LoginCard() {
                 required
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
-                placeholder="Password (6+)"
+                placeholder={`${t.passwordLabel || 'Password'} (6+)`}
                 className="login-input-field text-xs text-white placeholder-slate-500 bg-transparent outline-none w-full"
               />
             </div>
@@ -373,7 +373,7 @@ export function LoginCard() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm"
+                placeholder={t.confirmPasswordLabel || "Confirm"}
                 className="login-input-field text-xs text-white placeholder-slate-500 bg-transparent outline-none w-full"
               />
             </div>
@@ -389,7 +389,7 @@ export function LoginCard() {
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <span>Create Account & Continue →</span>
+              <span>{t.loginCreateAccountBtnText || "Create Account & Continue →"}</span>
             )}
           </motion.button>
         </form>
@@ -399,7 +399,7 @@ export function LoginCard() {
       <div className="my-4 flex items-center gap-4 login-divider">
         <div className="flex-1 h-px bg-slate-800 login-divider-line" />
         <span className="text-slate-500 text-[10px] font-bold tracking-widest uppercase login-divider-text">
-          OR
+          {t.loginOrDivider || "OR"}
         </span>
         <div className="flex-1 h-px bg-slate-800 login-divider-line" />
       </div>
@@ -418,7 +418,7 @@ export function LoginCard() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          <span className="login-social-text truncate">Continue with Google</span>
+          <span className="login-social-text truncate">{t.loginContinueGoogle || "Continue with Google"}</span>
         </button>
 
         {/* Apple */}
@@ -430,15 +430,16 @@ export function LoginCard() {
           <svg className="w-4 h-4 fill-white login-apple-icon shrink-0" viewBox="0 0 24 24">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 0.92-2.84-.9.04-1.99.6-2.64 1.35-.57.65-1.06 1.72-.92 2.74 1 .08 2.02-.5 2.64-1.25z"/>
           </svg>
-          <span className="login-social-text truncate">Continue with Apple</span>
+          <span className="login-social-text truncate">{t.loginContinueApple || "Continue with Apple"}</span>
         </button>
       </div>
 
       {/* 8. Legal terms note matching reference image */}
       <p className="login-terms-text text-center text-[10px] text-slate-400 mt-4 leading-normal">
-        By continuing, you agree to our{' '}
-        <a href="#" className="text-[#00A3FF] hover:underline">Terms of Service</a> and{' '}
-        <a href="#" className="text-[#00A3FF] hover:underline">Privacy Policy</a>.
+        {t.loginTermsAgreement || "By continuing, you agree to our"}{' '}
+        <a href="#" className="text-[#00A3FF] hover:underline">{t.loginTermsOfService || "Terms of Service"}</a>{' '}
+        {t.loginAndWord || "and"}{' '}
+        <a href="#" className="text-[#00A3FF] hover:underline">{t.loginPrivacyPolicy || "Privacy Policy"}</a>.
       </p>
 
       {/* 9. One-Click Instant Demo Credentials (Compact Accordion) */}
@@ -449,7 +450,7 @@ export function LoginCard() {
         >
           <div className="login-demo-title flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
             <FlaskConical size={13} className="text-cyan-400" />
-            <span>One-Click Instant Demo</span>
+            <span>{t.loginDemoAccessTitle || "One-Click Instant Demo"}</span>
             <Sparkles size={11} className="text-amber-400" />
           </div>
           {showDemoAccess ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
@@ -471,9 +472,9 @@ export function LoginCard() {
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <User size={12} className="text-cyan-400" />
-                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">Passenger</span>
+                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">{t.loginDemoPassenger || "Passenger"}</span>
                 </div>
-                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">Traveler</span>
+                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">{t.loginDemoPassengerSub || "Traveler"}</span>
               </button>
 
               <button
@@ -483,9 +484,9 @@ export function LoginCard() {
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <BarChart3 size={12} className="text-purple-400" />
-                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">Researcher</span>
+                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">{t.loginDemoResearcher || "Researcher"}</span>
                 </div>
-                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">Analyst</span>
+                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">{t.loginDemoResearcherSub || "Analyst"}</span>
               </button>
 
               <button
@@ -495,9 +496,9 @@ export function LoginCard() {
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <Shield size={12} className="text-emerald-400" />
-                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">Admin</span>
+                  <span className="login-demo-btn-title text-[10px] font-bold text-white block truncate">{t.loginDemoAdmin || "Admin"}</span>
                 </div>
-                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">Operations</span>
+                <span className="login-demo-btn-sub text-[9px] text-slate-400 block truncate">{t.loginDemoAdminSub || "Operations"}</span>
               </button>
             </motion.div>
           )}

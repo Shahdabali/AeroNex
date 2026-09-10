@@ -52,33 +52,141 @@ html.light [class*="bg-[#020A1D]"] {
   background-color: #F8FAFC !important;
 }
 
-/* Sidebar Navigation */
+/* Sidebar Navigation in Light Mode */
 html.light aside,
 html.light aside.bg-\[\#040D24\],
+html.light aside.bg-\[\#090A0F\],
 html.light [class*="bg-[#040D24]"] {
   background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
   box-shadow: 1px 0 10px 0 rgba(0, 0, 0, 0.03) !important;
 }
 
-html.light aside a.text-slate-400 {
+html.light aside [class*="bg-[#161822]"],
+html.light aside .bg-\[\#161822\] {
+  background-color: #EFF6FF !important;
+  border-color: #BFDBFE !important;
+  box-shadow: 0 1px 4px rgba(23, 136, 255, 0.12) !important;
+}
+
+html.light aside a.text-white,
+html.light aside a:has([class*="bg-[#161822]"]) span,
+html.light aside [class*="activeSidebarIndicator"] + div span {
+  color: #1788FF !important;
+  font-weight: 700 !important;
+}
+
+html.light aside a.text-zinc-400,
+html.light aside a.text-slate-400,
+html.light aside a .text-zinc-400 {
   color: #475569 !important;
 }
 
-html.light aside a.text-slate-400:hover {
+html.light aside a:hover {
   background-color: #F1F5F9 !important;
   color: #0F172A !important;
 }
 
-/* Header Bar */
+html.light aside [class*="bg-[#12141C]"],
+html.light aside .bg-\[\#12141C\] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light aside [class*="bg-[#12141C]"] h4,
+html.light aside [class*="bg-[#12141C]"] .text-white {
+  color: #0F172A !important;
+}
+
+html.light aside [class*="bg-[#12141C]"] p,
+html.light aside [class*="bg-[#12141C]"] .text-zinc-400 {
+  color: #64748B !important;
+}
+
+/* Header Bar in Light Mode */
 html.light header,
-html.light header.bg-\[rgba\(2\,10\,29\,0\.8\)\] {
-  background-color: rgba(255, 255, 255, 0.88) !important;
+html.light header.bg-\[rgba\(2\,10\,29\,0\.8\)\],
+html.light header[class*="bg-[#090A0F]"] {
+  background-color: rgba(255, 255, 255, 0.92) !important;
   border-color: #E2E8F0 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
-/* All Dark Navy Containers & Cards */
+html.light header input[class*="bg-[#12141C]"],
+html.light header input {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light header input::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light header [class*="bg-[#0E1017]"],
+html.light header [class*="bg-[#0A1838]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+}
+
+html.light header [class*="bg-[#0B1A3D]"],
+html.light header [class*="bg-[#040D24]"],
+html.light header [class*="bg-[#0C1E47]"] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light header [class*="bg-[#0E1017]"] span,
+html.light header [class*="bg-[#0E1017]"] p {
+  color: #334155 !important;
+}
+
+/* All Dark Obsidian & Navy Containers, Cards, and Elements in Light Mode */
+html.light .obsidian-card,
+html.light .bg-\[\#12141C\],
+html.light .bg-\[\#161824\],
+html.light .bg-\[\#0E1017\],
+html.light .bg-\[\#161822\],
+html.light .bg-\[\#1A1D2A\],
+html.light .bg-\[\#1C1F2E\],
+html.light .bg-\[\#090A0F\],
+html.light .bg-\[\#0B0D14\],
+html.light .bg-\[\#08173A\],
+html.light .bg-\[\#081530\],
+html.light .bg-\[\#0A1F4D\],
+html.light .bg-\[\#0B254E\],
+html.light .bg-\[\#0B2E3D\],
+html.light .bg-\[\#0C2A38\],
+html.light .bg-\[\#0E204A\],
+html.light .bg-\[\#0E352B\],
+html.light .bg-\[\#231A4E\],
+html.light .bg-\[\#351520\],
+html.light .bg-\[\#36260E\],
+html.light .bg-\[\#38141F\],
+html.light .bg-\[\#030A1D\],
+html.light .bg-\[\#091A3E\],
+html.light [class*="bg-[#12141C]"],
+html.light [class*="bg-[#161824]"],
+html.light [class*="bg-[#0E1017]"],
+html.light [class*="bg-[#161822]"],
+html.light [class*="bg-[#1A1D2A]"],
+html.light [class*="bg-[#1C1F2E]"],
+html.light [class*="bg-[#081530]"],
+html.light [class*="bg-[#0A1F4D]"],
+html.light [class*="bg-[#08173A]"],
+html.light [class*="bg-[#0B254E]"],
+html.light [class*="bg-[#0B2E3D]"],
+html.light [class*="bg-[#0C2A38]"],
+html.light [class*="bg-[#0E204A]"],
+html.light [class*="bg-[#0E352B]"],
+html.light [class*="bg-[#231A4E]"],
+html.light [class*="bg-[#351520]"],
+html.light [class*="bg-[#36260E]"],
+html.light [class*="bg-[#38141F]"],
+html.light [class*="bg-[#030A1D]"],
+html.light [class*="bg-[#091A3E]"],
 html.light .bg-\[rgba\(10\,24\,56\,0\.6\)\],
 html.light .bg-\[rgba\(10\,24\,56\,0\.65\)\],
 html.light .bg-\[rgba\(10\,24\,56\,0\.7\)\],
@@ -151,6 +259,55 @@ html.light [class*="bg-[#0F2454]"] {
   border-color: #E2E8F0 !important;
   color: #0F172A !important;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Subtle Nesting / Pill Controls / Inner Tracks */
+html.light .bg-\[\#161824\],
+html.light [class*="bg-[#161824]"]:not(.obsidian-card):not([class*="col-"]):not([class*="rounded-2xl"]):not([class*="rounded-3xl"]),
+html.light [class*="bg-[#1A1D2A]"],
+html.light [class*="bg-[#161822]"] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Obsidian Card Light State */
+html.light .obsidian-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+html.light .obsidian-card:hover {
+  background: #FFFFFF !important;
+  border-color: #00A3FF !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 163, 255, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Obsidian Input Light State */
+html.light .obsidian-input {
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light .obsidian-input:focus {
+  border-color: #00A3FF !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.15) !important;
+}
+
+/* Obsidian Button Light State */
+html.light .obsidian-btn {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html.light .obsidian-btn:hover {
+  background: #F1F5F9 !important;
+  border-color: #00A3FF !important;
+  color: #00A3FF !important;
 }
 
 /* Neutralize Dark Gradients on Light Mode Cards (Except Buttons & Active Elements) */
@@ -304,7 +461,7 @@ html.light h6 {
   color: #0F172A !important;
 }
 
-html.light .text-white:not(button):not([class*="bg-"]):not([class*="from-"]):not([class*="badge"]) {
+html.light .text-white:not(button[class*="bg-"]):not(button[class*="from-"]):not([class*="bg-[#1788FF]"]):not([class*="bg-[#00A3FF]"]):not([class*="bg-blue-600"]):not([class*="bg-blue-500"]):not([class*="bg-cyan-500"]):not([class*="bg-emerald-500"]):not([class*="bg-rose-500"]):not([class*="bg-red-500"]):not([class*="bg-amber-500"]):not([class*="bg-purple-500"]):not(.login-tab-active):not([class*="rounded-full.bg-rose"]):not([class*="rounded-full.bg-red"]):not(.badge) {
   color: #0F172A !important;
 }
 
@@ -313,24 +470,52 @@ html.light button[class*="from-"] .text-white,
 html.light button[class*="from-"],
 html.light button[class*="bg-[#1788FF]"],
 html.light [class*="bg-[#1788FF]"] .text-white,
+html.light [class*="bg-[#00A3FF]"],
+html.light [class*="bg-[#00A3FF]"] *,
 html.light .bg-red-500,
+html.light .bg-rose-500,
 html.light .bg-green-500,
-html.light .bg-emerald-500 {
+html.light .bg-emerald-500,
+html.light .login-tab-active,
+html.light .login-tab-active * {
   color: #FFFFFF !important;
 }
 
 /* Subtext & Secondary Labels */
+html.light .text-zinc-100,
+html.light [class*="text-zinc-100"] {
+  color: #0F172A !important;
+}
+
+html.light .text-zinc-200,
+html.light [class*="text-zinc-200"] {
+  color: #1E293B !important;
+}
+
+html.light .text-zinc-300,
+html.light [class*="text-zinc-300"],
 html.light .text-slate-200,
 html.light .text-slate-300 {
   color: #334155 !important;
 }
 
+html.light .text-zinc-400,
+html.light [class*="text-zinc-400"],
 html.light .text-slate-400,
 html.light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light .text-zinc-500,
+html.light [class*="text-zinc-500"] {
   color: #64748B !important;
 }
 
 /* Borders */
+html.light [class*="border-white/"] {
+  border-color: #E2E8F0 !important;
+}
+
 html.light .border-slate-800,
 html.light .border-slate-700,
 html.light .border-slate-600,
@@ -338,8 +523,6 @@ html.light .border-slate-500,
 html.light [class*="border-slate-800"],
 html.light [class*="border-slate-700"],
 html.light [class*="border-slate-600"],
-html.light [class*="border-blue-500"],
-html.light [class*="border-[#1788FF]"],
 html.light [class*="border-blue-500/20"],
 html.light [class*="border-blue-500/25"],
 html.light [class*="border-blue-500/30"],
@@ -361,15 +544,57 @@ html.light [class*="border-rose-500/30"] {
   border-color: #E2E8F0 !important;
 }
 
+/* FlightSearch & Autocomplete Popovers */
+html.light [class*="bg-[#07132e]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.15) !important;
+  color: #0F172A !important;
+}
+
+html.light [class*="bg-[#07132e]"] input {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light [class*="bg-[#07132e]"] input::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light [class*="bg-[#07132e]"] [class*="hover:bg-blue-500"]:hover {
+  background-color: #EFF6FF !important;
+}
+
+/* Modals & Dialog Windows in Light Mode */
+html.light .bg-black\/80,
+html.light .bg-black\/85,
+html.light [class*="bg-black/"] {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+html.light [class*="fixed"] [class*="bg-[#0E1017]"],
+html.light [class*="fixed"] [class*="bg-[#12141C]"],
+html.light [class*="fixed"] [class*="bg-[#071330]"],
+html.light [class*="fixed"] [class*="bg-[#07132e]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+}
+
 /* Tables in Light Mode */
 html.light table {
   color: #0F172A !important;
 }
 
 html.light table thead,
-html.light thead[class*="bg-"] {
+html.light table th,
+html.light thead[class*="bg-"],
+html.light thead [class*="bg-"] {
   background-color: #F1F5F9 !important;
   color: #475569 !important;
+  border-color: #E2E8F0 !important;
 }
 
 html.light table tbody tr {
@@ -382,6 +607,25 @@ html.light table tbody tr:hover {
 
 html.light table td {
   color: #1E293B !important;
+}
+
+/* Scrollbars in Light Mode */
+html.light ::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1 !important;
+  border-radius: 9999px !important;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8 !important;
+}
+
+/* Technical Grid in Light Mode */
+html.light .tech-grid-bg {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px) !important;
 }
 
 /* Dashboard Welcome Banner in Light Mode */
@@ -823,10 +1067,30 @@ html.light .theme-option {
   color: #64748B !important;
 }
 
-html.light .theme-option.active {
+html.light .theme-option:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light .theme-option.active,
+html.light .language-option.active {
   background-color: #EFF6FF !important;
   border-color: #1788FF !important;
   color: #1788FF !important;
+  box-shadow: 0 0 0 1px #1788FF, 0 4px 12px rgba(23, 136, 255, 0.12) !important;
+}
+
+html.light .language-option {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #334155 !important;
+}
+
+html.light .language-option:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
 }
 
 html.light .integration-row {
@@ -1036,7 +1300,7 @@ html {
 }
 
 /* Obsidian Card with Animated Hover & Border Beam */
-.obsidian-card {
+html:not(.light) .obsidian-card {
   position: relative;
   background: rgba(18, 20, 28, 0.85);
   backdrop-filter: blur(16px);
@@ -1048,12 +1312,33 @@ html {
               background 0.3s ease;
 }
 
-.obsidian-card:hover {
+html:not(.light) .obsidian-card:hover {
   transform: translateY(-3px);
   background: rgba(22, 24, 34, 0.95);
   border-color: rgba(0, 229, 255, 0.35);
   box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.8), 
               0 0 24px -4px rgba(0, 229, 255, 0.18);
+}
+
+html.light .obsidian-card {
+  position: relative;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 1rem;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease,
+              background 0.3s ease;
+}
+
+html.light .obsidian-card:hover {
+  transform: translateY(-3px);
+  background: #FFFFFF !important;
+  border-color: #00A3FF !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 163, 255, 0.2), 
+              0 0 24px -4px rgba(0, 163, 255, 0.12) !important;
 }
 
 /* Animated Border Beam Sweep */
@@ -1089,21 +1374,34 @@ html {
 }
 
 /* Obsidian Input & Form Elements */
-.obsidian-input {
+html:not(.light) .obsidian-input {
   background-color: #12141C !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: #FFFFFF !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.obsidian-input:focus {
+html:not(.light) .obsidian-input:focus {
   border-color: rgba(0, 229, 255, 0.5) !important;
   box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.15) !important;
   background-color: #161824 !important;
 }
 
+html.light .obsidian-input {
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+html.light .obsidian-input:focus {
+  border-color: #00A3FF !important;
+  box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.15) !important;
+  background-color: #FFFFFF !important;
+}
+
 /* Obsidian Button Micro-Interactions */
-.obsidian-btn {
+html:not(.light) .obsidian-btn {
   background: #161824;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #FFFFFF;
@@ -1111,12 +1409,28 @@ html {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.obsidian-btn:hover {
+html:not(.light) .obsidian-btn:hover {
   background: #1C1F2E;
   border-color: rgba(0, 229, 255, 0.4);
   transform: translateY(-1.5px);
   box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.6), 
               inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+html.light .obsidian-btn {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .obsidian-btn:hover {
+  background: #F1F5F9 !important;
+  border-color: #00A3FF !important;
+  color: #00A3FF !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px -2px rgba(0, 163, 255, 0.18) !important;
 }
 
 .obsidian-btn:active {

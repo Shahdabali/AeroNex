@@ -1050,33 +1050,81 @@ export function Settings() {
               <p className="text-xs text-slate-400 mb-4">{t.appearanceSectionDesc || 'Customize how Aeronex looks for you.'}</p>
 
               {/* Theme Selector */}
-              <div className="mb-4">
+              <div className="mb-5">
                 <label className="text-slate-400 text-xs mb-2 block font-medium">{t.themeLabel || 'Theme'}</label>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-3">
                   {([
-                    { key: 'light' as const, icon: Sun, label: t.light || 'Light' },
-                    { key: 'dark' as const, icon: Moon, label: t.dark || 'Dark' },
-                    { key: 'system' as const, icon: Monitor, label: t.systemTheme || 'System' },
+                    { key: 'light' as const, icon: Sun, label: t.light || 'Light', desc: 'Day Mode' },
+                    { key: 'dark' as const, icon: Moon, label: t.dark || 'Dark', desc: 'Night Flight' },
+                    { key: 'system' as const, icon: Monitor, label: t.systemTheme || 'System', desc: 'Auto Match' },
                   ]).map(opt => {
                     const Icon = opt.icon;
-                    const isActive = opt.key === 'system' ? false : theme === opt.key;
+                    const isActive = theme === opt.key;
                     return (
                       <button
                         key={opt.key}
                         onClick={() => {
-                          if (opt.key !== 'system') {
-                            setTheme(opt.key);
-                            api.updateUserAppearance({ theme: opt.key }, email);
-                          }
+                          setTheme(opt.key);
+                          api.updateUserAppearance({ theme: opt.key }, email);
+                          triggerToast(
+                            opt.key === 'light' 
+                              ? 'Light / Day mode activated' 
+                              : opt.key === 'dark' 
+                                ? 'Dark / Cockpit mode activated' 
+                                : 'System auto theme synchronized'
+                          );
                         }}
-                        className={`theme-option flex flex-col items-center gap-1.5 py-3 rounded-xl border transition-all cursor-pointer ${
+                        className={`theme-option relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
                           isActive
                             ? 'active bg-[#0A1F4D] border-[#1788FF] text-[#1788FF] shadow-[0_0_12px_rgba(23,136,255,0.25)]'
                             : 'bg-[#081530] border-slate-700/70 text-slate-400 hover:border-slate-500 hover:text-white'
                         }`}
                       >
-                        <Icon size={18} />
-                        <span className="text-xs font-semibold">{opt.label}</span>
+                        {isActive && (
+                          <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#1788FF] text-white flex items-center justify-center text-[10px]">
+                            <Check size={10} strokeWidth={3} />
+                          </span>
+                        )}
+                        <Icon size={18} className={isActive ? 'text-[#1788FF]' : 'text-slate-400'} />
+                        <span className="text-xs font-semibold mt-1">{opt.label}</span>
+                        <span className="text-[10px] opacity-70 mt-0.5">{opt.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Language Selector (Quick Cards) */}
+              <div className="mb-5">
+                <label className="text-slate-400 text-xs mb-2 block font-medium">
+                  {t.language || 'Language'} / भाषा
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { key: 'English' as const, flag: '🇬🇧', label: 'English', sub: 'International' },
+                    { key: 'Hindi' as const, flag: '🇮🇳', label: 'हिन्दी', sub: 'Hindi Interface' },
+                  ]).map(opt => {
+                    const isActive = language === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => handleLanguageChange(opt.key)}
+                        className={`language-option relative flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer text-left ${
+                          isActive
+                            ? 'active bg-[#0A1F4D] border-[#1788FF] text-[#1788FF] shadow-[0_0_12px_rgba(23,136,255,0.25)]'
+                            : 'bg-[#081530] border-slate-700/70 text-slate-300 hover:border-slate-500 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-2xl">{opt.flag}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold leading-tight">{opt.label}</div>
+                          <div className="text-[10px] text-slate-400 truncate mt-0.5">{opt.sub}</div>
+                        </div>
+                        {isActive && (
+                          <span className="w-4 h-4 rounded-full bg-[#1788FF] text-white flex items-center justify-center text-[10px] shrink-0">
+                            <Check size={10} strokeWidth={3} />
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -1084,7 +1132,7 @@ export function Settings() {
               </div>
 
               {/* Accent Color */}
-              <div className="mb-4">
+              <div className="mb-5">
                 <label className="text-slate-400 text-xs mb-2 block font-medium">{t.accentColorLabel || 'Accent Color'}</label>
                 <div className="flex items-center gap-3">
                   {accentColors.map(color => (
@@ -1093,6 +1141,7 @@ export function Settings() {
                       onClick={() => {
                         setAccentColor(color);
                         api.updateUserAppearance({ accentColor: color }, email);
+                        triggerToast('Accent color updated');
                       }}
                       className={`w-7 h-7 rounded-full transition-all cursor-pointer flex items-center justify-center ${
                         accentColor === color ? 'scale-110' : 'hover:scale-110'
@@ -1101,6 +1150,7 @@ export function Settings() {
                         backgroundColor: color, 
                         boxShadow: accentColor === color ? `0 0 0 2px #0A1838, 0 0 0 4px ${color}` : undefined 
                       }}
+                      title={color}
                     >
                       {accentColor === color && <Check size={12} className="text-white" />}
                     </button>
@@ -1113,25 +1163,33 @@ export function Settings() {
                 <label className="text-slate-400 text-xs mb-2 block font-medium">{t.fontSizeLabel || 'Font Size'}</label>
                 <div className="grid grid-cols-3 gap-2.5">
                   {([
-                    { key: 'small' as const, label: t.fontSmall || 'Small', size: 'text-xs' },
-                    { key: 'medium' as const, label: t.fontMedium || 'Medium', size: 'text-sm' },
-                    { key: 'large' as const, label: t.fontLarge || 'Large', size: 'text-base' },
-                  ]).map(opt => (
-                    <button
-                      key={opt.key}
-                      onClick={() => {
-                        setFontSize(opt.key);
-                        api.updateUserAppearance({ fontSize: opt.key }, email);
-                      }}
-                      className={`py-2 rounded-xl border text-center font-medium transition-all cursor-pointer ${
-                        fontSize === opt.key
-                          ? 'bg-[#1788FF] border-[#1788FF] text-white shadow-md'
-                          : 'bg-[#081530] border-slate-700/70 text-slate-400 hover:border-slate-500 hover:text-white'
-                      }`}
-                    >
-                      <span className={`${opt.size} font-bold`}>A</span> <span className="text-xs ml-1 font-semibold">{opt.label}</span>
-                    </button>
-                  ))}
+                    { key: 'small' as const, label: t.fontSmall || 'Small', size: 'text-xs', spec: '14.5px' },
+                    { key: 'medium' as const, label: t.fontMedium || 'Medium', size: 'text-sm', spec: '16px' },
+                    { key: 'large' as const, label: t.fontLarge || 'Large', size: 'text-base', spec: '17.5px' },
+                  ]).map(opt => {
+                    const isActive = fontSize === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => {
+                          setFontSize(opt.key);
+                          api.updateUserAppearance({ fontSize: opt.key }, email);
+                          triggerToast(t.fontSizeUpdated || 'Font size updated');
+                        }}
+                        className={`py-2 px-2 rounded-xl border text-center font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                          isActive
+                            ? 'bg-[#1788FF] border-[#1788FF] text-white shadow-md'
+                            : 'bg-[#081530] border-slate-700/70 text-slate-400 hover:border-slate-500 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1">
+                          <span className={`${opt.size} font-bold`}>A</span>
+                          <span className="text-xs font-semibold">{opt.label}</span>
+                        </div>
+                        <span className={`text-[10px] ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>{opt.spec}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
