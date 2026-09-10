@@ -15,6 +15,7 @@ import {
   Headphones, Package, Tag, ChevronDown, Megaphone, FileText,
   X, Copy, RefreshCw, Star, AlertTriangle, Eye, EyeOff, Loader2
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════════════════
    Reusable: Toggle Switch
@@ -40,7 +41,7 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Reusable Modal Wrapper
+   Reusable Modal Wrapper with Framer Motion Spring Physics
    ═══════════════════════════════════════════════════════════════ */
 function ModalWrapper({ isOpen, onClose, title, subtitle, children, maxWidth = 'max-w-lg' }: {
   isOpen: boolean;
@@ -50,27 +51,43 @@ function ModalWrapper({ isOpen, onClose, title, subtitle, children, maxWidth = '
   children: React.ReactNode;
   maxWidth?: string;
 }) {
-  if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-      <div className={`relative w-full ${maxWidth} bg-[#07132e] border border-blue-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden animate-in zoom-in-95 duration-200`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#091A3E]/50">
-          <div>
-            <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
-            {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
-          </div>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 15 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 360 }}
+            className={`relative w-full ${maxWidth} bg-[#07132e] border border-blue-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden z-10`}
           >
-            <X size={18} />
-          </button>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#091A3E]/50">
+              <div>
+                <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
+                {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              {children}
+            </div>
+          </motion.div>
         </div>
-        <div className="p-6 max-h-[80vh] overflow-y-auto">
-          {children}
-        </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -604,14 +621,23 @@ export function Settings() {
               <button
                 key={tab.key}
                 onClick={() => scrollToSection(tab.key)}
-                className={`settings-tab flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`relative settings-tab flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer select-none ${
                   isActive
-                    ? 'active bg-[#1788FF] text-white shadow-[0_0_20px_rgba(23,136,255,0.4)]'
+                    ? 'text-white'
                     : 'bg-[#081530]/80 hover:bg-[#0E2452] border border-slate-800 text-slate-300 hover:text-white'
                 }`}
               >
-                <Icon size={16} />
-                {tab.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="settingsActiveTabIndicator"
+                    className="absolute inset-0 bg-[#1788FF] rounded-xl shadow-[0_0_20px_rgba(23,136,255,0.4)]"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon size={16} />
+                  {tab.label}
+                </span>
               </button>
             );
           })}

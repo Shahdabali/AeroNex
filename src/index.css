@@ -830,4 +830,107 @@ html.light .integration-row {
   border-color: #F1F5F9 !important;
 }
 
+/* ========================================================================
+   TIER 1: CSS MICRO-INTERACTIONS & KEYFRAME ANIMATIONS
+   ======================================================================== */
 
+@keyframes pulseRadarSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmerAero {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes contrailDrift {
+  0% {
+    opacity: 0.8;
+    transform: scaleX(0.95);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scaleX(1.02);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scaleX(0.95);
+  }
+}
+
+.animate-radar-sweep {
+  animation: pulseRadarSweep 4s linear infinite;
+  transform-origin: center;
+}
+
+.animate-float-aircraft {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmerAero 3s infinite;
+}
+
+/* Button Micro-Interactions */
+.btn-glow {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(23, 136, 255, 0.45);
+}
+
+.btn-glow:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Interactive Card Elevations */
+.card-interactive {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(23, 136, 255, 0.35) !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(23, 136, 255, 0.15) !important;
+}
+
+/* Toggle Switch Spring Effect */
+.toggle-spring {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+}
+
+.interactive-scale {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interactive-scale:hover {
+  transform: scale(1.04);
+}
+
+.interactive-scale:active {
+  transform: scale(0.97);
+}

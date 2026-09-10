@@ -6,6 +6,8 @@ import {
 import { AeroNexLogo } from '../AeroNexLogo';
 import { useAppContext } from '../../context/AppProvider';
 
+import { motion } from 'framer-motion';
+
 export function Sidebar() {
   const location = useLocation();
   const { t } = useAppContext();
@@ -38,23 +40,30 @@ export function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+              className={`relative flex items-center justify-between px-4 py-3 rounded-xl transition-colors select-none ${
                 isActive 
-                  ? 'bg-[#1788FF] text-white shadow-[0_0_15px_rgba(23,136,255,0.3)]' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                  ? 'text-white' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5'
               }`}
             >
-              <div className="flex items-center gap-3">
+              {isActive && (
+                <motion.div
+                  layoutId="activeSidebarIndicator"
+                  className="absolute inset-0 bg-[#1788FF] rounded-xl shadow-[0_0_20px_rgba(23,136,255,0.4)]"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              <div className="relative z-10 flex items-center gap-3">
                 <item.icon size={18} className={isActive ? 'text-white' : item.label.includes('AI') ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400'} />
                 <span className="text-[14px] font-medium">{item.label}</span>
               </div>
               {item.badge && (
-                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold text-white">
+                <div className="relative z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold text-white shadow-md">
                   {item.badge}
                 </div>
               )}
               {item.badgeText && (
-                <div className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
+                <div className="relative z-10 px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-[10px] font-bold font-mono">
                   {item.badgeText}
                 </div>
               )}

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { TrendingUp, TrendingDown, Plane } from 'lucide-react';
+import { TrendingUp, TrendingDown, Plane, Globe, Map as MapIcon } from 'lucide-react';
 import { useAppContext } from '../../context/AppProvider';
+import { AviationGlobe3D } from '../visualizations/AviationGlobe3D';
 
 interface RegionPoint {
   id: string;
@@ -26,6 +27,7 @@ const REGION_HUBS: RegionPoint[] = [
 export function RegionalMap() {
   const { theme, t } = useAppContext();
   const [activeRegion, setActiveRegion] = useState<string>('North');
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
   const isLight = theme === 'light';
   
   const { data: regionalData } = useQuery({
@@ -51,18 +53,44 @@ export function RegionalMap() {
       <div className="flex items-center justify-between mb-2 z-10">
         <div>
           <h3 className="text-white text-[15px] font-bold flex items-center gap-2">
-            <span>{t.regionalMapTitle || 'Airfare Index by Region'}</span>
+            <span>{viewMode === '3d' ? '3D Indian Airspace' : (t.regionalMapTitle || 'Airfare Index by Region')}</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           </h3>
           <p className="text-slate-400 text-[11px]">{t.regionalMapSubtitle || 'Interactive Aviation Radar & Fare Corridors'}</p>
         </div>
-        <div className="text-right">
-          <span className="text-[11px] text-[#1788FF] font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
-            {selectedPoint.id} Sector: {selectedMetrics.value}
-          </span>
+        
+        {/* 2D / 3D Mode Toggle Switch */}
+        <div className="flex items-center gap-1 bg-[#061433]/90 p-1 rounded-xl border border-slate-700/80 shadow-inner">
+          <button
+            onClick={() => setViewMode('2d')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+              viewMode === '2d' 
+                ? 'bg-[#1788FF] text-white shadow-sm' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <MapIcon size={12} />
+            <span>2D</span>
+          </button>
+          <button
+            onClick={() => setViewMode('3d')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+              viewMode === '3d' 
+                ? 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white shadow-sm' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Globe size={12} />
+            <span>3D</span>
+          </button>
         </div>
       </div>
 
+      {viewMode === '3d' ? (
+        <div className="flex-1 w-full h-full min-h-0 relative">
+          <AviationGlobe3D className="w-full h-full border-0 shadow-none bg-transparent" />
+        </div>
+      ) : (
       <div className="flex-1 relative flex items-center justify-center">
         {/* Custom Vector SVG Map of India & Aviation Routes */}
         <svg viewBox="0 0 400 420" className="w-full h-full max-h-[300px] select-none">
@@ -217,6 +245,7 @@ export function RegionalMap() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

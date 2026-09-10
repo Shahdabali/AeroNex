@@ -12,37 +12,68 @@ import { PopularRoutes } from '../../components/dashboard/PopularRoutes';
 import { useAirfareRealtime } from '../../hooks/useAirfareRealtime';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.09, delayChildren: 0.04 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const }
+  }
+};
+
 export function Dashboard() {
   usePageTitle('Dashboard');
   useAirfareRealtime();
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-6 pb-10">
-        <WelcomeBanner />
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col gap-6 pb-10"
+      >
+        <motion.div variants={itemVariants}>
+          <WelcomeBanner />
+        </motion.div>
         
-        <KPIGrid />
-        <SecondaryMetrics />
+        <motion.div variants={itemVariants}>
+          <KPIGrid />
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <SecondaryMetrics />
+        </motion.div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <AirfareIndexChart />
           </div>
           <div>
             <RegionalMap />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <RouteChangesTable />
           </div>
           <div>
             <QuickInsights />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <CheapestDates />
           </div>
@@ -52,8 +83,8 @@ export function Dashboard() {
           <div className="lg:col-span-1">
             <PopularRoutes />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 }
