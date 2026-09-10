@@ -126,6 +126,7 @@ class LiveAirfareEngine {
     { region: 'West', value: 138.2, change: 1.9 },
     { region: 'East', value: 126.5, change: 1.5 },
     { region: 'South', value: 142.1, change: 3.6 },
+    { region: 'Central', value: 128.4, change: -0.8 },
   ];
 
   public liveChart: Array<{ time: string; value: number }> = [
@@ -268,7 +269,7 @@ export const api = {
         .select('*')
         .neq('region', 'India')
         .order('calculated_at', { ascending: false })
-        .limit(4);
+        .limit(10);
 
       if (data && data.length > 0) {
         return data.map((d: any) => ({
