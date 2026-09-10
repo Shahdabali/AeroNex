@@ -725,4 +725,109 @@ body.light .aeronex-logo-light {
   }
 }
 
+/* ========================================================================
+   SETTINGS PAGE — LIGHT MODE OVERRIDES
+   ======================================================================== */
+
+html.light .settings-hero {
+  background: linear-gradient(135deg, #E0ECFF 0%, #F0F4FF 50%, #E8EFFF 100%) !important;
+  border-color: rgba(23, 136, 255, 0.15) !important;
+}
+
+html.light .settings-hero * {
+  color: #0F172A !important;
+}
+
+html.light .settings-hero .hero-tagline {
+  color: #1788FF !important;
+}
+
+html.light .settings-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .settings-card h2,
+html.light .settings-card h3,
+html.light .settings-card h4,
+html.light .settings-card label {
+  color: #0F172A !important;
+}
+
+html.light .settings-card p,
+html.light .settings-card .text-slate-400 {
+  color: #64748B !important;
+}
+
+html.light .settings-input {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html.light .settings-input:focus {
+  border-color: #1788FF !important;
+  background-color: #FFFFFF !important;
+}
+
+html.light .settings-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+html.light .settings-select {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html.light .settings-tab {
+  color: #64748B !important;
+}
+
+html.light .settings-tab:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+html.light .settings-tab.active {
+  background: linear-gradient(135deg, #1788FF, #4E55F5) !important;
+  color: #FFFFFF !important;
+}
+
+html.light .settings-row {
+  border-color: #F1F5F9 !important;
+}
+
+html.light .settings-row:hover {
+  background-color: #F8FAFC !important;
+}
+
+html.light .settings-action-btn {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html.light .settings-action-btn:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light .theme-option {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #64748B !important;
+}
+
+html.light .theme-option.active {
+  background-color: #EFF6FF !important;
+  border-color: #1788FF !important;
+  color: #1788FF !important;
+}
+
+html.light .integration-row {
+  border-color: #F1F5F9 !important;
+}
+
 
