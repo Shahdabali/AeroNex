@@ -11,25 +11,7 @@ import { AirfareVsCPI } from '../../components/dashboard/AirfareVsCPI';
 import { PopularRoutes } from '../../components/dashboard/PopularRoutes';
 import { useAirfareRealtime } from '../../hooks/useAirfareRealtime';
 import { usePageTitle } from '../../hooks/usePageTitle';
-
-import { motion } from 'framer-motion';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.09, delayChildren: 0.04 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const }
-  }
-};
+import { ScrollReveal } from '../../components/ui/ScrollReveal';
 
 export function Dashboard() {
   usePageTitle('Dashboard');
@@ -37,43 +19,38 @@ export function Dashboard() {
 
   return (
     <DashboardLayout>
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col gap-6 pb-10"
-      >
-        <motion.div variants={itemVariants}>
+      <div className="flex flex-col gap-6 pb-10">
+        <ScrollReveal delay={0.1}>
           <WelcomeBanner />
-        </motion.div>
+        </ScrollReveal>
         
-        <motion.div variants={itemVariants}>
+        <ScrollReveal delay={0.2}>
           <KPIGrid />
-        </motion.div>
+        </ScrollReveal>
 
-        <motion.div variants={itemVariants}>
+        <ScrollReveal delay={0.1}>
           <SecondaryMetrics />
-        </motion.div>
+        </ScrollReveal>
         
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <AirfareIndexChart />
           </div>
           <div>
             <RegionalMap />
           </div>
-        </motion.div>
+        </ScrollReveal>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <RouteChangesTable />
           </div>
           <div>
             <QuickInsights />
           </div>
-        </motion.div>
+        </ScrollReveal>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <CheapestDates />
           </div>
@@ -83,8 +60,8 @@ export function Dashboard() {
           <div className="lg:col-span-1">
             <PopularRoutes />
           </div>
-        </motion.div>
-      </motion.div>
+        </ScrollReveal>
+      </div>
     </DashboardLayout>
   );
 }

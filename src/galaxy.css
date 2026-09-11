@@ -1,0 +1,19 @@
+.stars-bg {
+  background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat top center;
+  animation: moveStars 150s linear infinite;
+  opacity: 0.25;
+}
+
+@keyframes moveStars {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 1000px 1000px;
+  }
+}
+
+html.light .stars-bg {
+  opacity: 0.05;
+  filter: invert(1);
+}

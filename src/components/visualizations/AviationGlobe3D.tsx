@@ -617,7 +617,7 @@ export function AviationGlobe3D({
   const selectedMetrics = getRegionValue(selectedHub.id);
 
   return (
-    <div className={`relative w-full h-full min-h-[380px] bg-[#08090E] rounded-2xl overflow-hidden select-none ${className}`}>
+    <div className={`relative w-full h-full min-h-[380px] bg-[#08090E]/30 backdrop-blur-md rounded-2xl overflow-hidden select-none ${className}`}>
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none z-10">

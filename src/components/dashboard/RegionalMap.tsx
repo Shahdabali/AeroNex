@@ -186,7 +186,7 @@ export function RegionalMap() {
           />
         </div>
       ) : (
-        <div className="flex-1 relative flex items-center justify-center min-h-[340px] bg-[#070910] rounded-xl border border-white/[0.06] overflow-hidden">
+        <div className="flex-1 relative flex items-center justify-center min-h-[340px] bg-[#070910]/40 backdrop-blur-md rounded-xl border border-white/[0.06] overflow-hidden">
           
           {/* Tactical Coordinate Grid Overlay */}
           <div className="absolute top-2 left-3 text-[9.5px] font-mono text-zinc-500 pointer-events-none z-10 flex items-center gap-3">
