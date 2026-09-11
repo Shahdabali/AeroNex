@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppProvider';
 import { AviationGlobe3D, SECTOR_HUBS } from '../visualizations/AviationGlobe3D';
+import { AnimatedNumber } from '../ui/AnimatedNumber';
 
 interface Sector2DCoords {
   x: number;
@@ -165,10 +166,11 @@ export function RegionalMap() {
                 {hub.id}
               </span>
               <span className={`text-xs font-mono font-extrabold ${isSelected ? 'text-cyan-300' : 'text-zinc-400'}`}>
-                {metrics.value}
+                <AnimatedNumber value={metrics.value} format={(v) => v.toFixed(1)} />
               </span>
               <span className={`text-[10px] font-mono font-bold ${metrics.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {metrics.change >= 0 ? '+' : ''}{metrics.change}%
+                {metrics.change >= 0 ? '+' : ''}
+                <AnimatedNumber value={metrics.change} format={(v) => v.toFixed(1)} />%
               </span>
             </button>
           );
@@ -432,14 +434,19 @@ export function RegionalMap() {
         <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto border-t md:border-t-0 pt-2 md:pt-0 border-white/[0.06]">
           <div className="text-right">
             <div className="text-base font-mono font-black text-cyan-300 flex items-center justify-end gap-1.5">
-              <span>{selectedMetrics.value}</span>
+              <span>
+                <AnimatedNumber value={selectedMetrics.value} format={(v) => v.toFixed(1)} />
+              </span>
               <span className={`text-xs px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 ${
                 selectedMetrics.change >= 0 
                   ? 'bg-emerald-500/20 text-emerald-400' 
                   : 'bg-rose-500/20 text-rose-400'
               }`}>
                 {selectedMetrics.change >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                <span>{selectedMetrics.change >= 0 ? '+' : ''}{selectedMetrics.change}%</span>
+                <span>
+                  {selectedMetrics.change >= 0 ? '+' : ''}
+                  <AnimatedNumber value={selectedMetrics.change} format={(v) => v.toFixed(1)} />%
+                </span>
               </span>
             </div>
             <div className="text-[10px] font-mono text-zinc-500">DGCA LASPEYRES WEIGHTED</div>

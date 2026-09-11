@@ -7,6 +7,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[#090A0F] text-zinc-100 flex font-['Inter',sans-serif] transition-colors relative overflow-hidden">
       {/* Galaxy Theme Background Elements */}
       <div className="absolute inset-0 z-0 pointer-events-none stars-bg mix-blend-screen" />
+      <div className="nebula-bg" />
       <div className="absolute inset-0 z-0 pointer-events-none tech-grid-bg opacity-30" />
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none z-0 mix-blend-screen" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-blue-900/10 blur-[120px] pointer-events-none z-0 mix-blend-screen" />

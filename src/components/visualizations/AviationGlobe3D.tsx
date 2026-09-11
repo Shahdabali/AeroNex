@@ -4,6 +4,7 @@ import {
   Radio, RotateCw, ZoomIn, ZoomOut, Compass, 
   Layers, Eye, EyeOff
 } from 'lucide-react';
+import { AnimatedNumber } from '../ui/AnimatedNumber';
 
 export interface SectorHubData {
   id: string; // 'North' | 'West' | 'South' | 'East' | 'Central'
@@ -746,10 +747,11 @@ export function AviationGlobe3D({
                 </div>
                 <div className="flex items-center gap-1 mt-0.5 font-mono">
                   <span className={`text-[10px] font-extrabold ${isSelected ? 'text-cyan-300' : 'text-zinc-300'}`}>
-                    {metrics.value}
+                    <AnimatedNumber value={metrics.value} format={(v) => v.toFixed(1)} />
                   </span>
                   <span className={`text-[8.5px] ${metrics.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {metrics.change >= 0 ? '+' : ''}{metrics.change}%
+                    {metrics.change >= 0 ? '+' : ''}
+                    <AnimatedNumber value={metrics.change} format={(v) => v.toFixed(1)} />%
                   </span>
                 </div>
               </button>
@@ -784,13 +786,16 @@ export function AviationGlobe3D({
 
           <div className="text-right shrink-0">
             <div className="text-sm font-mono font-extrabold text-cyan-300 flex items-center justify-end gap-1">
-              <span>{selectedMetrics.value}</span>
+              <span>
+                <AnimatedNumber value={selectedMetrics.value} format={(v) => v.toFixed(1)} />
+              </span>
               <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${
                 selectedMetrics.change >= 0 
                   ? 'bg-emerald-500/20 text-emerald-400' 
                   : 'bg-rose-500/20 text-rose-400'
               }`}>
-                {selectedMetrics.change >= 0 ? '+' : ''}{selectedMetrics.change}%
+                {selectedMetrics.change >= 0 ? '+' : ''}
+                <AnimatedNumber value={selectedMetrics.change} format={(v) => v.toFixed(1)} />%
               </span>
             </div>
             <div className="text-[9.5px] font-mono text-zinc-400 mt-0.5">

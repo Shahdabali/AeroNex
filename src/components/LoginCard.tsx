@@ -177,7 +177,7 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       initial={{ opacity: 0, y: 25, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="login-card-container w-full max-w-[460px] rounded-[32px] bg-[#061126]/90 backdrop-blur-2xl border border-blue-500/25 p-6 sm:p-9 shadow-[0_25px_80px_rgba(0,0,0,0.75)] flex flex-col justify-between relative transition-all"
+      className="login-card-container w-full max-w-[460px] rounded-2xl bg-[#061126]/90 backdrop-blur-2xl border border-blue-500/25 p-6 sm:p-9 shadow-[0_25px_80px_rgba(0,0,0,0.75)] flex flex-col justify-between relative transition-all"
     >
       
       {/* 1. Official AERONEX Logo */}

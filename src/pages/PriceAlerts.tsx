@@ -11,6 +11,7 @@ import {
 import { api } from '../services/api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { INDIAN_AIRPORTS, type IndianAirport } from '../data/indianAviation';
+import { ScrollReveal } from '../components/ui/ScrollReveal';
 
 export function PriceAlerts() {
   usePageTitle('Autonomous Price Alerts — AERONEX');
@@ -232,6 +233,7 @@ export function PriceAlerts() {
       <div className="flex flex-col gap-7 max-w-[1400px] mx-auto pb-12">
         
         {/* ── 1. Page Header ── */}
+        <ScrollReveal delay={0.1}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
           <div className="flex items-center gap-3.5">
             <div className="relative">
@@ -272,6 +274,7 @@ export function PriceAlerts() {
             </button>
           </div>
         </div>
+        </ScrollReveal>
 
         {/* ── Toast Notification Banner ── */}
         {toastMessage && (
@@ -282,6 +285,7 @@ export function PriceAlerts() {
         )}
 
         {/* ── 2. Top Summary Metric Cards ── */}
+        <ScrollReveal delay={0.2}>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-2xl bg-[#090A0F]/90 border border-white/[0.08] backdrop-blur-xl shadow-lg relative overflow-hidden group hover:border-cyan-500/40 transition-all">
             <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
@@ -335,9 +339,11 @@ export function PriceAlerts() {
             </p>
           </div>
         </div>
+        </ScrollReveal>
 
         {/* ── 3. High-Tech Alert Creation Engine ── */}
-        <div className="p-6 sm:p-7 rounded-[28px] bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+        <ScrollReveal delay={0.3}>
+        <div className="p-6 sm:p-7 rounded-2xl bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl relative overflow-hidden">
           
           {/* Header */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
@@ -590,8 +596,10 @@ export function PriceAlerts() {
           )}
 
         </div>
+        </ScrollReveal>
 
         {/* ── 4. AI Recommended Smart Alerts ── */}
+        <ScrollReveal delay={0.4}>
         <div>
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2">
@@ -661,9 +669,11 @@ export function PriceAlerts() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
 
         {/* ── 5. Active Alerts Management Table ── */}
-        <div className="rounded-[28px] bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl overflow-hidden">
+        <ScrollReveal delay={0.5}>
+        <div className="rounded-2xl bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl overflow-hidden">
           
           {/* Table Header Controls */}
           <div className="p-5 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -867,8 +877,8 @@ export function PriceAlerts() {
               })}
             </div>
           )}
-
         </div>
+        </ScrollReveal>
 
       </div>
     </DashboardLayout>

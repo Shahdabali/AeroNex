@@ -55,13 +55,13 @@ export function CPIAnalytics() {
               <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30 flex items-center gap-1.5">
                 <Activity size={12} /> Macroeconomic Intelligence
               </span>
-              <span className="text-xs text-slate-400">MoSPI & DGCA Official Reference Matrix</span>
+              <span className="text-xs text-slate-400">MoSPI Prototype Augmentation</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-white">
-              AeroNex Airfare Index vs Consumer Price Index (CPI)
+              CPI Augmentation Intelligence
             </h1>
             <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Track aviation-specific fare inflation against retail headline CPI, transportation sub-indices, and Aviation Turbine Fuel (ATF) pricing.
+              Demonstrating how high-frequency automated web scraping of dynamic airfares can augment the traditional MoSPI Consumer Price Index (CPI) basket for highly responsive inflation tracking.
             </p>
           </div>
 
@@ -169,7 +169,7 @@ export function CPIAnalytics() {
         </div>
 
         {/* Primary Interactive Chart */}
-        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-2xl">
+        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -317,7 +317,7 @@ export function CPIAnalytics() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Cost Basket Breakdown (5 cols) */}
-          <div className="lg:col-span-5 bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-xl flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -360,7 +360,7 @@ export function CPIAnalytics() {
           </div>
 
           {/* MoM Inflation Seasonality (7 cols) */}
-          <div className="lg:col-span-7 bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-xl">
+          <div className="lg:col-span-7 bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -415,7 +415,7 @@ export function CPIAnalytics() {
         </div>
 
         {/* Interactive Inflation Travel Impact Simulator */}
-        <div className="bg-gradient-to-br from-[#0B1E4A] via-[#07132e] to-[#0D245A] border border-blue-500/30 rounded-[24px] p-6 md:p-8 shadow-2xl">
+        <div className="bg-gradient-to-br from-[#0B1E4A] via-[#07132e] to-[#0D245A] border border-blue-500/30 rounded-2xl p-6 md:p-8 shadow-2xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-2xl bg-gradient-to-tr from-[#1788FF] to-[#4E55F5] text-white shadow-lg shadow-blue-500/25">
               <Calculator size={22} />
@@ -502,7 +502,7 @@ export function CPIAnalytics() {
         </div>
 
         {/* Regional CPI vs Regional Airfare Divergence Table */}
-        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] overflow-hidden shadow-xl">
+        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-6 border-b border-slate-800">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Compass size={18} className="text-[#1788FF]" /> Regional Airfare vs Regional CPI Divergence

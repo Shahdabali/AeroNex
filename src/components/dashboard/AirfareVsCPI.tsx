@@ -1,66 +1,42 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 export function AirfareVsCPI() {
-  const data = [
-    { month: 'Apr', airfare: 124.8, cpi: 118.2 },
-    { month: 'May', airfare: 129.5, cpi: 119.1 },
-    { month: 'Jun', airfare: 137.2, cpi: 120.4 },
-    { month: 'Jul', airfare: 142.8, cpi: 121.2 },
-    { month: 'Aug', airfare: 139.1, cpi: 121.9 },
-    { month: 'Sep', airfare: 138.4, cpi: 122.7 },
-  ];
+  const navigate = useNavigate();
 
   return (
-    <div className="bg-[#12141C]/80 backdrop-blur-md rounded-[16px] border border-white/[0.08] hover:border-white/[0.14] p-6 h-[320px] flex flex-col transition-all shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white text-[16px] font-bold">Airfare Index vs CPI</h3>
-        <select className="bg-[#161824] border border-white/[0.08] text-zinc-300 text-[11px] rounded-md px-2 py-1 outline-none focus:border-cyan-400/40">
-          <option>Last 6 Months (2026)</option>
-          <option>Last Year</option>
-        </select>
+    <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] hover:border-cyan-500/30 p-6 h-full flex flex-col transition-colors group">
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-zinc-400 text-[12px] font-bold uppercase tracking-widest">CPI Intelligence</h3>
       </div>
 
-      <div className="flex items-center gap-4 mb-4 px-2">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-          <span className="text-[12px] text-zinc-300">Airfare Index (2026)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-          <span className="text-[12px] text-zinc-300">Retail CPI</span>
+      <div className="flex-1">
+        <p className="text-sm text-zinc-300 leading-relaxed mb-6">
+          Airfare is a dynamic component of consumer travel expenditure. AeroNex provides high-frequency airfare observations that can potentially support analytical augmentation of CPI-related price monitoring.
+        </p>
+
+        <div className="space-y-4">
+          <div className="flex items-end justify-between border-b border-white/[0.04] pb-2">
+            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Airfare Index</span>
+            <span className="text-lg font-mono font-bold text-white">140.2</span>
+          </div>
+          <div className="flex items-end justify-between border-b border-white/[0.04] pb-2">
+            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Monthly Movement</span>
+            <span className="text-sm font-mono font-bold text-rose-400">+5.6%</span>
+          </div>
+          <div className="flex items-end justify-between">
+            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Observed Volatility</span>
+            <span className="text-sm font-bold text-amber-500">Moderate</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 w-full min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-            <XAxis dataKey="month" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} dy={5} />
-            <YAxis domain={[110, 150]} stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-            <Tooltip
-              contentStyle={{ backgroundColor: '#12141C', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px' }}
-              itemStyle={{ color: '#fff', fontSize: '12px' }}
-              labelStyle={{ display: 'none' }}
-            />
-            <Line type="monotone" dataKey="airfare" stroke="#1788FF" strokeWidth={2} dot={{ r: 3, fill: '#1788FF' }} />
-            <Line type="monotone" dataKey="cpi" stroke="#4E55F5" strokeWidth={2} dot={{ r: 3, fill: '#4E55F5' }} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
-        <div>
-          <div className="text-[11px] text-slate-400 mb-0.5">Airfare Index</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">138.4 <span className="text-green-400 text-[11px]">↑ 4.2%</span></div>
-        </div>
-        <div>
-          <div className="text-[11px] text-slate-400 mb-0.5">CPI</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">122.7 <span className="text-green-400 text-[11px]">↑ 2.4%</span></div>
-        </div>
-        <div>
-          <div className="text-[11px] text-slate-400 mb-0.5">Contribution to CPI</div>
-          <div className="text-[15px] font-bold text-white flex items-center gap-2">5.2% <span className="text-slate-500 text-[10px] font-normal">(airfare)</span></div>
-        </div>
-      </div>
+      <button 
+        onClick={() => navigate('/cpi-analytics')}
+        className="mt-6 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-300 transition-colors w-fit"
+      >
+        Explore CPI Analytics <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+      </button>
     </div>
   );
 }

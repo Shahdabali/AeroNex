@@ -15,7 +15,8 @@ import { CPIAnalytics } from './pages/CPIAnalytics';
 import { MethodologyPage } from './pages/MethodologyPage';
 import { DataScrapingPage } from './pages/DataScrapingPage';
 import { Settings } from './pages/Settings';
-import { AppProvider, useAppContext } from './context/AppProvider';
+import { AppProvider } from './context/AppProvider';
+import { LandingPage } from './pages/LandingPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,24 +27,15 @@ const queryClient = new QueryClient({
   },
 });
 
-function HomeRedirect() {
-  const { isAuthenticated, authLoading } = useAppContext();
-  if (authLoading) {
-    return (
-      <div className="min-h-screen w-full bg-[#020A1D] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-      </div>
-    );
-  }
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <BrowserRouter>
           <Routes>
+            {/* Public Landing Page */}
+            <Route path="/" element={<LandingPage />} />
+
             {/* Public Authentication Routes */}
             <Route path="/login" element={<LoginPage initialMode="signin" />} />
             <Route path="/signup" element={<LoginPage initialMode="signup" />} />
@@ -74,9 +66,8 @@ function App() {
             <Route path="/my-flights" element={<Navigate to="/search" replace />} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-            {/* Root & Catch-all */}
-            <Route path="/" element={<HomeRedirect />} />
-            <Route path="*" element={<HomeRedirect />} />
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AppProvider>

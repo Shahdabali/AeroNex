@@ -1,14 +1,13 @@
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { WelcomeBanner } from '../../components/dashboard/WelcomeBanner';
 import { KPIGrid } from '../../components/dashboard/KPIGrid';
-import { SecondaryMetrics } from '../../components/dashboard/SecondaryMetrics';
+import { MarketSignals } from '../../components/dashboard/MarketSignals';
 import { AirfareIndexChart } from '../../components/dashboard/AirfareIndexChart';
-import { RegionalMap } from '../../components/dashboard/RegionalMap';
-import { RouteChangesTable } from '../../components/dashboard/RouteChangesTable';
+import { IndiaAirfareMarketPulse } from '../../components/dashboard/IndiaAirfareMarketPulse';
+import { DataIngestionMonitor } from '../../components/dashboard/DataIngestionMonitor';
 import { QuickInsights } from '../../components/dashboard/QuickInsights';
-import { CheapestDates } from '../../components/dashboard/CheapestDates';
 import { AirfareVsCPI } from '../../components/dashboard/AirfareVsCPI';
-import { PopularRoutes } from '../../components/dashboard/PopularRoutes';
+import { AnomalyMonitor } from '../../components/dashboard/AnomalyMonitor';
 import { useAirfareRealtime } from '../../hooks/useAirfareRealtime';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { ScrollReveal } from '../../components/ui/ScrollReveal';
@@ -28,37 +27,30 @@ export function Dashboard() {
           <KPIGrid />
         </ScrollReveal>
 
-        <ScrollReveal delay={0.1}>
-          <SecondaryMetrics />
+        <ScrollReveal delay={0.3}>
+          <MarketSignals />
         </ScrollReveal>
         
-        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <AirfareIndexChart />
-          </div>
-          <div>
-            <RegionalMap />
-          </div>
+        <ScrollReveal className="grid grid-cols-1 gap-6">
+          <AirfareIndexChart />
         </ScrollReveal>
 
-        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <RouteChangesTable />
+        <ScrollReveal className="grid grid-cols-1 gap-6">
+          <IndiaAirfareMarketPulse />
+        </ScrollReveal>
+
+        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <DataIngestionMonitor />
           </div>
-          <div>
+          <div className="lg:col-span-1">
             <QuickInsights />
           </div>
-        </ScrollReveal>
-
-        <ScrollReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <CheapestDates />
+            <AnomalyMonitor />
           </div>
           <div className="lg:col-span-1">
             <AirfareVsCPI />
-          </div>
-          <div className="lg:col-span-1">
-            <PopularRoutes />
           </div>
         </ScrollReveal>
       </div>

@@ -370,7 +370,7 @@ export function AITripSuggester() {
         )}
 
         {/* 1. Natural Language Prompt Assistant Panel */}
-        <div className="bg-gradient-to-br from-[#071738] via-[#05112B] to-[#0A1C44] border border-blue-500/30 rounded-[24px] p-6 shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#071738] via-[#05112B] to-[#0A1C44] border border-blue-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400">
               <Sparkles size={18} />
@@ -423,7 +423,7 @@ export function AITripSuggester() {
         </div>
 
         {/* 2. Structured Trip Specification Form */}
-        <form onSubmit={handleManualSearch} className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-2xl">
+        <form onSubmit={handleManualSearch} className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
             
             {/* Origin Airport Picker (4 cols) */}
@@ -854,7 +854,7 @@ export function AITripSuggester() {
 
         {/* 3. Multi-Stage Animated Loading Experience */}
         {isLoading && (
-          <div className="bg-[rgba(10,24,56,0.8)] border border-blue-500/30 rounded-[24px] p-10 flex flex-col items-center justify-center text-center shadow-2xl animate-in fade-in">
+          <div className="bg-[rgba(10,24,56,0.8)] border border-blue-500/30 rounded-2xl p-10 flex flex-col items-center justify-center text-center shadow-2xl animate-in fade-in">
             <div className="relative mb-5">
               <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-[#1788FF] animate-pulse">
                 <Plane size={30} className="animate-bounce" />
@@ -943,7 +943,7 @@ export function AITripSuggester() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
               {/* Category 1: 🏆 Best Overall */}
-              <div className="bg-gradient-to-br from-[#0B1E4A] via-[rgba(10,24,56,0.85)] to-[#07132e] border-2 border-[#1788FF] rounded-[24px] p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between group">
+              <div className="bg-gradient-to-br from-[#0B1E4A] via-[rgba(10,24,56,0.85)] to-[#07132e] border-2 border-[#1788FF] rounded-2xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#1788FF]/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div>
@@ -1055,7 +1055,7 @@ export function AITripSuggester() {
               </div>
 
               {/* Category 2: 💰 Cheapest */}
-              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-emerald-500/30 rounded-[24px] p-6 shadow-xl flex flex-col justify-between">
+              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
@@ -1107,7 +1107,7 @@ export function AITripSuggester() {
               </div>
 
               {/* Category 3: ⚡ Fastest */}
-              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-amber-500/30 rounded-[24px] p-6 shadow-xl flex flex-col justify-between">
+              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
@@ -1158,7 +1158,7 @@ export function AITripSuggester() {
               </div>
 
               {/* Category 4: ⭐ Best Value */}
-              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-purple-500/30 rounded-[24px] p-6 shadow-xl flex flex-col justify-between">
+              <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">

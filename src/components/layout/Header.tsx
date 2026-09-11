@@ -341,7 +341,18 @@ export function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-5">
+        
+        {/* Data Status Indicator */}
+        <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-[#12141C] shadow-sm select-none">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-[10px] font-bold text-white tracking-widest uppercase">Live Data</span>
+          </div>
+          <div className="w-px h-3 bg-white/[0.1]" />
+          <span className="text-[10px] font-mono text-zinc-400 tracking-wider">DEMO DATA STREAM</span>
+        </div>
+
         {/* Notification Bell */}
         <div className="relative" ref={notifRef}>
           <div 

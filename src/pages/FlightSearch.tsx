@@ -235,7 +235,7 @@ export function FlightSearch() {
         </div>
         
         {/* Main Search Panel */}
-        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-[24px] p-6 shadow-2xl">
+        <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
             
             {/* Departure City Selector */}

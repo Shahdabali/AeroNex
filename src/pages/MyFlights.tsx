@@ -202,7 +202,7 @@ export function MyFlights() {
           </div>
         ) : (
           /* Empty State */
-          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[24px] p-12 flex flex-col items-center justify-center text-center shadow-2xl">
+          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-2xl">
             <div className="w-20 h-20 bg-[#0A1838] rounded-3xl border border-slate-700 flex items-center justify-center text-cyan-400 mb-6 shadow-inner">
               <Bookmark size={36} />
             </div>
