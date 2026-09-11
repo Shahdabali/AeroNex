@@ -139,11 +139,18 @@ class LiveAirfareEngine {
     { time: 'LIVE', value: 138.4 },
   ];
 
+  private lastTickTime = 0;
+
   tick() {
+    const nowMs = Date.now();
+    if (nowMs - this.lastTickTime < 3000) {
+      return;
+    }
+    this.lastTickTime = nowMs;
     this.ticksCount++;
     this.lastUpdated = new Date().toISOString();
 
-    // High frequency micro-fluctuations every second (+/- 0.05 to 0.22)
+    // High frequency micro-fluctuations (+/- 0.05 to 0.22)
     const deltaIndex = (Math.random() - 0.49) * 0.22;
     this.currentIndex = parseFloat(Math.max(134.5, Math.min(143.5, this.currentIndex + deltaIndex)).toFixed(2));
 

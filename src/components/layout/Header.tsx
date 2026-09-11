@@ -12,10 +12,19 @@ export function Header() {
   const navigate = useNavigate();
   const { user, logout, t } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
+
+  // Debounce search term to prevent keystroke lag and re-render stutter
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -54,8 +63,8 @@ export function Header() {
     { label: 'CPI Analytics', path: '/cpi-analytics', icon: Calculator, desc: 'Aviation vs CPI inflation benchmarks' },
   ];
 
-  // Filtered results when user types
-  const query = searchTerm.trim().toLowerCase();
+  // Filtered results when user types (debounced for smooth 60fps typing)
+  const query = debouncedSearchTerm.trim().toLowerCase();
 
   const filteredRoutes = trendingRoutes.filter(r => 
     r.label.toLowerCase().includes(query) || r.from.toLowerCase().includes(query) || r.to.toLowerCase().includes(query)
@@ -175,8 +184,8 @@ export function Header() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white block">{r.fare}</span>
-                          <span className={`text-[10px] font-medium ${r.trend.startsWith('+') ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          <span className="text-xs font-bold text-slate-900 dark:text-white block tabular-nums">{r.fare}</span>
+                          <span className={`text-[10px] font-medium tabular-nums ${r.trend.startsWith('+') ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                             {r.trend}
                           </span>
                         </div>
@@ -361,7 +370,7 @@ export function Header() {
           >
             <Bell size={20} className="text-slate-500 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white transition-colors" />
             {unreadCount > 0 && (
-              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white animate-pulse">
+              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white tabular-nums animate-pulse">
                 {unreadCount}
               </div>
             )}

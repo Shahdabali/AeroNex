@@ -6,7 +6,7 @@ export function DataIngestionMonitor() {
   const { data: freshness } = useQuery({
     queryKey: ['dataFreshness'],
     queryFn: api.getFreshness,
-    refetchInterval: 5000,
+    staleTime: 6000,
   });
 
   const isLive = freshness?.status === 'live';

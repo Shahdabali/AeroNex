@@ -8,7 +8,7 @@ export function AnomalyMonitor() {
   const { data: routeChanges, isLoading } = useQuery({
     queryKey: ['routeChanges'],
     queryFn: api.getRouteChanges,
-    refetchInterval: 5000,
+    staleTime: 6000,
   });
 
   const anomalies = Array.isArray(routeChanges) 

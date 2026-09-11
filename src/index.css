@@ -10,7 +10,35 @@
   --color-matte-card: #161822;
 }
 
+
 :root {
+  --background: #090A0F;
+  --surface: #0E111A;
+  --surface-card: #0A0C13;
+  --surface-elevated: #12141C;
+  --surface-muted: #161822;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --accent: #00E5FF;
+  --accent-blue: #1788FF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #F43F5E;
+  --chart-grid: rgba(255, 255, 255, 0.04);
+  --map-background: #070910;
+
+  /* AeroNex Motion System Tokens */
+  --motion-micro: 140ms;
+  --motion-ui: 220ms;
+  --motion-page: 280ms;
+  --motion-data: 8000ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -23,6 +51,36 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numbers for price indices, percentages, and currencies */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  -moz-font-feature-settings: "tnum";
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/* Consistent Motion Utilities */
+.transition-micro {
+  transition: all var(--motion-micro) var(--ease-enter);
+}
+
+.transition-ui {
+  transition: all var(--motion-ui) var(--ease-state);
+}
+
+.transition-page {
+  transition: opacity var(--motion-page) var(--ease-enter), transform var(--motion-page) var(--ease-enter);
+}
+
+/* Subtle, intentional hover lift without heavy scaling */
+.hover-lift {
+  transition: transform var(--motion-ui) var(--ease-state), border-color var(--motion-ui) var(--ease-state), box-shadow var(--motion-ui) var(--ease-state);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
 }
 
 body {
@@ -38,12 +96,87 @@ body {
    Transforms the whole webpage when html.light or body.light is active
    ========================================================================== */
 
+
 html.light,
 html.light body {
+  --background: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-elevated: #F1F5F9;
+  --surface-muted: #E2E8F0;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --accent: #0284C7;
+  --accent-blue: #1788FF;
+  --success: #059669;
+  --warning: #D97706;
+  --danger: #E11D48;
+  --chart-grid: #E2E8F0;
+  --map-background: #F1F5F9;
   color-scheme: light !important;
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
+
+/* Command Center Cards in Light Mode */
+html.light .bg-\[\#0A0C13\],
+html.light [class*="bg-[#0A0C13]"],
+html.light .bg-\[\#0C0E17\],
+html.light [class*="bg-[#0C0E17]"],
+html.light .bg-\[\#070910\],
+html.light [class*="bg-[#070910]"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Inner Stripes & Header Strips in Light Mode */
+html.light [class*="bg-[#0E1017]"],
+html.light [class*="bg-[#141824]"],
+html.light [class*="bg-white/[0.02]"],
+html.light [class*="bg-white/[0.04]"],
+html.light [class*="bg-white/[0.06]"] {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Global Text Corrections in Light Mode */
+html.light .text-white:not(button[class*="from-"]):not(button[class*="bg-gradient"]):not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not([class*="bg-cyan-"]):not([class*="bg-blue-"]) {
+  color: #0F172A !important;
+}
+
+html.light .text-zinc-300,
+html.light .text-slate-300 {
+  color: #1E293B !important;
+}
+
+html.light .text-zinc-200,
+html.light .text-slate-200 {
+  color: #0F172A !important;
+}
+
+html.light .text-zinc-400,
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light .text-zinc-500,
+html.light .text-slate-500 {
+  color: #64748B !important;
+}
+
+html.light [class*="border-white/"] {
+  border-color: #E2E8F0 !important;
+}
+
+html.light [class*="divide-white/"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: #E2E8F0 !important;
+}
+
 
 /* Base Webpage & Main Container */
 html.light .min-h-screen,
