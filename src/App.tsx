@@ -20,6 +20,10 @@ const CPIAnalytics = lazy(() => import('./pages/CPIAnalytics').then(m => ({ defa
 const MethodologyPage = lazy(() => import('./pages/MethodologyPage').then(m => ({ default: m.MethodologyPage })));
 const DataScrapingPage = lazy(() => import('./pages/DataScrapingPage').then(m => ({ default: m.DataScrapingPage })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Predictions = lazy(() => import('./pages/Predictions').then(m => ({ default: m.Predictions })));
+const MyFlights = lazy(() => import('./pages/MyFlights').then(m => ({ default: m.MyFlights })));
+const Gamification = lazy(() => import('./pages/Gamification').then(m => ({ default: m.Gamification })));
+const AITripSuggester = lazy(() => import('./pages/AITripSuggester').then(m => ({ default: m.AITripSuggester })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,14 +61,14 @@ function App() {
 
               {/* Protected Application Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/ai-trip-suggester" element={<Navigate to="/search" replace />} />
-              <Route path="/trip-suggester" element={<Navigate to="/search" replace />} />
+              <Route path="/ai-trip-suggester" element={<ProtectedRoute><AITripSuggester /></ProtectedRoute>} />
+              <Route path="/trip-suggester" element={<ProtectedRoute><AITripSuggester /></ProtectedRoute>} />
               <Route path="/search" element={<ProtectedRoute><FlightSearch /></ProtectedRoute>} />
               <Route path="/flights" element={<ProtectedRoute><FlightSearch /></ProtectedRoute>} />
               <Route path="/airfare-index" element={<ProtectedRoute><AirfareIndex /></ProtectedRoute>} />
               <Route path="/price-trends" element={<ProtectedRoute><PriceTrends /></ProtectedRoute>} />
               <Route path="/trends" element={<ProtectedRoute><PriceTrends /></ProtectedRoute>} />
-              <Route path="/predictions" element={<Navigate to="/airfare-index" replace />} />
+              <Route path="/predictions" element={<ProtectedRoute><Predictions /></ProtectedRoute>} />
               <Route path="/price-alerts" element={<ProtectedRoute><PriceAlerts /></ProtectedRoute>} />
               <Route path="/alerts" element={<ProtectedRoute><PriceAlerts /></ProtectedRoute>} />
               <Route path="/routes" element={<ProtectedRoute><RoutesPage /></ProtectedRoute>} />
@@ -74,9 +78,10 @@ function App() {
               <Route path="/methodology" element={<ProtectedRoute><MethodologyPage /></ProtectedRoute>} />
               <Route path="/data-scraping" element={<ProtectedRoute><DataScrapingPage /></ProtectedRoute>} />
               <Route path="/scraping" element={<Navigate to="/data-scraping" replace />} />
-              <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/my-flights" element={<Navigate to="/search" replace />} />
+              <Route path="/gamification" element={<ProtectedRoute><Gamification /></ProtectedRoute>} />
+              <Route path="/rewards" element={<ProtectedRoute><Gamification /></ProtectedRoute>} />
+              <Route path="/my-flights" element={<ProtectedRoute><MyFlights /></ProtectedRoute>} />
+              <Route path="/saved-flights" element={<ProtectedRoute><MyFlights /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
               {/* Catch-all */}

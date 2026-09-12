@@ -52,12 +52,12 @@ export function MarketSignals() {
               
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium text-white">{signal.route}</span>
-                <span className="text-lg font-mono font-bold text-white">{signal.value}</span>
+                <span className="text-lg font-mono font-bold text-white tabular-nums">{signal.value}</span>
               </div>
               
               <div className="flex items-center justify-between mt-auto pt-2">
                 <span className="text-[11px] text-zinc-500">{signal.time}</span>
-                <span className={`text-[12px] font-bold flex items-center gap-0.5 ${signal.isIncrease ? 'text-rose-500' : 'text-emerald-500'}`}>
+                <span className={`text-[12px] font-bold flex items-center gap-0.5 tabular-nums ${signal.isIncrease ? 'text-rose-500' : 'text-emerald-500'}`}>
                   {signal.isIncrease ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                   {signal.trend}
                 </span>

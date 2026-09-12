@@ -2,7 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
   Map, Plane, Calculator, Settings, Activity,
-  BookOpen, Database, ShieldAlert, FileText, CheckCircle2
+  BookOpen, ShieldAlert, CheckCircle2,
+  Sparkles, Bookmark
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
@@ -14,15 +15,15 @@ export function Sidebar() {
     { icon: Home, label: 'Overview', path: '/dashboard' },
     { icon: LineChart, label: 'Airfare Index', path: '/airfare-index', badgeText: 'LIVE' },
     { icon: Activity, label: 'Live Intelligence', path: '/data-scraping', badgeText: 'SYNC' },
+    { icon: Search, label: 'Flight Search', path: '/search' },
     { icon: Map, label: 'Routes', path: '/routes' },
     { icon: Plane, label: 'Airlines', path: '/airlines' },
-    { icon: Search, label: 'Regions', path: '/search' },
     { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
-    { icon: ShieldAlert, label: 'Anomalies', path: '/price-alerts', badge: 3 },
-    { icon: Database, label: 'Data Quality', path: '/gamification' },
+    { icon: Sparkles, label: 'AI Predictions', path: '/predictions' },
+    { icon: ShieldAlert, label: 'Price Alerts', path: '/price-alerts', badge: 3 },
     { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },
-    { icon: FileText, label: 'Reports', path: '/my-flights' },
+    { icon: Bookmark, label: 'Saved Flights', path: '/my-flights' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
