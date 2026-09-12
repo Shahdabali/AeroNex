@@ -20,22 +20,21 @@ export function IndiaAirfareMarketPulse() {
         <RegionalMap />
       </div>
       
-      <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] p-5 flex flex-col h-full max-h-[460px]">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-zinc-400 text-[12px] font-bold uppercase tracking-widest flex items-center gap-2">
-            <Activity size={14} className="text-cyan-400" />
-            Live Route Telemetry
+      <div className="bg-white dark:bg-[#0E1424] rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col h-full max-h-[500px] shadow-xs">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="text-xs font-bold text-[#0F2A4A] dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <Activity size={15} className="text-blue-600" />
+            Active Route Price Swings
           </h3>
-          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold uppercase tracking-wider border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            Polling
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
+            30s Refresh
           </span>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-2 text-xs">
           {isLoading ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-full h-full flex items-center justify-center text-slate-400 py-12">
+              Loading active corridor feeds...
             </div>
           ) : (
             routes.map((route: any, i: number) => {
@@ -44,34 +43,34 @@ export function IndiaAirfareMarketPulse() {
                 <div 
                   key={i} 
                   onClick={() => navigate('/routes')}
-                  className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all cursor-pointer flex flex-col gap-2 group"
+                  className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#0B101D] border border-slate-100 dark:border-slate-800/80 hover:bg-slate-100/80 transition-colors cursor-pointer flex flex-col gap-1.5"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-white font-mono flex items-center gap-2">
-                      <Plane size={12} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                    <span className="font-bold text-slate-900 dark:text-white font-mono flex items-center gap-1.5">
+                      <Plane size={13} className="text-blue-600" />
                       {route.route}
                     </span>
                     <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded font-mono ${
-                      isIncrease ? 'text-rose-400 bg-rose-500/10' : 'text-emerald-400 bg-emerald-500/10'
+                      isIncrease ? 'text-rose-700 bg-rose-50 border border-rose-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200'
                     }`}>
                       {isIncrease ? '+' : ''}{route.change.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-zinc-500 uppercase tracking-widest">Current Fare</span>
-                    <span className="text-zinc-300 font-mono">₹{route.currentFare.toLocaleString('en-IN')}</span>
+                  <div className="flex justify-between items-center text-[11px] text-slate-500">
+                    <span>Observed: <strong className="text-slate-800 dark:text-slate-200 font-mono">₹{route.currentFare?.toLocaleString('en-IN')}</strong></span>
+                    <span>Prev: ₹{route.previousFare?.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
-              )
+              );
             })
           )}
         </div>
 
         <button 
           onClick={() => navigate('/routes')}
-          className="mt-4 pt-4 border-t border-white/[0.08] flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-cyan-400 transition-colors w-full group"
+          className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
         >
-          View Complete Telemetry <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+          View All 184 Routes <ArrowRight size={12} />
         </button>
       </div>
     </div>

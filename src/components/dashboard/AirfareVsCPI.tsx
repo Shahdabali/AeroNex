@@ -1,42 +1,57 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { Calculator, ArrowRight } from 'lucide-react';
 
 export function AirfareVsCPI() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] hover:border-cyan-500/30 p-6 h-full flex flex-col transition-colors group">
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-zinc-400 text-[12px] font-bold uppercase tracking-widest">CPI Intelligence</h3>
-      </div>
-
-      <div className="flex-1">
-        <p className="text-sm text-zinc-300 leading-relaxed mb-6">
-          Airfare is a dynamic component of consumer travel expenditure. AeroNex provides high-frequency airfare observations that can potentially support analytical augmentation of CPI-related price monitoring.
-        </p>
-
-        <div className="space-y-4">
-          <div className="flex items-end justify-between border-b border-white/[0.04] pb-2">
-            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Airfare Index</span>
-            <span className="text-lg font-mono font-bold text-white">140.2</span>
+    <div className="bg-white dark:bg-[#0E1424] rounded-xl border border-slate-200 dark:border-slate-800 p-5 h-full flex flex-col justify-between shadow-xs">
+      <div>
+        <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-1.5">
+            <Calculator size={16} className="text-emerald-600" />
+            <h3 className="text-xs font-bold text-[#0F2A4A] dark:text-white uppercase tracking-wider">
+              CPI Augmentation Signal
+            </h3>
           </div>
-          <div className="flex items-end justify-between border-b border-white/[0.04] pb-2">
-            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Monthly Movement</span>
-            <span className="text-sm font-mono font-bold text-rose-400">+5.6%</span>
-          </div>
-          <div className="flex items-end justify-between">
-            <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Observed Volatility</span>
-            <span className="text-sm font-bold text-amber-500">Moderate</span>
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-bold font-mono">
+            Research Metric
+          </span>
+        </div>
+
+        <div className="space-y-3 text-xs">
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+            High-frequency price quotes captured by AeroNex serve as an advance analytical proxy for official CPI Transport & Communication inflation trends.
+          </p>
+
+          <div className="space-y-2 p-3 bg-slate-50 dark:bg-[#0B101D] rounded-lg border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">AeroNex Airfare Index:</span>
+              <span className="font-mono font-bold text-[#0F2A4A] dark:text-white">124.8 (Base 2024=100)</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Official CPI Transport:</span>
+              <span className="font-mono font-bold text-slate-700 dark:text-slate-300">118.2 (Ref: 2024=100)</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Index Divergence / Spread:</span>
+              <span className="font-mono font-bold text-blue-600 dark:text-blue-400">+6.6 pts (Airfare Lead)</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <button 
-        onClick={() => navigate('/cpi-analytics')}
-        className="mt-6 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-300 transition-colors w-fit"
-      >
-        Explore CPI Analytics <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-      </button>
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] text-slate-400">
+          Independent research indicator
+        </span>
+        <button 
+          onClick={() => navigate('/cpi-analytics')}
+          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+        >
+          Explore CPI Analytics <ArrowRight size={12} />
+        </button>
+      </div>
     </div>
   );
 }

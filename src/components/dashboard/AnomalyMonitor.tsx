@@ -1,91 +1,60 @@
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../../services/api';
-import { ShieldAlert, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function AnomalyMonitor() {
   const navigate = useNavigate();
-  const { data: routeChanges, isLoading } = useQuery({
-    queryKey: ['routeChanges'],
-    queryFn: api.getRouteChanges,
-    staleTime: 6000,
-  });
-
-  const anomalies = Array.isArray(routeChanges) 
-    ? routeChanges.filter(r => Math.abs(r.change) > 3.5).slice(0, 1) // Only show the top 1 anomaly for a detailed card
-    : [];
 
   return (
-    <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] hover:border-cyan-500/30 p-6 h-full flex flex-col transition-colors group">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-zinc-400 text-[12px] font-bold uppercase tracking-widest">AI Anomalies</h3>
-        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 text-[9px] font-bold uppercase tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-          Active
-        </span>
+    <div className="bg-white dark:bg-[#0E1424] rounded-xl border border-slate-200 dark:border-slate-800 p-5 h-full flex flex-col justify-between shadow-xs">
+      <div>
+        <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-1.5">
+            <AlertTriangle size={16} className="text-rose-600" />
+            <h3 className="text-xs font-bold text-[#0F2A4A] dark:text-white uppercase tracking-wider">
+              Airfare Anomaly Monitor
+            </h3>
+          </div>
+          <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 text-[9px] font-bold font-mono border border-rose-200">
+            Z ≥ 2.5 Active
+          </span>
+        </div>
+
+        <div className="space-y-2.5 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-slate-800 dark:text-white text-sm">Delhi → Mumbai (DEL–BOM)</span>
+            <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
+              HIGH ANOMALY (+58%)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#0B101D] border border-slate-100 dark:border-slate-800 font-mono text-[11px]">
+            <div>
+              <span className="text-slate-400 block text-[9px] uppercase font-sans">Normal Range</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">₹3,800 – ₹6,200</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[9px] uppercase font-sans">Observed Fare</span>
+              <span className="font-bold text-rose-600 dark:text-rose-400">₹9,850</span>
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 text-[11px] text-amber-900 dark:text-amber-300 leading-relaxed">
+            <span className="font-bold block mb-0.5">Statistical Note:</span>
+            Potential demand/capacity/booking-horizon driven movement. Requires secondary regulatory validation under DGCA Rule 135.
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center">
-        {isLoading ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : anomalies.length === 0 ? (
-          <div className="w-full flex flex-col items-center justify-center text-center">
-            <ShieldAlert size={24} className="text-emerald-400/40 mb-2" />
-            <span className="text-sm font-semibold text-white">System Nominal</span>
-            <p className="text-[11px] text-slate-400 mt-1">No significant fare anomalies detected.</p>
-          </div>
-        ) : (
-          anomalies.map((route: any, i: number) => {
-            const isSpike = route.change > 0;
-            // Generate some plausible expected range based on the current anomaly
-            const expectedMin = Math.round(route.currentFare / (1 + route.change / 100) * 0.9);
-            const expectedMax = Math.round(route.currentFare / (1 + route.change / 100) * 1.1);
-
-            return (
-              <div 
-                key={i} 
-                onClick={() => navigate('/price-alerts')}
-                className="flex flex-col cursor-pointer"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={14} className="text-rose-500" />
-                  <span className="text-[12px] font-bold text-rose-500 uppercase tracking-wider">
-                    {isSpike ? 'Price Spike' : 'Price Drop'}
-                  </span>
-                </div>
-
-                <div className="text-2xl font-mono font-bold text-white mb-4">
-                  {route.route}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Observed</span>
-                    <span className="text-[13px] font-mono font-bold text-rose-400">₹{route.currentFare.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Expected</span>
-                    <span className="text-[13px] font-mono font-bold text-zinc-300">₹{expectedMin.toLocaleString('en-IN')}–₹{expectedMax.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Deviation</span>
-                    <span className="text-[13px] font-mono font-bold text-white">{isSpike ? '+' : ''}{route.change.toFixed(1)}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-widest">AI Confidence</span>
-                    <span className="text-[13px] font-mono font-bold text-white">87%</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-white/[0.04] pt-3 mt-1">
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Status</span>
-                    <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider">Requires Review</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] text-slate-400">
+          Evaluated against rolling 30d median
+        </span>
+        <button 
+          onClick={() => navigate('/anomalies')}
+          className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+        >
+          View Anomaly Register <ArrowRight size={12} />
+        </button>
       </div>
     </div>
   );

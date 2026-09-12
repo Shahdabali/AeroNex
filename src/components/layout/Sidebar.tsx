@@ -1,98 +1,150 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Home, Search, LineChart, TrendingUp, 
-  Map, Plane, Calculator, Settings, Activity,
+  BarChart3, LineChart, TrendingUp, 
+  Map, Plane, Calculator, Settings,
   BookOpen, ShieldAlert, CheckCircle2,
-  Sparkles, Bookmark
+  Bookmark, FileText, Database, Layers,
+  Compass, PieChart, Activity
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
-import { motion } from 'framer-motion';
+
+interface NavSection {
+  title: string;
+  items: {
+    icon: any;
+    label: string;
+    path: string;
+    badgeText?: string;
+    badge?: number;
+  }[];
+}
 
 export function Sidebar() {
   const location = useLocation();
 
-  const navItems = [
-    { icon: Home, label: 'Overview', path: '/dashboard' },
-    { icon: LineChart, label: 'Airfare Index', path: '/airfare-index', badgeText: 'LIVE' },
-    { icon: Activity, label: 'Live Intelligence', path: '/data-scraping', badgeText: 'SYNC' },
-    { icon: Search, label: 'Flight Search', path: '/search' },
-    { icon: Map, label: 'Routes', path: '/routes' },
-    { icon: Plane, label: 'Airlines', path: '/airlines' },
-    { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
-    { icon: Sparkles, label: 'AI Predictions', path: '/predictions' },
-    { icon: ShieldAlert, label: 'Price Alerts', path: '/price-alerts', badge: 3 },
-    { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
-    { icon: BookOpen, label: 'Methodology', path: '/methodology' },
-    { icon: Bookmark, label: 'Saved Flights', path: '/my-flights' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+  const navigationSections: NavSection[] = [
+    {
+      title: 'OVERVIEW',
+      items: [
+        { icon: BarChart3, label: 'National Dashboard', path: '/dashboard' },
+      ]
+    },
+    {
+      title: 'AIRFARE INTELLIGENCE',
+      items: [
+        { icon: Activity, label: 'Live Fare Monitor', path: '/fare-monitor', badgeText: 'SYNC' },
+        { icon: LineChart, label: 'Airfare Price Index', path: '/airfare-index' },
+        { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
+        { icon: Map, label: 'Route Intelligence', path: '/routes' },
+        { icon: Plane, label: 'Airline Market Monitor', path: '/airlines' },
+        { icon: ShieldAlert, label: 'Anomaly Detection', path: '/anomalies', badge: 2 },
+      ]
+    },
+    {
+      title: 'CPI & ECONOMIC ANALYTICS',
+      items: [
+        { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
+        { icon: PieChart, label: 'Regional Analysis', path: '/regional-analysis' },
+      ]
+    },
+    {
+      title: 'RESEARCH',
+      items: [
+        { icon: FileText, label: 'Research Reports', path: '/reports' },
+        { icon: Compass, label: 'AI Analytical Insights', path: '/predictions' },
+        { icon: Bookmark, label: 'Saved Analysis', path: '/saved-analysis' },
+      ]
+    },
+    {
+      title: 'DATA & GOVERNANCE',
+      items: [
+        { icon: Database, label: 'Data Sources & Provenance', path: '/data-sources' },
+        { icon: Layers, label: 'Data Quality & Coverage', path: '/data-quality' },
+        { icon: BookOpen, label: 'Methodology & Formulae', path: '/methodology' },
+      ]
+    },
+    {
+      title: 'SYSTEM',
+      items: [
+        { icon: Settings, label: 'Settings & Audit', path: '/settings' },
+      ]
+    }
   ];
 
   return (
-    <aside className="w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col fixed left-0 top-0 overflow-y-auto z-40 transition-colors">
-      <div className="p-5 pb-4">
-        <AeroNexLogo size={36} showTagline={false} />
-        <div className="mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
-          Airfare Intelligence
+    <aside className="w-[260px] h-screen bg-[#0F1E36] dark:bg-[#080D1A] border-r border-slate-700/60 dark:border-slate-800/80 flex flex-col fixed left-0 top-0 overflow-y-auto z-40 transition-colors shadow-sm select-none">
+      {/* Brand Header */}
+      <div className="p-4 pb-3 border-b border-slate-700/50 dark:border-slate-800">
+        <AeroNexLogo size={32} showTagline={false} />
+        <div className="mt-2 text-[10px] font-extrabold text-amber-400 tracking-[0.15em] uppercase flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+          Airfare Intelligence Platform
         </div>
       </div>
 
-      <nav className="flex-1 px-3 flex flex-col gap-0.5 pb-6">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`relative flex items-center justify-between px-3 py-2 rounded-lg transition-all select-none group ${
-                isActive 
-                  ? 'text-white font-medium' 
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeSidebarIndicator"
-                  className="absolute inset-0 bg-[#161822] border border-white/[0.08] rounded-lg"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                />
-              )}
-              <div className="relative z-10 flex items-center gap-3">
-                <item.icon 
-                  size={15} 
-                  className={`transition-colors ${
+      {/* Navigation Sections */}
+      <nav className="flex-1 px-3 py-3 flex flex-col gap-4 text-xs">
+        {navigationSections.map((sec, idx) => (
+          <div key={idx} className="flex flex-col gap-0.5">
+            <div className="px-3 py-1 text-[9.5px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+              {sec.title}
+            </div>
+            {sec.items.map((item) => {
+              const isActive = location.pathname === item.path || 
+                (item.path === '/dashboard' && location.pathname === '/') ||
+                (item.path === '/fare-monitor' && (location.pathname === '/search' || location.pathname === '/flights')) ||
+                (item.path === '/saved-analysis' && (location.pathname === '/my-flights' || location.pathname === '/saved-flights'));
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
                     isActive 
-                      ? 'text-cyan-400' 
-                      : 'text-zinc-500 group-hover:text-zinc-400'
-                  }`} 
-                />
-                <span className="text-[13px] tracking-tight">{item.label}</span>
-              </div>
-              {item.badge && (
-                <div className="relative z-10 w-4 h-4 rounded bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-[9px] font-bold text-rose-400 shadow-sm">
-                  {item.badge}
-                </div>
-              )}
-              {item.badgeText && (
-                <div className="relative z-10 px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold font-mono tracking-wider">
-                  {item.badgeText}
-                </div>
-              )}
-            </Link>
-          );
-        })}
+                      ? 'bg-blue-600 text-white font-semibold shadow-xs' 
+                      : 'text-slate-300 dark:text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <item.icon 
+                      size={15} 
+                      className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} 
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-400/30 text-[9px] font-bold">
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.badgeText && (
+                    <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[9px] font-bold font-mono">
+                      {item.badgeText}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
-      {/* SYSTEM STATUS */}
-      <div className="p-4 mt-auto border-t border-white/[0.04] bg-[#0B0C13]">
-        <div className="flex flex-col gap-2">
-          <div className="text-[10px] font-bold text-zinc-500 tracking-wider">SYSTEM STATUS</div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-300 font-medium">
-            <CheckCircle2 size={12} className="text-emerald-500" />
-            <span>Data pipeline operational</span>
+      {/* SYSTEM STATUS FOOTER */}
+      <div className="p-3.5 mt-auto border-t border-slate-700/60 dark:border-slate-800 bg-[#0A1526] dark:bg-[#060A14]">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Pipeline</span>
+            <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9px] font-bold font-mono">
+              OPERATIONAL
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse ml-0.5" />
-            <span>Last sync: 12 sec ago</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-300">
+            <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />
+            <span className="truncate">Automated Scraping Active</span>
+          </div>
+          <div className="text-[10px] text-slate-400 font-mono flex items-center justify-between mt-1">
+            <span>Base: 2024 = 100</span>
+            <span className="text-amber-400 font-semibold">DEMO MODE</span>
           </div>
         </div>
       </div>

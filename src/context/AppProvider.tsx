@@ -48,7 +48,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem('theme') as Theme;
       if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
     }
-    return 'dark';
+    return 'light';
   });
 
   const [user, setUser] = useState<User | null>(() => {

@@ -1,5 +1,4 @@
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
-import { ScrollReveal } from '../ui/ScrollReveal';
 
 export function MarketSignals() {
   const signals = [
@@ -38,32 +37,33 @@ export function MarketSignals() {
   ];
 
   return (
-    <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] overflow-hidden">
-      <div className="p-4 border-b border-white/[0.08] bg-[#0E1017]">
-        <h3 className="text-[12px] font-bold tracking-widest text-zinc-400 uppercase">Market Signals</h3>
+    <div className="bg-white dark:bg-[#0E1424] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+      <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-[#0B101D] flex items-center justify-between">
+        <h3 className="text-xs font-bold tracking-wider text-[#0F2A4A] dark:text-white uppercase">
+          Key Market Observations & Corridor Extremes
+        </h3>
+        <span className="text-[10px] font-mono text-slate-400">Continuous 24h Window</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/[0.08]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800">
         {signals.map((signal, idx) => (
-          <ScrollReveal key={idx} delay={idx * 0.1}>
-            <div className="p-5 flex flex-col hover:bg-white/[0.02] transition-colors h-full">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-3">
-                {signal.label}
-              </span>
-              
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white">{signal.route}</span>
-                <span className="text-lg font-mono font-bold text-white tabular-nums">{signal.value}</span>
-              </div>
-              
-              <div className="flex items-center justify-between mt-auto pt-2">
-                <span className="text-[11px] text-zinc-500">{signal.time}</span>
-                <span className={`text-[12px] font-bold flex items-center gap-0.5 tabular-nums ${signal.isIncrease ? 'text-rose-500' : 'text-emerald-500'}`}>
-                  {signal.isIncrease ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                  {signal.trend}
-                </span>
-              </div>
+          <div key={idx} className="p-4 flex flex-col hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors h-full">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              {signal.label}
+            </span>
+            
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{signal.route}</span>
+              <span className="text-base font-mono font-extrabold text-[#0F2A4A] dark:text-white tabular-nums">{signal.value}</span>
             </div>
-          </ScrollReveal>
+            
+            <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/60 text-xs">
+              <span className="text-[11px] text-slate-400">{signal.time}</span>
+              <span className={`text-xs font-bold flex items-center gap-0.5 tabular-nums ${signal.isIncrease ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                {signal.isIncrease ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {signal.trend}
+              </span>
+            </div>
+          </div>
         ))}
       </div>
     </div>
