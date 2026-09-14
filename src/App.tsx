@@ -20,6 +20,7 @@ const CPIAnalytics = lazy(() => import('./pages/CPIAnalytics').then(m => ({ defa
 const MethodologyPage = lazy(() => import('./pages/MethodologyPage').then(m => ({ default: m.MethodologyPage })));
 const DataScrapingPage = lazy(() => import('./pages/DataScrapingPage').then(m => ({ default: m.DataScrapingPage })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const AiAnalyticsPage = lazy(() => import('./pages/AiAnalyticsPage').then(m => ({ default: m.AiAnalyticsPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ function App() {
               <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
               <Route path="/my-flights" element={<Navigate to="/search" replace />} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/ai-analytics" element={<ProtectedRoute><AiAnalyticsPage /></ProtectedRoute>} />
 
               {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />

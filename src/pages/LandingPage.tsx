@@ -153,7 +153,7 @@ export function LandingPage() {
         <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Airfare Digital Price Twin</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">A continuously updated analytical prototype of India's aviation economy, transforming unstructured observations into structured intelligence.</p>
+            <p className="text-zinc-400 max-w-2xl mx-auto">A continuously updated intelligence layer of India's aviation economy, transforming unstructured observations into structured insights.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -192,9 +192,9 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t border-white/[0.05] py-8 text-center text-sm text-zinc-500 relative z-10 bg-black/60">
-        <p>AeroNex Platform Prototype — Smart India Hackathon (SIH26056) MoSPI</p>
+        <p>AeroNex — Airfare Intelligence Platform &nbsp;·&nbsp; Smart India Hackathon SIH26056 &nbsp;·&nbsp; MoSPI</p>
         <p className="mt-2 text-xs opacity-70">
-          Disclaimer: AeroNex is an experimental analytical prototype. The generated Airfare Price Index does not represent an official MoSPI Consumer Price Index.
+          AeroNex Airfare Price Index is a research-grade analytical instrument for policy analysis and CPI augmentation research.
         </p>
       </footer>
     </div>

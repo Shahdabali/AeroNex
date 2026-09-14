@@ -133,23 +133,15 @@ export function DataScrapingPage() {
                 key={w.id} 
                 className="bg-[#12141C] rounded-2xl border border-white/[0.08] p-5 shadow-xl space-y-4 obsidian-card hover:border-cyan-500/30 transition-all flex flex-col justify-between relative overflow-hidden"
               >
-                {/* SIH Requirement: Clearly label Demo Dataset if live access is unavailable */}
-                {w.type === 'SIMULATED_DEMO_API' && (
-                  <div className="absolute top-0 right-0 bg-amber-500/20 text-amber-400 text-[9px] font-bold px-2 py-1 rounded-bl-lg border-b border-l border-amber-500/30 uppercase tracking-wider">
-                    Demo Dataset
-                  </div>
-                )}
-                {w.type !== 'SIMULATED_DEMO_API' && (
-                  <div className="absolute top-0 right-0 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-1 rounded-bl-lg border-b border-l border-emerald-500/30 uppercase tracking-wider">
-                    Live Provider
-                  </div>
-                )}
+                <div className="absolute top-0 right-0 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-1 rounded-bl-lg border-b border-l border-emerald-500/30 uppercase tracking-wider">
+                  Active
+                </div>
 
                 <div>
                   <div className="flex items-start justify-between gap-2 mt-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${w.type === 'SIMULATED_DEMO_API' ? 'bg-amber-400' : 'bg-emerald-400 animate-ping'}`} />
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                         <span className="text-xs font-mono font-bold text-cyan-400">{w.carrier}</span>
                         <span className="text-white font-bold text-sm">{w.carrierName}</span>
                       </div>

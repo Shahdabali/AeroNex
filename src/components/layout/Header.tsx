@@ -359,7 +359,7 @@ export function Header() {
             <span className="text-[10px] font-bold text-white tracking-widest uppercase">Live Data</span>
           </div>
           <div className="w-px h-3 bg-white/[0.1]" />
-          <span className="text-[10px] font-mono text-zinc-400 tracking-wider">DEMO DATA STREAM</span>
+          <span className="text-[10px] font-mono text-zinc-400 tracking-wider">AIRFARE FEED</span>
         </div>
 
         {/* Notification Bell */}

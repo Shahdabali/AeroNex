@@ -2,12 +2,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
   Map, Plane, Calculator, Settings, Activity,
-  BookOpen, Database, ShieldAlert, FileText, CheckCircle2
+  BookOpen, Database, ShieldAlert, FileText, Brain, X
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
 
   const navItems = [
@@ -21,18 +25,31 @@ export function Sidebar() {
     { icon: ShieldAlert, label: 'Anomalies', path: '/price-alerts', badge: 3 },
     { icon: Database, label: 'Data Quality', path: '/gamification' },
     { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
+    { icon: Brain, label: 'AI Analytics', path: '/ai-analytics', badgeText: 'NEW' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },
     { icon: FileText, label: 'Reports', path: '/my-flights' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   return (
-    <aside className="w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col fixed left-0 top-0 overflow-y-auto z-40 transition-colors">
-      <div className="p-5 pb-4">
-        <AeroNexLogo size={36} showTagline={false} />
-        <div className="mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
-          Airfare Intelligence
+    <aside className="w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col overflow-y-auto transition-colors">
+      <div className="p-5 pb-4 flex items-center justify-between">
+        <div>
+          <AeroNexLogo size={36} showTagline={false} />
+          <div className="mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
+            Airfare Intelligence
+          </div>
         </div>
+        {/* Mobile close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-3 flex flex-col gap-0.5 pb-6">
@@ -42,6 +59,7 @@ export function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
+              onClick={onClose}
               className={`relative flex items-center justify-between px-3 py-2 rounded-lg transition-all select-none group ${
                 isActive 
                   ? 'text-white font-medium' 
@@ -80,21 +98,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      {/* SYSTEM STATUS */}
-      <div className="p-4 mt-auto border-t border-white/[0.04] bg-[#0B0C13]">
-        <div className="flex flex-col gap-2">
-          <div className="text-[10px] font-bold text-zinc-500 tracking-wider">SYSTEM STATUS</div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-300 font-medium">
-            <CheckCircle2 size={12} className="text-emerald-500" />
-            <span>Data pipeline operational</span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse ml-0.5" />
-            <span>Last sync: 12 sec ago</span>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

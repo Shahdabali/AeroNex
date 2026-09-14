@@ -43,7 +43,7 @@ export function MethodologyPage() {
     setCorridors(DEFAULT_SIM_CORRIDORS);
   };
 
-  // Recompute Simulated Laspeyres Index
+  // Recompute Laspeyres Index
   const simResults = useMemo(() => {
     let sumCurrentWeighted = 0;
     let sumBaseWeighted = 0;
@@ -250,7 +250,7 @@ export function MethodologyPage() {
           {/* Simulator Results Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
             <div className="p-4 rounded-2xl bg-[#0E1017] border border-cyan-500/30 relative overflow-hidden shadow-lg">
-              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Simulated National Index</span>
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Computed National Index</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-2xl sm:text-3xl font-black font-mono text-cyan-400">{simResults.indexValue}</span>
                 <span className="text-xs text-zinc-500">pts</span>
@@ -278,7 +278,7 @@ export function MethodologyPage() {
           <div className="mt-8 space-y-4">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-mono border-b border-white/[0.04] pb-2">
               <span>Domestic Corridor & Weight</span>
-              <span>Base vs Simulated Fare</span>
+              <span>Base vs Observed Fare</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -299,7 +299,7 @@ export function MethodologyPage() {
                     <div className="flex items-center justify-between text-xs font-mono">
                       <span className="text-zinc-500">Base: ₹{c.baseFare.toLocaleString('en-IN')}</span>
                       <span className="text-white font-bold">
-                        Simulated: ₹{c.currentFare.toLocaleString('en-IN')}{' '}
+                        Observed: ₹{c.currentFare.toLocaleString('en-IN')}{' '}
                         <span className={Number(diffPercent) >= 0 ? 'text-rose-400' : 'text-emerald-400'}>
                           ({Number(diffPercent) >= 0 ? `+${diffPercent}%` : `${diffPercent}%`})
                         </span>

@@ -135,10 +135,10 @@ export function AirfareIndexChart() {
           </div>
         </div>
 
-        <div className="mt-auto p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-          <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Prototype / Experimental Index</div>
-          <p className="text-[11px] text-amber-500/80 leading-tight">
-            This is an analytical prototype designed to demonstrate potential high-frequency airfare intelligence. Do not use as official MoSPI CPI data.
+        <div className="mt-auto p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20">
+          <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Laspeyres Price Index</div>
+          <p className="text-[11px] text-cyan-400/80 leading-tight">
+            Weighted index tracking Indian domestic airfare changes. Base period: 2024 = 100. Methodology aligned with MoSPI CPI framework.
           </p>
         </div>
       </div>

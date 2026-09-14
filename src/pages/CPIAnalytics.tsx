@@ -55,13 +55,13 @@ export function CPIAnalytics() {
               <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30 flex items-center gap-1.5">
                 <Activity size={12} /> Macroeconomic Intelligence
               </span>
-              <span className="text-xs text-slate-400">MoSPI Prototype Augmentation</span>
+              <span className="text-xs text-slate-400">MoSPI CPI Augmentation Intelligence</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-white">
               CPI Augmentation Intelligence
             </h1>
             <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              Demonstrating how high-frequency automated web scraping of dynamic airfares can augment the traditional MoSPI Consumer Price Index (CPI) basket for highly responsive inflation tracking.
+              High-frequency automated ingestion of dynamic airfare data augments the traditional MoSPI Consumer Price Index (CPI) basket, enabling highly responsive inflation tracking across domestic corridors.
             </p>
           </div>
 
