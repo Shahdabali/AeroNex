@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export function DataScrapingPage() {
-  usePageTitle('Data Quality Monitor — AeroNex Prototype');
+  usePageTitle('Data Quality Monitor - AeroNex');
   const queryClient = useQueryClient();
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);

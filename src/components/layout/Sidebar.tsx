@@ -2,16 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
   Map, Plane, Calculator, Settings, Activity,
-  BookOpen, Database, ShieldAlert, FileText, Brain, X
+  BookOpen, Database, ShieldAlert, FileText, Brain
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
 
-interface SidebarProps {
-  onClose?: () => void;
-}
-
-export function Sidebar({ onClose }: SidebarProps) {
+export function Sidebar() {
   const location = useLocation();
 
   const navItems = [
@@ -23,44 +19,34 @@ export function Sidebar({ onClose }: SidebarProps) {
     { icon: Search, label: 'Regions', path: '/search' },
     { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
     { icon: ShieldAlert, label: 'Anomalies', path: '/price-alerts', badge: 3 },
-    { icon: Database, label: 'Data Quality', path: '/gamification' },
+    { icon: Database, label: 'Data Quality', path: '/data-scraping' },
     { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
     { icon: Brain, label: 'AI Analytics', path: '/ai-analytics', badgeText: 'NEW' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },
-    { icon: FileText, label: 'Reports', path: '/my-flights' },
+    { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   return (
-    <aside className="w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col overflow-y-auto transition-colors">
-      <div className="p-5 pb-4 flex items-center justify-between">
-        <div>
-          <AeroNexLogo size={36} showTagline={false} />
-          <div className="mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
+    <aside className="w-[64px] lg:w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col overflow-y-auto transition-all duration-300">
+      <div className="p-3 lg:p-5 lg:pb-4 flex flex-col items-center lg:items-start justify-center lg:justify-between">
+        <div className="flex flex-col items-center lg:items-start">
+          <AeroNexLogo size={32} showTagline={false} />
+          <div className="hidden lg:block mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
             Airfare Intelligence
           </div>
         </div>
-        {/* Mobile close button */}
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-colors"
-            aria-label="Close menu"
-          >
-            <X size={18} />
-          </button>
-        )}
       </div>
 
-      <nav className="flex-1 px-3 flex flex-col gap-0.5 pb-6">
+      <nav className="flex-1 px-2 lg:px-3 flex flex-col gap-1 lg:gap-0.5 pb-6">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
           return (
             <Link
-              key={item.path}
+              key={item.label}
               to={item.path}
-              onClick={onClose}
-              className={`relative flex items-center justify-between px-3 py-2 rounded-lg transition-all select-none group ${
+              title={item.label}
+              className={`relative flex items-center justify-center lg:justify-between p-3 lg:px-3 lg:py-2 rounded-lg transition-all select-none group ${
                 isActive 
                   ? 'text-white font-medium' 
                   : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
@@ -73,26 +59,33 @@ export function Sidebar({ onClose }: SidebarProps) {
                   transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
               )}
-              <div className="relative z-10 flex items-center gap-3">
+              <div className="relative z-10 flex items-center lg:gap-3">
                 <item.icon 
-                  size={15} 
-                  className={`transition-colors ${
+                  size={18} 
+                  className={`transition-colors lg:w-[15px] lg:h-[15px] ${
                     isActive 
                       ? 'text-cyan-400' 
                       : 'text-zinc-500 group-hover:text-zinc-400'
                   }`} 
                 />
-                <span className="text-[13px] tracking-tight">{item.label}</span>
+                <span className="hidden lg:block text-[13px] tracking-tight">{item.label}</span>
               </div>
+              
+              {/* Badges - Hidden on mobile */}
               {item.badge && (
-                <div className="relative z-10 w-4 h-4 rounded bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-[9px] font-bold text-rose-400 shadow-sm">
+                <div className="hidden lg:flex relative z-10 w-4 h-4 rounded bg-rose-500/20 border border-rose-500/30 items-center justify-center text-[9px] font-bold text-rose-400 shadow-sm">
                   {item.badge}
                 </div>
               )}
               {item.badgeText && (
-                <div className="relative z-10 px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold font-mono tracking-wider">
+                <div className="hidden lg:block relative z-10 px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold font-mono tracking-wider">
                   {item.badgeText}
                 </div>
+              )}
+
+              {/* Mobile notification dot if item has badge */}
+              {(item.badge || item.badgeText) && (
+                <div className="lg:hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-rose-500" />
               )}
             </Link>
           );

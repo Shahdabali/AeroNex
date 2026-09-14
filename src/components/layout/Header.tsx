@@ -390,12 +390,19 @@ export function Header() {
                 )}
               </div>
               <div className="flex flex-col gap-2 mt-3 max-h-60 overflow-y-auto">
-                {notifications.map((notif: any, i: number) => (
-                  <div key={i} className="p-2.5 rounded-xl bg-[#040D24]/80 border border-slate-800/60 hover:border-blue-500/30 transition-all">
-                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">{notif.message || notif.title}</p>
-                    <span className="text-[10px] text-slate-400 mt-1 block">Just now</span>
+                {notifications.length > 0 ? (
+                  notifications.map((notif: any, i: number) => (
+                    <div key={i} className={`p-2.5 rounded-xl border transition-all ${unreadCount === 0 ? 'bg-transparent border-slate-800/40 opacity-70' : 'bg-[#040D24]/80 border-slate-800/60 hover:border-blue-500/30'}`}>
+                      <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">{notif.message || notif.title}</p>
+                      <span className="text-[10px] text-slate-400 mt-1 block">Just now</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-6 text-center">
+                    <Bell size={24} className="mx-auto text-slate-600 mb-2" />
+                    <p className="text-xs text-slate-400">No new notifications</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
