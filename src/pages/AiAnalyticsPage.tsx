@@ -6,6 +6,7 @@ import {
   RefreshCw, Send, Activity,
   BarChart2
 } from 'lucide-react';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 export function AiAnalyticsPage() {
@@ -74,7 +75,8 @@ export function AiAnalyticsPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-10">
+    <DashboardLayout>
+      <div className="space-y-6 pb-10">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -319,7 +321,8 @@ export function AiAnalyticsPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
 

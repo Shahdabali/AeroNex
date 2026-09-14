@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
   Map, Plane, Calculator, Settings, Activity,
-  BookOpen, Database, ShieldAlert, FileText, Brain
+  BookOpen, ShieldAlert, FileText, Brain
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
@@ -19,7 +19,6 @@ export function Sidebar() {
     { icon: Search, label: 'Regions', path: '/search' },
     { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
     { icon: ShieldAlert, label: 'Anomalies', path: '/price-alerts', badge: 3 },
-    { icon: Database, label: 'Data Quality', path: '/data-scraping' },
     { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
     { icon: Brain, label: 'AI Analytics', path: '/ai-analytics', badgeText: 'NEW' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },

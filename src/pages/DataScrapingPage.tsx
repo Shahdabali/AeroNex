@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export function DataScrapingPage() {
-  usePageTitle('Data Quality Monitor - AeroNex');
+  usePageTitle('Live Intelligence & Scraper Pipeline - AeroNex');
   const queryClient = useQueryClient();
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
@@ -49,14 +49,14 @@ export function DataScrapingPage() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-3xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider">
-                <ShieldCheck size={14} />
-                <span>Automated Validation Active</span>
+                <Activity size={14} className="text-cyan-400 animate-pulse" />
+                <span>Live Ingestion & Telemetry Active</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                Data Quality & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-blue-500">Source Monitor</span>
+                Live Intelligence & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-blue-500">Scraper Pipeline</span>
               </h1>
               <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
-                Supervising the automated airfare data ingestion pipeline. Ensuring 100% normalized, validated, and anomaly-free records before inclusion in the AeroNex Airfare Price Index.
+                Supervising the automated airfare data ingestion pipeline, active crawler workers, and real-time observation feeds to ensure 100% normalized and validated records for the AeroNex Price Index.
               </p>
             </div>
 

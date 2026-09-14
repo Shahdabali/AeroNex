@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { 
@@ -29,7 +29,6 @@ const DEFAULT_SIM_CORRIDORS: CorridorSim[] = [
 
 export function MethodologyPage() {
   usePageTitle('Airfare Index Methodology — AeroNex Specification');
-  const navigate = useNavigate();
 
   // Interactive Simulator State
   const [corridors, setCorridors] = useState<CorridorSim[]>(DEFAULT_SIM_CORRIDORS);
@@ -102,20 +101,22 @@ export function MethodologyPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
-              <button
-                onClick={() => navigate('/airfare-index')}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
+              <Link
+                to="/airfare-index"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all cursor-pointer hover:scale-105 active:scale-95"
               >
                 <Activity size={15} />
                 <span>Open Live Index Terminal</span>
-              </button>
-              <button
-                onClick={() => navigate('/data-scraping')}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#161824] hover:bg-white/[0.08] border border-white/[0.1] text-zinc-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+              </Link>
+              <Link
+                to="/data-scraping"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#161824] hover:bg-white/[0.08] border border-white/[0.1] text-zinc-300 hover:text-white text-xs font-semibold transition-all cursor-pointer hover:scale-105 active:scale-95"
               >
                 <Database size={15} />
                 <span>Inspect Data Scraper Nodes</span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -398,13 +399,14 @@ export function MethodologyPage() {
               Inspect active scraping workers, GDS connectors, and live telemetry feeds on our data ingestion control panel.
             </p>
           </div>
-          <button
-            onClick={() => navigate('/data-scraping')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 text-xs font-bold font-mono transition-all cursor-pointer shrink-0"
+          <Link
+            to="/data-scraping"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer shrink-0 shadow-lg shadow-cyan-500/10 hover:scale-105 active:scale-95"
           >
             <span>Inspect Scraper Pipeline</span>
             <ArrowRight size={14} />
-          </button>
+          </Link>
         </div>
 
       </div>
