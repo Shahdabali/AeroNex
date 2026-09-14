@@ -169,9 +169,7 @@ export function Settings() {
     } catch {}
     return {
       google: false,
-      calendar: false,
       email: false,
-      discord: false,
       apiAccess: true,
     };
   });
@@ -215,6 +213,11 @@ export function Settings() {
   const [feedbackComments, setFeedbackComments] = useState('');
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
+  /* ─── Legal & App Info Modals ─── */
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+
   /* ─── Feedback Toast ─── */
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -254,9 +257,7 @@ export function Settings() {
           setIntegrations(prev => {
             const merged = {
               google: typeof data.integrations.google === 'boolean' ? data.integrations.google : prev.google,
-              calendar: typeof data.integrations.calendar === 'boolean' ? data.integrations.calendar : prev.calendar,
               email: typeof data.integrations.email === 'boolean' ? data.integrations.email : prev.email,
-              discord: typeof data.integrations.discord === 'boolean' ? data.integrations.discord : prev.discord,
               apiAccess: typeof data.integrations.apiAccess === 'boolean' ? data.integrations.apiAccess : prev.apiAccess,
             };
             localStorage.setItem('aeronex_integrations', JSON.stringify(merged));
@@ -385,9 +386,7 @@ export function Settings() {
 
     const providerNames: Record<string, string> = {
       google: 'Google Account',
-      calendar: 'Google Calendar',
       email: 'Email Integration',
-      discord: 'Discord Webhook',
       apiAccess: 'API Access',
     };
     const displayName = providerNames[provider] || provider.toUpperCase();
@@ -584,7 +583,7 @@ export function Settings() {
     {
       id: 4,
       q: 'How do price drop alerts reach me?',
-      a: 'Alerts are dispatched via real-time WebSocket push notifications, email summaries, and optional webhook integrations for connected Discord servers.',
+      a: 'Alerts are dispatched via real-time WebSocket push notifications, browser alerts, and email summaries for your monitored corridors.',
     },
     {
       id: 5,
@@ -1248,36 +1247,18 @@ export function Settings() {
                     ),
                     bg: 'bg-white/10',
                     label: t.googleAccountLabel || 'Google Account',
-                    desc: t.googleAccountDesc || 'Sync and sign in with Google',
-                    action: 'connect'
-                  },
-                  {
-                    id: 'calendar',
-                    icon: <Calendar size={16} className="text-blue-400" />,
-                    bg: 'bg-blue-500/15 border border-blue-500/30',
-                    label: t.calendarLabel || 'Calendar (Google)',
-                    desc: t.calendarDesc || 'Import flight dates to your calendar',
-                    action: 'connect'
+                    desc: user?.email ? `Authenticated as ${user.email}` : (t.googleAccountDesc || 'Sync and sign in with Google'),
+                    action: 'connect',
+                    isActualUser: !!user && !user?.isGuest
                   },
                   {
                     id: 'email',
                     icon: <Mail size={16} className="text-rose-400" />,
                     bg: 'bg-rose-500/15 border border-rose-500/30',
-                    label: t.emailIntegrationLabel || 'Email (Gmail/Outlook)',
-                    desc: t.emailIntegrationDesc || 'Receive travel updates',
-                    action: 'connect'
-                  },
-                  {
-                    id: 'discord',
-                    icon: (
-                      <svg className="w-4 h-4 fill-[#5865F2]" viewBox="0 0 24 24">
-                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                      </svg>
-                    ),
-                    bg: 'bg-[#5865F2]/15 border border-[#5865F2]/30',
-                    label: t.discordLabel || 'Discord',
-                    desc: t.discordDesc || 'Get updates in your server',
-                    action: 'connect'
+                    label: t.emailIntegrationLabel || 'Email Service',
+                    desc: user?.email ? `Active delivery to ${user.email}` : (t.emailIntegrationDesc || 'Receive travel updates'),
+                    action: 'connect',
+                    isActualUser: !!user?.email
                   },
                   {
                     id: 'apiAccess',
@@ -1285,12 +1266,17 @@ export function Settings() {
                     bg: 'bg-cyan-500/15 border border-cyan-500/30',
                     label: t.apiAccessLabel || 'API Access',
                     desc: t.apiAccessDesc || 'For researchers and developers',
-                    action: 'manage'
+                    action: 'manage',
+                    isActualUser: true
                   },
                 ].map((item) => {
-                  const isConnected = !!integrations[item.id];
+                  const isConnected = item.id === 'google' 
+                    ? (!!user && !user.isGuest) 
+                    : item.id === 'email' 
+                      ? !!user?.email 
+                      : !!integrations[item.id];
                   return (
-                    <div key={item.id} className="integration-row flex items-center justify-between py-2.5 border-b border-slate-800/80 last:border-0">
+                    <div key={item.id} className="integration-row flex items-center justify-between py-3 border-b border-slate-800/80 last:border-0">
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
                           {item.icon}
@@ -1318,6 +1304,12 @@ export function Settings() {
                         onClick={() => {
                           if (item.action === 'manage') {
                             setShowApiKeyModal(true);
+                          } else if (item.id === 'google') {
+                            if (user && !user.isGuest) {
+                              triggerToast(`Connected as ${user.email}`);
+                            } else {
+                              handleToggleIntegration(item.id);
+                            }
                           } else {
                             handleToggleIntegration(item.id);
                           }
@@ -1326,11 +1318,11 @@ export function Settings() {
                           item.action === 'manage'
                             ? 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
                             : isConnected 
-                              ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50' 
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' 
                               : 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
                         }`}
                       >
-                        {item.action === 'manage' ? (t.manageBtn || 'Manage') : isConnected ? 'Disconnect' : (t.connectBtn || 'Connect')}
+                        {item.action === 'manage' ? (t.manageBtn || 'Manage') : isConnected ? 'Connected' : (t.connectBtn || 'Connect')}
                       </button>
                     </div>
                   );
@@ -1417,12 +1409,27 @@ export function Settings() {
 
               <p className="text-white font-bold text-xs mb-2 tracking-wide">{t.appVersion || 'AERONEX v1.0.0'}</p>
 
-              <div className="flex items-center gap-3 text-xs text-blue-400 mb-4 font-medium">
-                <a href="#" onClick={(e) => { e.preventDefault(); triggerToast('AeroNex Terms of Service v1.0 (India DGCA Compliance)'); }} className="hover:underline">{t.termsOfService || 'Terms of Service'}</a>
+              <div className="flex items-center gap-3 text-xs text-blue-400 mb-4 font-medium flex-wrap">
+                <button 
+                  onClick={() => setShowTermsModal(true)} 
+                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                >
+                  {t.termsOfService || 'Terms of Service'}
+                </button>
                 <span className="text-slate-600">|</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); triggerToast('AeroNex Privacy Policy — Zero Personal Flight Data Selling'); }} className="hover:underline">{t.privacyPolicyLink || 'Privacy Policy'}</a>
+                <button 
+                  onClick={() => setShowPrivacyModal(true)} 
+                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                >
+                  {t.privacyPolicyLink || 'Privacy Policy'}
+                </button>
                 <span className="text-slate-600">|</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); triggerToast('AeroNex Aviation Intelligence Platform — Built with React, Vite, Node & Gemini'); }} className="hover:underline">{t.aboutLink || 'About'}</a>
+                <button 
+                  onClick={() => setShowAboutModal(true)} 
+                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                >
+                  {t.aboutLink || 'About AeroNex'}
+                </button>
               </div>
             </div>
 
@@ -1920,6 +1927,178 @@ export function Settings() {
             </>
           )}
         </form>
+      </ModalWrapper>
+
+      {/* 8. Terms and Conditions Modal */}
+      <ModalWrapper
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Terms and Conditions"
+        subtitle="Last Updated: October 2026 • AeroNex National Airfare Intelligence Platform"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs text-slate-300 leading-relaxed">
+          <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+            <span className="font-bold block mb-1">SIH26056 Specification Notice</span>
+            AeroNex is developed as an econometric research and decision-support tool for Real-Time Airfare Price Index tracking and Consumer Price Index (CPI) augmentation under Ministry guidelines.
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">1. Acceptance of Terms</h4>
+            <p className="text-slate-400">
+              By accessing, browsing, or utilizing the AeroNex platform, APIs, predictive indices, or report exports, you agree to be bound by these Terms and Conditions. If you do not agree to all provisions, you may not access or use this service.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">2. Permitted Use and Analytical Data</h4>
+            <p className="text-slate-400">
+              AeroNex aggregates published domestic civil aviation pricing data for index formulation, academic research, macroeconomic modeling, and personal travel research. Users shall not use automated scripts to overload platform endpoints or breach underlying airline portal security per DGCA guidelines.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">3. Index Accuracy and Price Volatility</h4>
+            <p className="text-slate-400">
+              Airfare yields fluctuate dynamically based on airline revenue management engines. While the National Airfare Index (NAI) employs Laspeyres-Fisher capacity weighting and 95th-percentile winsorization to minimize sample bias, AeroNex provides pricing intelligence on an "as-observed" basis without warranties for commercial third-party bookings.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">4. Intellectual Property & Algorithmic Models</h4>
+            <p className="text-slate-400">
+              All proprietary algorithms, synthetic inflation tracking methodologies, UI interfaces, and real-time corridor aggregators are the intellectual property of AeroNex.
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-3 border-t border-slate-800">
+            <button
+              onClick={() => setShowTermsModal(false)}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white text-xs font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
+            >
+              Close Terms
+            </button>
+          </div>
+        </div>
+      </ModalWrapper>
+
+      {/* 9. Privacy Policy Modal */}
+      <ModalWrapper
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        title="Privacy Policy"
+        subtitle="Our commitment to your privacy • Zero Personal Data Selling"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs text-slate-300 leading-relaxed">
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+            <span className="font-bold block mb-1">Zero Monetization of User Data</span>
+            AeroNex does not sell, lease, or broker your personal travel searches, email addresses, or corridor tracking preferences to advertising networks or airline brokers.
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">1. Information We Collect</h4>
+            <p className="text-slate-400">
+              We only collect information necessary to deliver real-time airfare analytics: your registered email for alert delivery, account credentials for profile preferences, and anonymous session telemetry for platform performance optimization.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">2. How We Use Collected Data</h4>
+            <ul className="list-disc pl-5 space-y-1 text-slate-400 mt-1">
+              <li>Dispatching route price drop alerts and target fare triggers.</li>
+              <li>Maintaining your authenticated session and corridor watchlists.</li>
+              <li>Calibrating custom report downloads and econometric export formatting.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">3. Data Retention and Deletion Rights</h4>
+            <p className="text-slate-400">
+              You retain full ownership of your data. You may download a full copy of your recorded account data via the "Download My Data" option or permanently delete your account at any time via Settings &gt; Data & Privacy.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">4. Security Standards</h4>
+            <p className="text-slate-400">
+              All communications are encrypted using Transport Layer Security (TLS 1.3). API tokens and credential records are hashed utilizing enterprise cryptographic standards.
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-3 border-t border-slate-800">
+            <button
+              onClick={() => setShowPrivacyModal(false)}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer"
+            >
+              Acknowledge & Close
+            </button>
+          </div>
+        </div>
+      </ModalWrapper>
+
+      {/* 10. About AeroNex Modal */}
+      <ModalWrapper
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        title="About AeroNex"
+        subtitle="Real-Time Airfare Intelligence Platform (SIH26056)"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs text-slate-300 leading-relaxed">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 flex items-center gap-4">
+            <AeroNexLogo size={36} showTagline={false} />
+            <div>
+              <h3 className="text-white font-bold text-sm">AeroNex National Airfare Index Platform</h3>
+              <p className="text-slate-400 text-xs mt-0.5">Version 1.0.0 (Production Release)</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">Problem Statement SIH26056</h4>
+            <p className="text-slate-400">
+              Development of a Real-time Airfare Price Index for India through automated scraping and API ingestion of airline and OTA portals to augment the official Consumer Price Index (CPI) transport basket.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">Core Architecture & Technologies</h4>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="p-2.5 rounded-xl bg-[#090A0F] border border-white/[0.06]">
+                <span className="text-cyan-400 font-bold block text-[11px]">Frontend</span>
+                <span className="text-slate-400 text-[11px]">React 18, Vite, TypeScript, Tailwind CSS, Lucide React</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#090A0F] border border-white/[0.06]">
+                <span className="text-blue-400 font-bold block text-[11px]">Backend & Ingestion</span>
+                <span className="text-slate-400 text-[11px]">Node.js, Express, LiveDataStore, Ingestion Workers</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#090A0F] border border-white/[0.06]">
+                <span className="text-purple-400 font-bold block text-[11px]">AI Analytics</span>
+                <span className="text-slate-400 text-[11px]">Google Gemini LLM, Elasticity Detection, Trend Forecasting</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#090A0F] border border-white/[0.06]">
+                <span className="text-emerald-400 font-bold block text-[11px]">Econometrics</span>
+                <span className="text-slate-400 text-[11px]">Modified Laspeyres Aggregation & Fisher Ideal Index</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white text-sm mb-1">Coverage Scope</h4>
+            <p className="text-slate-400">
+              Continuously monitoring 104 high-density Indian domestic aviation corridors across 7 major scheduled carriers (IndiGo, Air India, Vistara, Akasa Air, SpiceJet, AirAsia India, and regional operators).
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-3 border-t border-slate-800">
+            <button
+              onClick={() => setShowAboutModal(false)}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#1788FF] to-[#4E55F5] text-white text-xs font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
+            >
+              Done
+            </button>
+          </div>
+        </div>
       </ModalWrapper>
 
     </DashboardLayout>
