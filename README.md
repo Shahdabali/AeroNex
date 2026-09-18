@@ -88,3 +88,5 @@ Navigate to `http://localhost:5173/dashboard` to view the application.
 
 ## Server-Side AI Architecture
 The `server/src/services/aiService.ts` module isolates all Google Gemini operations on the backend. No API keys are ever leaked to the client bundle. All incoming prompts are validated with Zod schemas, cached in-memory to prevent API abuse, and grounded in real database analytics.
+
+This Project is meant for SIH purpose.
