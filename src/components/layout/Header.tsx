@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle';
 import { LanguageSelector } from '../LanguageSelector';
 import { api } from '../../services/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { DataSourceBadge } from '../DataSourceBadge';
 import { useAppContext } from '../../context/AppProvider';
 import { INDIAN_AIRPORTS } from '../../data/indianAviation';
 
@@ -16,7 +17,6 @@ export function Header() {
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
   // Debounce search term to prevent keystroke lag and re-render stutter
   useEffect(() => {
@@ -30,35 +30,47 @@ export function Header() {
   const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  const queryClient = useQueryClient();
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
-    queryFn: async () => {
-      try {
-        const res = await api.getNotifications();
-        return Array.isArray(res) ? res : [];
-      } catch {
-        return [
-          { id: 1, message: 'Price dropped for DEL → BOM (₹5,380)', read: false },
-          { id: 2, message: 'Target fare reached for BOM → BLR', read: false },
-          { id: 3, message: 'Airfare Index updated: 124.8 (+3.7%)', read: false }
-        ];
-      }
-    }
+    queryFn: api.getNotifications,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: false,
   });
+  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
 
-  // Recommended Quick Routes
-  const trendingRoutes = [
-    { label: 'Delhi to Mumbai (DEL → BOM)', from: 'DEL', to: 'BOM', fare: '₹5,420', trend: '+4.8%' },
-    { label: 'Mumbai to Bengaluru (BOM → BLR)', from: 'BOM', to: 'BLR', fare: '₹4,280', trend: '-3.2%' },
-    { label: 'Delhi to Bengaluru (DEL → BLR)', from: 'DEL', to: 'BLR', fare: '₹6,850', trend: '+1.5%' },
-    { label: 'Delhi to Goa (DEL → GOI)', from: 'DEL', to: 'GOI', fare: '₹5,800', trend: '+2.1%' },
-    { label: 'Kolkata to Delhi (CCU → DEL)', from: 'CCU', to: 'DEL', fare: '₹5,120', trend: '+2.4%' },
-  ];
+  const markAllRead = async () => {
+    try {
+      await api.markNotificationsRead();
+    } finally {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }
+  };
+
+  // Trending routes come from the biggest fare movements the pipeline has actually observed.
+  const { data: routeChanges = [] } = useQuery({
+    queryKey: ['routeChanges'],
+    queryFn: api.getRouteChanges,
+    staleTime: 30_000,
+    retry: false,
+  });
+  const trendingRoutes = (Array.isArray(routeChanges) ? routeChanges : []).map((r: any) => {
+    const [from, to] = String(r.route).replace(/s*→s*/, '-').split('-');
+    const name = (code: string) => INDIAN_AIRPORTS.find(x => x.code === code)?.city || code;
+    return {
+      label: `${name(from)} to ${name(to)} (${from} → ${to})`,
+      from,
+      to,
+      fare: `₹${Number(r.currentFare).toLocaleString('en-IN')}`,
+      trend: `${r.change >= 0 ? '+' : ''}${r.change}%`,
+    };
+  });
 
   // Quick Feature Links
   const quickLinks = [
-    { label: 'Airfare Index', path: '/airfare-index', icon: BarChart3, desc: 'Live benchmark & regional map' },
-    { label: 'Flight Search', path: '/search', icon: Search, desc: 'Real-time fare lookup & comparison' },
+    { label: 'Airfare Index', path: '/airfare-index', icon: BarChart3, desc: 'National benchmark & regional map' },
+    { label: 'Flight Search', path: '/search', icon: Search, desc: 'Fare lookup & comparison' },
     { label: 'Price Trends', path: '/price-trends', icon: TrendingUp, desc: 'Corridor analytics & historical swings' },
     { label: 'CPI Analytics', path: '/cpi-analytics', icon: Calculator, desc: 'Aviation vs CPI inflation benchmarks' },
   ];
@@ -75,10 +87,9 @@ export function Header() {
   ).slice(0, 5);
 
   const filteredAirlines = [
-    { name: 'IndiGo (6E)', path: '/airlines', desc: '104 Monitored Routes' },
-    { name: 'Air India (AI)', path: '/airlines', desc: '85 Monitored Routes' },
-    { name: 'Vistara (UK)', path: '/airlines', desc: '42 Monitored Routes' },
-    { name: 'Akasa Air (QP)', path: '/airlines', desc: '24 Monitored Routes' },
+    { name: 'IndiGo (6E)', path: '/airlines', desc: 'Airline overview' },
+    { name: 'Air India (AI)', path: '/airlines', desc: 'Airline overview' },
+    { name: 'Akasa Air (QP)', path: '/airlines', desc: 'Airline overview' },
   ].filter(a => a.name.toLowerCase().includes(query));
 
   const handleRouteSelect = (from: string, to: string) => {
@@ -161,9 +172,12 @@ export function Header() {
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#1788FF] flex items-center gap-1.5">
                       <TrendingUp size={12} /> Trending Domestic Routes
                     </span>
-                    <span className="text-[10px] text-slate-400">Live 5s Feed</span>
+                    <DataSourceBadge />
                   </div>
                   <div className="space-y-1">
+                    {trendingRoutes.length === 0 && (
+                      <p className="px-3 py-2 text-xs text-slate-400">Fare movements will appear here once the data feed has produced observations.</p>
+                    )}
                     {trendingRoutes.map((r, i) => (
                       <div
                         key={i}
@@ -354,27 +368,27 @@ export function Header() {
         
         {/* Data Status Indicator */}
         <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-[#12141C] shadow-sm select-none">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="text-[10px] font-bold text-white tracking-widest uppercase">Live Data</span>
-          </div>
+          <DataSourceBadge showAge />
           <div className="w-px h-3 bg-white/[0.1]" />
           <span className="text-[10px] font-mono text-zinc-400 tracking-wider">AIRFARE FEED</span>
         </div>
 
         {/* Notification Bell */}
         <div className="relative" ref={notifRef}>
-          <div 
+          <button
+            type="button"
+            aria-label={`Notifications${unreadCount ? ` (${unreadCount} unread)` : ''}`}
+            aria-expanded={showNotifications}
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative cursor-pointer p-2 rounded-full hover:bg-white/5 transition-colors"
           >
             <Bell size={20} className="text-slate-500 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white transition-colors" />
             {unreadCount > 0 && (
-              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white tabular-nums animate-pulse">
+              <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-[#020A1D] flex items-center justify-center text-[9px] font-bold text-white tabular-nums">
                 {unreadCount}
               </div>
             )}
-          </div>
+          </button>
 
           {showNotifications && (
             <div className="absolute right-0 top-[50px] w-80 bg-[#0A1838] border border-slate-700 rounded-2xl shadow-2xl p-4 z-50">
@@ -382,7 +396,7 @@ export function Header() {
                 <span className="text-slate-900 dark:text-white font-bold text-sm">{t.notifications}</span>
                 {unreadCount > 0 && (
                   <button 
-                    onClick={() => setUnreadCount(0)} 
+                    onClick={markAllRead} 
                     className="text-xs text-blue-500 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Check size={12} /> {t.markRead}
@@ -392,15 +406,21 @@ export function Header() {
               <div className="flex flex-col gap-2 mt-3 max-h-60 overflow-y-auto">
                 {notifications.length > 0 ? (
                   notifications.map((notif: any, i: number) => (
-                    <div key={i} className={`p-2.5 rounded-xl border transition-all ${unreadCount === 0 ? 'bg-transparent border-slate-800/40 opacity-70' : 'bg-[#040D24]/80 border-slate-800/60 hover:border-blue-500/30'}`}>
+                    <div
+                      key={notif.id ?? i}
+                      className={`p-2.5 rounded-xl border transition-all ${notif.read ? 'bg-transparent border-slate-800/40 opacity-70' : 'bg-[#040D24]/80 border-slate-800/60 hover:border-blue-500/30'}`}
+                    >
                       <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">{notif.message || notif.title}</p>
-                      <span className="text-[10px] text-slate-400 mt-1 block">Just now</span>
+                      {notif.timestamp && (
+                        <span className="text-[10px] text-slate-400 mt-1 block">{new Date(notif.timestamp).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                      )}
                     </div>
                   ))
                 ) : (
                   <div className="py-6 text-center">
                     <Bell size={24} className="mx-auto text-slate-600 mb-2" />
-                    <p className="text-xs text-slate-400">No new notifications</p>
+                    <p className="text-xs text-slate-400">No notifications yet</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Set a price alert and you'll be notified here when it triggers.</p>
                   </div>
                 )}
               </div>
@@ -456,11 +476,11 @@ export function Header() {
                 {t.profileAccount}
               </button>
               <button 
-                onClick={() => { setShowProfileMenu(false); navigate('/my-flights'); }}
+                onClick={() => { setShowProfileMenu(false); navigate('/price-alerts'); }}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-[#1788FF] dark:hover:text-white hover:bg-blue-500/15 rounded-xl transition-all text-left cursor-pointer"
               >
                 <Bookmark size={16} className="text-purple-400" />
-                {t.mySavedFlights}
+                Price Alerts
               </button>
               <button 
                 onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}

@@ -1,22 +1,22 @@
 import { useState } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, Legend, ReferenceLine 
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
-import { 
-  Activity, Percent, TrendingUp, Fuel, 
-  ShieldCheck, BarChart2, Calculator, Info, Compass 
+import {
+  Activity, Percent, TrendingUp, Fuel,
+  ShieldCheck, BarChart2, Calculator, Info, Compass
 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { 
-  CPI_DATA_SERIES, COST_BASKET_BREAKDOWN, REGIONAL_CPI_DIVERGENCE 
+import {
+  CPI_DATA_SERIES, COST_BASKET_BREAKDOWN, REGIONAL_CPI_DIVERGENCE
 } from '../data/indianAviation';
 
 export function CPIAnalytics() {
   usePageTitle('CPI Analytics');
   const [period, setPeriod] = useState<'6M' | 'YTD' | '1Y' | '3Y' | '5Y'>('1Y');
-  
+
   // Active comparison series toggles
   const [visibleSeries, setVisibleSeries] = useState({
     airfare: true,
@@ -47,7 +47,7 @@ export function CPIAnalytics() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-10">
-        
+
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -61,7 +61,10 @@ export function CPIAnalytics() {
               CPI Augmentation Intelligence
             </h1>
             <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-              High-frequency automated ingestion of dynamic airfare data augments the traditional MoSPI Consumer Price Index (CPI) basket, enabling highly responsive inflation tracking across domestic corridors.
+              Compares airfare movement with the Consumer Price Index (CPI) basket to show how domestic airfares track broader inflation.
+            </p>
+            <p className="mt-2 text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 max-w-3xl">
+              Reference dataset: the CPI, ATF and cost-basket series on this page are bundled with the app for analysis and are not fetched live from MoSPI or fuel-price sources.
             </p>
           </div>
 
@@ -267,45 +270,45 @@ export function CPIAnalytics() {
                 />
                 <Legend />
                 {visibleSeries.airfare && (
-                  <Line 
-                    type="monotone" 
-                    dataKey="airfare" 
-                    name="Airfare Index" 
-                    stroke="#1788FF" 
-                    strokeWidth={3.5} 
-                    dot={{ r: 4, fill: '#07132e', stroke: '#1788FF', strokeWidth: 2 }} 
-                    activeDot={{ r: 7, fill: '#1788FF' }} 
+                  <Line
+                    type="monotone"
+                    dataKey="airfare"
+                    name="Airfare Index"
+                    stroke="#1788FF"
+                    strokeWidth={3.5}
+                    dot={{ r: 4, fill: '#07132e', stroke: '#1788FF', strokeWidth: 2 }}
+                    activeDot={{ r: 7, fill: '#1788FF' }}
                   />
                 )}
                 {visibleSeries.cpi && (
-                  <Line 
-                    type="monotone" 
-                    dataKey="cpi" 
-                    name="General CPI" 
-                    stroke="#10B981" 
-                    strokeWidth={2.5} 
+                  <Line
+                    type="monotone"
+                    dataKey="cpi"
+                    name="General CPI"
+                    stroke="#10B981"
+                    strokeWidth={2.5}
                     strokeDasharray="4 4"
-                    dot={{ r: 3, fill: '#10B981' }} 
+                    dot={{ r: 3, fill: '#10B981' }}
                   />
                 )}
                 {visibleSeries.transportCpi && (
-                  <Line 
-                    type="monotone" 
-                    dataKey="transportCpi" 
-                    name="Transport CPI" 
-                    stroke="#F59E0B" 
-                    strokeWidth={2.5} 
-                    dot={{ r: 3, fill: '#F59E0B' }} 
+                  <Line
+                    type="monotone"
+                    dataKey="transportCpi"
+                    name="Transport CPI"
+                    stroke="#F59E0B"
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: '#F59E0B' }}
                   />
                 )}
                 {visibleSeries.atfIndex && (
-                  <Line 
-                    type="monotone" 
-                    dataKey="atfIndex" 
-                    name="ATF Jet Fuel" 
-                    stroke="#EC4899" 
-                    strokeWidth={2} 
-                    dot={{ r: 3, fill: '#EC4899' }} 
+                  <Line
+                    type="monotone"
+                    dataKey="atfIndex"
+                    name="ATF Jet Fuel"
+                    stroke="#EC4899"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: '#EC4899' }}
                   />
                 )}
               </LineChart>
@@ -315,7 +318,7 @@ export function CPIAnalytics() {
 
         {/* Two Column Grid: Cost Basket & MoM Seasonality */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+
           {/* Cost Basket Breakdown (5 cols) */}
           <div className="lg:col-span-5 bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
             <div>
@@ -337,9 +340,9 @@ export function CPIAnalytics() {
                       <span className="font-mono font-bold text-white">{item.weight}%</span>
                     </div>
                     <div className="w-full h-2.5 bg-[#081533] rounded-full overflow-hidden border border-slate-800">
-                      <div 
-                        className="h-full rounded-full transition-all duration-700" 
-                        style={{ width: `${item.weight}%`, backgroundColor: item.color }} 
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${item.weight}%`, backgroundColor: item.color }}
                       />
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
@@ -384,9 +387,9 @@ export function CPIAnalytics() {
                     formatter={(val: any) => [`${val}%`, 'MoM Change']}
                   />
                   <ReferenceLine y={0} stroke="#475569" />
-                  <Bar 
-                    dataKey="momAirfareChange" 
-                    name="MoM Change" 
+                  <Bar
+                    dataKey="momAirfareChange"
+                    name="MoM Change"
                     radius={[6, 6, 0, 0]}
                     fill="#1788FF"
                   />
@@ -437,7 +440,7 @@ export function CPIAnalytics() {
                     ₹{annualSpend.toLocaleString('en-IN')}
                   </span>
                 </div>
-                <input 
+                <input
                   type="range"
                   min="20000"
                   max="500000"

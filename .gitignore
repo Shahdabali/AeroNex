@@ -25,3 +25,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local runtime data (per-user settings, alerts, tickets)
+server/data/*.json

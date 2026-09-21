@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
-import { 
-  Search, Calendar, Users, Briefcase, ArrowLeftRight, Plane, 
-  Check, Bookmark, Clock, ChevronDown, Bell
+import { FlightDetailModal } from '../components/FlightDetailModal';
+import { DataSourceBadge } from '../components/DataSourceBadge';
+import { ErrorBlock } from '../components/StateViews';
+import {
+  Search, Calendar, Users, Briefcase, ArrowLeftRight, Plane,
+  Check, Bookmark, Clock, ChevronDown, Bell, Info
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -12,7 +15,7 @@ import { INDIAN_AIRPORTS, type IndianAirport, type FlightItem } from '../data/in
 
 export function FlightSearch() {
   usePageTitle('Flight Search');
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const initialFrom = searchParams.get('from') || 'DEL';
   const initialTo = searchParams.get('to') || 'BOM';
@@ -26,28 +29,22 @@ export function FlightSearch() {
   });
   const [passengers, setPassengers] = useState(1);
   const [cabinClass, setCabinClass] = useState('Economy');
-  
+
   // Dropdown UI states
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showToDropdown, setShowToDropdown] = useState(false);
   const [fromSearchFilter, setFromSearchFilter] = useState('');
   const [toSearchFilter, setToSearchFilter] = useState('');
-  
+
   // Sorting & Filtering
   const [sortBy, setSortBy] = useState<'cheapest' | 'fastest' | 'departure'>('cheapest');
   const [filterStops, setFilterStops] = useState<'all' | 'nonstop'>('all');
   const [filterMaxPrice, setFilterMaxPrice] = useState<number>(15000);
-  const [filterAirline, setFilterAirline] = useState<string>('all');
+  const [filterAirline, setFilterAirline] = useState<string>(searchParams.get('airline') || 'all');
 
   // Tracking notifications
-  const [savedFlightIds, setSavedFlightIds] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('aeronex_saved_flights');
-      return stored ? JSON.parse(stored).map((f: any) => f.id) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [savedFlightIds, setSavedFlightIds] = useState<string[]>([]);
+  const [detailFlight, setDetailFlight] = useState<FlightItem | null>(null);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -76,11 +73,27 @@ export function FlightSearch() {
     if (paramTo) setToCode(paramTo.toUpperCase());
   }, [searchParams]);
 
-  const { data: flights = [], isLoading, refetch } = useQuery<FlightItem[]>({
+  // Keep the URL in sync with the search so it survives refresh and can be shared.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    next.set('from', fromCode);
+    next.set('to', toCode);
+    next.set('date', departDate);
+    if (next.toString() !== searchParams.toString()) setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromCode, toCode, departDate]);
+
+  const { data: flights = [], isLoading, isError, error, refetch } = useQuery<FlightItem[]>({
     queryKey: ['flights', fromCode, toCode, departDate, cabinClass],
     queryFn: () => api.searchFlights(fromCode, toCode, departDate, cabinClass),
     enabled: Boolean(fromCode && toCode),
+    staleTime: 30_000,
   });
+
+  const minutes = (d: string) => {
+    const m = d.match(/(\d+)h\s*(\d+)?m?/);
+    return m ? Number(m[1]) * 60 + Number(m[2] || 0) : 0;
+  };
 
   const getAirportInfo = (code: string) => {
     return INDIAN_AIRPORTS.find(a => a.code.toUpperCase() === code.toUpperCase()) || {
@@ -116,34 +129,25 @@ export function FlightSearch() {
     setToSearchFilter('');
   };
 
-  const handleSaveFlight = (flight: FlightItem) => {
+  // "Track" creates a real price alert for the corridor at 10% below this fare.
+  const handleTrackFlight = async (flight: FlightItem) => {
+    if (savedFlightIds.includes(flight.id)) return;
     try {
-      const existing = localStorage.getItem('aeronex_saved_flights');
-      let list = existing ? JSON.parse(existing) : [];
-      if (savedFlightIds.includes(flight.id)) {
-        list = list.filter((f: any) => f.id !== flight.id);
-        setSavedFlightIds(savedFlightIds.filter(id => id !== flight.id));
-        setToastMessage(`Flight ${flight.flightNumber} removed from saved flights.`);
-      } else {
-        const enriched = {
-          ...flight,
-          savedAt: new Date().toISOString(),
-          originCity: getAirportInfo(flight.from).city,
-          destCity: getAirportInfo(flight.to).city,
-          targetFare: Math.round(flight.price * 0.9),
-          currentFare: flight.price,
-          status: 'Tracking Live'
-        };
-        list.push(enriched);
-        setSavedFlightIds([...savedFlightIds, flight.id]);
-        setToastMessage(`Flight ${flight.flightNumber} saved! View in My Flights.`);
-      }
-      localStorage.setItem('aeronex_saved_flights', JSON.stringify(list));
-      setTimeout(() => setToastMessage(null), 3500);
-    } catch {
-      setToastMessage('Could not update saved flights.');
-      setTimeout(() => setToastMessage(null), 2500);
+      await api.createAlert({
+        origin: flight.from,
+        destination: flight.to,
+        targetPrice: Math.round(flight.price * 0.9),
+        airline: flight.airline,
+        date: departDate,
+        cabinClass,
+        channels: ['In-app'],
+      });
+      setSavedFlightIds(ids => [...ids, flight.id]);
+      setToastMessage(`Price alert set for ${flight.from} → ${flight.to} below ₹${Math.round(flight.price * 0.9).toLocaleString('en-IN')}. Manage it in Price Alerts.`);
+    } catch (err: any) {
+      setToastMessage(err?.message || 'Could not set the price alert.');
     }
+    setTimeout(() => setToastMessage(null), 4500);
   };
 
   // Filtered dropdown airport lists
@@ -169,12 +173,12 @@ export function FlightSearch() {
     })
     .sort((a, b) => {
       if (sortBy === 'cheapest') return a.price - b.price;
-      if (sortBy === 'fastest') return a.duration.localeCompare(b.duration);
+      if (sortBy === 'fastest') return minutes(a.duration) - minutes(b.duration) || a.price - b.price;
       if (sortBy === 'departure') return a.departureTime.localeCompare(b.departureTime);
       return 0;
     });
 
-  const lowestPrice = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.price)) : 4500;
+  const lowestPrice = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.price)) : 0;
   const fromInfo = getAirportInfo(fromCode);
   const toInfo = getAirportInfo(toCode);
 
@@ -201,14 +205,12 @@ export function FlightSearch() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2.5">
-              Flight Search & Real-Time Fares
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30">
-                5s Live Pricing
-              </span>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2.5 flex-wrap">
+              Flight Search &amp; Fare Comparison
+              <DataSourceBadge />
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Search verified multi-carrier flights across 20+ major Indian hubs with automated fare tracking.
+              Compare indicative fares across Indian domestic corridors and set price alerts. Prices are anchored to fares AeroNex has observed.
             </p>
           </div>
 
@@ -233,17 +235,17 @@ export function FlightSearch() {
             ))}
           </div>
         </div>
-        
+
         {/* Main Search Panel */}
         <div className="bg-[rgba(10,24,56,0.7)] backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-            
+
             {/* Departure City Selector */}
             <div className="lg:col-span-4 relative" ref={fromRef}>
               <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1.5 block">
                 Departure (From)
               </label>
-              <div 
+              <div
                 onClick={() => {
                   setShowFromDropdown(!showFromDropdown);
                   setShowToDropdown(false);
@@ -276,7 +278,7 @@ export function FlightSearch() {
                       className="w-full bg-[#0A1838] border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-[#1788FF]"
                     />
                   </div>
-                  
+
                   <div className="overflow-y-auto flex-1 divide-y divide-slate-800/60 space-y-1">
                     <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1">
                       Major Indian Airports ({filteredFromAirports.length})
@@ -325,7 +327,7 @@ export function FlightSearch() {
               <label className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1.5 block">
                 Arrival (To)
               </label>
-              <div 
+              <div
                 onClick={() => {
                   setShowToDropdown(!showToDropdown);
                   setShowFromDropdown(false);
@@ -358,7 +360,7 @@ export function FlightSearch() {
                       className="w-full bg-[#0A1838] border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
                     />
                   </div>
-                  
+
                   <div className="overflow-y-auto flex-1 divide-y divide-slate-800/60 space-y-1">
                     <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1">
                       Destinations ({filteredToAirports.length})
@@ -397,8 +399,8 @@ export function FlightSearch() {
               </label>
               <div className="relative">
                 <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   value={departDate}
                   onChange={(e) => setDepartDate(e.target.value)}
                   className="w-full bg-[#0A1838] border border-slate-700 rounded-2xl text-white pl-10 pr-4 py-3 text-sm focus:border-[#1788FF] focus:outline-none"
@@ -413,8 +415,8 @@ export function FlightSearch() {
               <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2">
                 <Users size={16} className="text-slate-400" />
                 <span className="text-xs text-slate-400">Travelers:</span>
-                <select 
-                  value={passengers} 
+                <select
+                  value={passengers}
                   onChange={(e) => setPassengers(Number(e.target.value))}
                   className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer"
                 >
@@ -428,8 +430,8 @@ export function FlightSearch() {
               <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2">
                 <Briefcase size={16} className="text-slate-400" />
                 <span className="text-xs text-slate-400">Cabin:</span>
-                <select 
-                  value={cabinClass} 
+                <select
+                  value={cabinClass}
                   onChange={(e) => setCabinClass(e.target.value)}
                   className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer"
                 >
@@ -441,15 +443,23 @@ export function FlightSearch() {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => refetch()}
               className="w-full md:w-auto bg-gradient-to-r from-cyan-500 via-[#1788FF] to-[#4E55F5] text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] transition-all cursor-pointer"
             >
               <Search size={18} />
-              Find Live Fares
+              Search fares
             </button>
           </div>
         </div>
+
+        <p className="flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+          <Info size={14} className="shrink-0 mt-0.5" />
+          <span>
+            Schedules and fares below are an <strong>indicative model</strong>, not live airline inventory. Where AeroNex has observed a fare for the corridor, prices are scaled to it. Open a flight for the details
+            and caveats.
+          </span>
+        </p>
 
         {/* Results Toolbar (Filters & Sorters) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,24,56,0.4)] p-4 rounded-2xl border border-slate-800/80">
@@ -468,7 +478,7 @@ export function FlightSearch() {
           <div className="flex flex-wrap items-center gap-3 text-xs">
             {/* Sort options */}
             <div className="flex items-center bg-[#0A1838] border border-slate-700 rounded-xl p-1">
-              <button 
+              <button
                 onClick={() => setSortBy('cheapest')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   sortBy === 'cheapest' ? 'bg-[#1788FF] text-white' : 'text-slate-400 hover:text-white'
@@ -476,7 +486,7 @@ export function FlightSearch() {
               >
                 Cheapest
               </button>
-              <button 
+              <button
                 onClick={() => setSortBy('fastest')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   sortBy === 'fastest' ? 'bg-[#1788FF] text-white' : 'text-slate-400 hover:text-white'
@@ -484,7 +494,7 @@ export function FlightSearch() {
               >
                 Fastest
               </button>
-              <button 
+              <button
                 onClick={() => setSortBy('departure')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   sortBy === 'departure' ? 'bg-[#1788FF] text-white' : 'text-slate-400 hover:text-white'
@@ -495,7 +505,7 @@ export function FlightSearch() {
             </div>
 
             {/* Filter by Stops */}
-            <select 
+            <select
               value={filterStops}
               onChange={(e) => setFilterStops(e.target.value as any)}
               className="bg-[#0A1838] border border-slate-700 rounded-xl text-slate-300 px-3 py-2 outline-none"
@@ -505,7 +515,7 @@ export function FlightSearch() {
             </select>
 
             {/* Filter by Airline */}
-            <select 
+            <select
               value={filterAirline}
               onChange={(e) => setFilterAirline(e.target.value)}
               className="bg-[#0A1838] border border-slate-700 rounded-xl text-slate-300 px-3 py-2 outline-none"
@@ -513,7 +523,6 @@ export function FlightSearch() {
               <option value="all">All Airlines</option>
               <option value="6E">IndiGo</option>
               <option value="AI">Air India</option>
-              <option value="UK">Vistara</option>
               <option value="QP">Akasa Air</option>
               <option value="SG">SpiceJet</option>
             </select>
@@ -524,15 +533,14 @@ export function FlightSearch() {
         <div className="bg-gradient-to-r from-blue-950/40 via-cyan-950/20 to-purple-950/30 border border-cyan-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-cyan-400">
-              <Bell className="w-5 h-5 animate-pulse" />
+              <Bell className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-white">Track fares for {fromCode} ➔ {toCode}</span>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-500/30">AI Autonomous</span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Target drops below ₹{Math.round(lowestPrice * 0.9).toLocaleString('en-IN')} (-10%) with multi-channel alerts (WhatsApp, Discord, Email).
+                {lowestPrice ? `Get notified in-app when the fare drops below ₹${Math.round(lowestPrice * 0.9).toLocaleString('en-IN')} (10% under today's lowest).` : 'Get notified in-app when the fare drops to your target.'}
               </p>
             </div>
           </div>
@@ -548,8 +556,12 @@ export function FlightSearch() {
         {/* Flight Cards Grid */}
         {isLoading ? (
           <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-12 text-center text-slate-400 flex flex-col items-center justify-center">
-            <Plane className="w-8 h-8 text-[#1788FF] animate-bounce mb-3" />
-            <span className="text-sm font-medium">Scanning live flight radar & dynamic fares...</span>
+            <Plane className="w-8 h-8 text-[#1788FF] animate-pulse mb-3" />
+            <span className="text-sm font-medium">Loading fares…</span>
+          </div>
+        ) : isError ? (
+          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px]">
+            <ErrorBlock error={error} onRetry={() => refetch()} title="Couldn't load fares" />
           </div>
         ) : processedFlights.length > 0 ? (
           <div className="space-y-4">
@@ -557,7 +569,7 @@ export function FlightSearch() {
               const isSaved = savedFlightIds.includes(flight.id);
 
               return (
-                <div 
+                <div
                   key={flight.id}
                   className="bg-[rgba(10,24,56,0.65)] hover:bg-[rgba(10,24,56,0.85)] border border-blue-500/20 hover:border-blue-500/40 rounded-[20px] p-5 transition-all shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 group"
                 >
@@ -576,7 +588,7 @@ export function FlightSearch() {
                         )}
                       </div>
                       <span className="text-xs text-slate-400 font-mono block">
-                        {flight.flightNumber} • {flight.aircraft}
+                        {flight.flightNumber}
                       </span>
                     </div>
                   </div>
@@ -621,22 +633,17 @@ export function FlightSearch() {
                       <div className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">
                         ₹{flight.price.toLocaleString('en-IN')}
                       </div>
-                      <span className="text-[11px] text-slate-400 block">
-                        {flight.availableSeats <= 6 ? (
-                          <span className="text-amber-400 font-semibold">Only {flight.availableSeats} seats left</span>
-                        ) : (
-                          `${flight.availableSeats} seats available`
-                        )}
-                      </span>
+                      <span className="text-[11px] text-slate-400 block">{flight.priceBasis === 'observed' ? 'Scaled to observed fare' : 'Model estimate'}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleSaveFlight(flight)}
-                        title={isSaved ? "Remove from tracking" : "Track price in My Flights"}
+                        onClick={() => handleTrackFlight(flight)}
+                        aria-label={isSaved ? 'Price alert set' : `Set a price alert for ${flight.flightNumber}`}
+                        title={isSaved ? 'Price alert set' : 'Track this fare with a price alert'}
                         className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                          isSaved 
-                            ? 'bg-blue-500/20 border-blue-500 text-cyan-400 shadow-[0_0_15px_rgba(23,136,255,0.3)]' 
+                          isSaved
+                            ? 'bg-blue-500/20 border-blue-500 text-cyan-400 shadow-[0_0_15px_rgba(23,136,255,0.3)]'
                             : 'bg-[#0A1838] border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
                         }`}
                       >
@@ -644,13 +651,10 @@ export function FlightSearch() {
                       </button>
 
                       <button
-                        onClick={() => {
-                          setToastMessage(`Flight ${flight.flightNumber} selected. Redirecting to instant reservation...`);
-                          setTimeout(() => setToastMessage(null), 3000);
-                        }}
+                        onClick={() => setDetailFlight(flight)}
                         className="bg-gradient-to-r from-[#1788FF] to-[#4E55F5] hover:shadow-[0_0_20px_rgba(23,136,255,0.4)] text-white px-5 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer whitespace-nowrap"
                       >
-                        Select Flight
+                        View details
                       </button>
                     </div>
                   </div>
@@ -675,6 +679,7 @@ export function FlightSearch() {
           </div>
         )}
       </div>
+      {detailFlight && <FlightDetailModal flight={detailFlight} onClose={() => setDetailFlight(null)} />}
     </DashboardLayout>
   );
 }

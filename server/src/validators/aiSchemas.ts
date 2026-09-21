@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
+const routeCode = z.string().regex(/^[A-Za-z]{3}-[A-Za-z]{3}$/, 'Route must look like DEL-BOM');
+
 // Input schemas
 export const predictRequestSchema = z.object({
-  route: z.string().min(3).optional(),
+  route: routeCode.optional(),
   origin: z.string().length(3).optional(),
   destination: z.string().length(3).optional(),
   departureDate: z.string().optional(),
@@ -11,16 +13,21 @@ export const predictRequestSchema = z.object({
 });
 
 export const routeAnalysisRequestSchema = z.object({
-  route: z.string().min(3),
+  route: routeCode,
 });
 
 export const bookingRecommendationRequestSchema = z.object({
-  route: z.string().min(3),
+  route: routeCode,
   targetFare: z.number().positive().optional(),
 });
 
 export const regionalAnalysisRequestSchema = z.object({
   region: z.enum(['North', 'South', 'East', 'West', 'Central', 'Northeast']),
+});
+
+export const chatRequestSchema = z.object({
+  message: z.string().trim().min(2, 'Please type a question.').max(500, 'Questions are limited to 500 characters.'),
+  route: routeCode.optional(),
 });
 
 // Output validation schemas
@@ -34,7 +41,16 @@ export const predictionOutputSchema = z.object({
   recommendedAction: z.enum(['book_now', 'book_soon', 'wait', 'monitor']),
   bestBookingWindow: z.string(),
   reason: z.string(),
-  disclaimer: z.string().default('AI predictions are estimates based on available airfare data and are not guaranteed.')
+  disclaimer: z.string().default('AI predictions are estimates based on available airfare data and are not guaranteed.'),
+  // Explainability: why the recommendation was produced and what it was based on.
+  explanation: z.object({
+    price: z.string(),
+    timing: z.string(),
+    route: z.string(),
+  }).optional(),
+  dataUsed: z.array(z.string()).optional(),
+  caveats: z.array(z.string()).optional(),
+  source: z.enum(['gemini', 'deterministic']).optional(),
 });
 
 export const routeAnalysisOutputSchema = z.object({
@@ -45,6 +61,14 @@ export const routeAnalysisOutputSchema = z.object({
   recommendation: z.string(),
   bestBookingWindow: z.string(),
   explanation: z.string(),
+  stats: z.object({
+    observations: z.number(),
+    minFare: z.number().nullable(),
+    maxFare: z.number().nullable(),
+    averageFare: z.number().nullable(),
+    currentFare: z.number(),
+  }).optional(),
+  source: z.enum(['gemini', 'deterministic']).optional(),
 });
 
 export const aiInsightItemSchema = z.object({

@@ -18,13 +18,13 @@ export function LandingPage() {
       <nav className="relative z-20 flex items-center justify-between px-6 py-4 lg:px-12 backdrop-blur-md border-b border-white/[0.05]">
         <AeroNexLogo size={40} showTagline={false} />
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => navigate('/login')}
             className="text-sm font-semibold text-zinc-300 hover:text-white transition-colors cursor-pointer"
           >
             Sign In
           </button>
-          <button 
+          <button
             onClick={() => navigate('/dashboard')}
             className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl text-sm font-bold text-white shadow-[0_0_15px_rgba(0,229,255,0.3)] hover:shadow-[0_0_25px_rgba(0,229,255,0.5)] transition-all cursor-pointer flex items-center gap-2"
           >
@@ -45,8 +45,8 @@ export function LandingPage() {
             <ShieldCheck size={14} />
             Experimental Airfare Price Indexing
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
@@ -57,29 +57,29 @@ export function LandingPage() {
               Economic Intelligence.
             </span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-400 max-w-3xl mb-10 leading-relaxed"
           >
-            An AI-powered platform for real-time airfare intelligence, price indexing, and analytical support for India's evolving aviation economy. Designed to explore potential augmentation of the Consumer Price Index (CPI).
+            An AI-powered platform for airfare intelligence, price indexing, and analytical support for India's evolving aviation economy. Designed to explore potential augmentation of the Consumer Price Index (CPI).
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center gap-4"
           >
-            <button 
+            <button
               onClick={() => navigate('/dashboard')}
               className="px-8 py-4 bg-white text-[#0A0F1C] rounded-xl text-base font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:-translate-y-1 transition-all cursor-pointer w-full sm:w-auto"
             >
               Explore Airfare Index
             </button>
-            <button 
+            <button
               onClick={() => navigate('/methodology')}
               className="px-8 py-4 bg-[#121624] border border-white/[0.1] text-white rounded-xl text-base font-semibold hover:bg-white/[0.05] transition-all cursor-pointer w-full sm:w-auto flex items-center justify-center gap-2"
             >
@@ -133,7 +133,7 @@ export function LandingPage() {
                 <ul className="space-y-4">
                   {[
                     'Automated, policy-compliant data ingestion',
-                    'Real-time strict price normalization',
+                    'Strict price normalization',
                     'Dynamic Airfare Price Index calculation',
                     'Route-level intelligence and volatility tracking',
                     'AI-assisted anomaly detection & data validation'
@@ -157,32 +157,32 @@ export function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <FeatureCard 
+            <FeatureCard
               icon={LineChart}
               title="Airfare Price Index"
               desc="A weighted benchmark modeled after the CPI basket, tracking high-density metro corridors and regional routes."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Globe}
               title="Route Intelligence"
               desc="Analyze specific sector yields, fare volatility, and structural pricing changes across domestic airspace."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Database}
               title="Automated Validation"
-              desc="Ingestion pipelines feature real-time data cleaning, ensuring observed fares are normalized before index inclusion."
+              desc="Ingestion pipelines feature automated data cleaning, ensuring observed fares are normalized before index inclusion."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Brain}
               title="AI Anomaly Detection"
               desc="Detects sudden fare spikes or drops outside expected historical ranges using Gemini-powered intelligence."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Activity}
               title="Volatility Monitoring"
               desc="Identify sectors experiencing rapid price instability to understand structural airfare inflation."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={ShieldCheck}
               title="CPI Augmentation"
               desc="Analytical insights designed to explore how high-frequency observations can complement traditional methodologies."

@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { 
-  Calculator, Layers, ShieldCheck, 
+import {
+  Calculator, Layers, ShieldCheck,
   Sliders, RefreshCw, ArrowRight, CheckCircle2,
   Activity, Database
 } from 'lucide-react';
@@ -83,14 +83,18 @@ export function MethodologyPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-16">
-        
+
+        <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+          <strong>Implementation note:</strong> the index the platform computes today is the fixed-basket ratio described on the Airfare Index page (current fares ÷ baseline fares over the tracked corridors). The Laspeyres-Fisher, capacity-weighted specification below is the target methodology; it needs DGCA seat-capacity data that is not integrated yet.
+        </div>
+
         {/* Header Hero Banner */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B0D14] via-[#12141F] to-[#161928] border border-white/[0.08] p-6 sm:p-8 shadow-2xl obsidian-card">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-3xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <ShieldCheck size={14} />
-                <span>DGCA-Calibrated Econometric Specification</span>
+                <span>Econometric Specification</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
                 National Airfare Index <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">(NAI)</span> Methodology
@@ -132,7 +136,7 @@ export function MethodologyPage() {
             </div>
             <div>
               <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Sampling Window</span>
-              <span className="text-white text-base font-bold font-mono">104 Metro Pairs</span>
+              <span className="text-white text-base font-bold font-mono">Fixed corridor basket</span>
             </div>
             <div>
               <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Dynamic Trim</span>
@@ -217,7 +221,7 @@ export function MethodologyPage() {
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span>Yield updates verified against 104 active domestic routes across 7 scheduled airlines.</span>
+                <span>Target design: yield updates verified across the full domestic route network (see implementation note above).</span>
               </div>
             </div>
           </div>
@@ -235,7 +239,7 @@ export function MethodologyPage() {
                 </span>
               </div>
               <p className="text-xs text-zinc-400">
-                Adjust domestic corridor fares below. Watch the modified Laspeyres algorithm recompute national & regional indices in real time.
+                Adjust domestic corridor fares below. Watch the index recompute instantly. This is an interactive illustration, not live data.
               </p>
             </div>
 
@@ -394,9 +398,9 @@ export function MethodologyPage() {
         {/* Section 4: Architecture Link Card */}
         <div className="p-6 rounded-2xl bg-[#12141C] border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 obsidian-card">
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-white font-bold text-base">Interested in real-time data collection?</h4>
+            <h4 className="text-white font-bold text-base">Want to see how data is collected?</h4>
             <p className="text-xs text-zinc-400">
-              Inspect active scraping workers, GDS connectors, and live telemetry feeds on our data ingestion control panel.
+              Open the data pipeline to see the active data source, validation results and refresh history.
             </p>
           </div>
           <Link

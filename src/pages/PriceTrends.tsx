@@ -1,292 +1,186 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { 
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  AreaChart, Area, ReferenceLine 
-} from 'recharts';
-import { 
-  ArrowLeftRight, TrendingDown, TrendingUp, Search, Zap 
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ReferenceLine } from 'recharts';
+import { TrendingDown, TrendingUp, Bell, Search, Sparkles } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { INDIAN_AIRPORTS } from '../data/indianAviation';
+import { api } from '../services/api';
+import { useAppContext } from '../context/AppProvider';
+import { useRoutes, MARKET_REFRESH_MS, fmtINR } from '../hooks/useMarket';
+import { DataSourceBadge } from '../components/DataSourceBadge';
+import { LoadingBlock, ErrorBlock, EmptyBlock } from '../components/StateViews';
+import { RouteDetailModal } from '../components/RouteDetailModal';
+
+const city = (code: string) => INDIAN_AIRPORTS.find(a => a.code === code)?.city ?? code;
 
 export function PriceTrends() {
   usePageTitle('Price Trends');
   const navigate = useNavigate();
+  const { theme } = useAppContext();
+  const isLight = theme === 'light';
+  const [params, setParams] = useSearchParams();
+  const [showDetail, setShowDetail] = useState(false);
 
-  const [origin, setOrigin] = useState('DEL');
-  const [destination, setDestination] = useState('BOM');
-  const [period, setPeriod] = useState<'30d' | '90d' | '180d'>('30d');
+  const routes = useRoutes();
+  const options = useMemo(() => ((routes.data as any[]) || []).map(r => r.route as string).sort(), [routes.data]);
+  const route = params.get('route') && options.includes(params.get('route')!) ? params.get('route')! : options.includes('DEL-BOM') ? 'DEL-BOM' : options[0];
 
-  const handleSwap = () => {
-    const temp = origin;
-    setOrigin(destination);
-    setDestination(temp);
-  };
+  const history = useQuery({
+    queryKey: ['routeHistory', route],
+    queryFn: () => api.getRouteHistory(route),
+    enabled: Boolean(route),
+    refetchInterval: MARKET_REFRESH_MS,
+    staleTime: 10_000,
+    retry: 1,
+  });
 
-  // Generate dynamic trend dataset based on selected route and period
-  const trendData = useMemo(() => {
-    const isMajor = (origin === 'DEL' && destination === 'BOM') || (origin === 'BOM' && destination === 'DEL');
-    const isBlr = (origin === 'BOM' && destination === 'BLR') || (origin === 'BLR' && destination === 'BOM');
-    const isGoi = origin === 'GOI' || destination === 'GOI';
+  const points = useMemo(
+    () =>
+      ((history.data as any[]) || []).map(h => ({
+        at: new Date(h.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        date: new Date(h.timestamp).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+        fare: h.fare as number,
+      })),
+    [history.data],
+  );
 
-    let base = 5200;
-    if (isMajor) base = 5400;
-    else if (isBlr) base = 4300;
-    else if (isGoi) base = 4800;
+  const stats = useMemo(() => {
+    if (points.length === 0) return null;
+    const fares = points.map(p => p.fare);
+    const avg = fares.reduce((a, b) => a + b, 0) / fares.length;
+    return {
+      min: Math.min(...fares),
+      max: Math.max(...fares),
+      avg,
+      first: fares[0],
+      last: fares[fares.length - 1],
+      change: ((fares[fares.length - 1] - fares[0]) / fares[0]) * 100,
+    };
+  }, [points]);
 
-    const days = period === '30d' ? 30 : period === '90d' ? 90 : 180;
-    const step = period === '30d' ? 2 : period === '90d' ? 6 : 12;
-
-    const data = [];
-    const now = new Date();
-
-    for (let i = days; i >= 0; i -= step) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-      
-      // Dynamic simulated curve with weekday/weekend fluctuations
-      const dayOfWeek = d.getDay();
-      const weekendSurcharge = (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) ? 450 : -200;
-      const wave = Math.sin(i / 5) * 350;
-      const jitter = ((i * 37) % 250) - 125;
-      const fare = Math.round(base + weekendSurcharge + wave + jitter);
-
-      data.push({
-        date: label,
-        price: fare,
-        lowest: Math.round(fare * 0.88),
-        highest: Math.round(fare * 1.15),
-      });
-    }
-
-    return data;
-  }, [origin, destination, period]);
-
-  const prices = trendData.map(d => d.price);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-  const avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
-  const currentPrice = prices[prices.length - 1];
-  const firstPrice = prices[0];
-  const priceChangePercent = (((currentPrice - firstPrice) / firstPrice) * 100).toFixed(1);
-  const isDrop = Number(priceChangePercent) <= 0;
-
-  const originAirport = INDIAN_AIRPORTS.find(a => a.code === origin) || { city: origin, name: 'Airport' };
-  const destAirport = INDIAN_AIRPORTS.find(a => a.code === destination) || { city: destination, name: 'Airport' };
+  const [from, to] = (route || '-').split('-');
+  const axis = isLight ? '#64748B' : '#94A3B8';
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-6 pb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-              Historical Price Trends & Volatility
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30">
-                180-Day Memory
-              </span>
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Analyze seasonal fare trajectories and timing windows across domestic aviation sectors.
-            </p>
-          </div>
-
-          <div className="flex bg-[#12141C] border border-white/[0.08] rounded-2xl p-1 shadow-lg">
-            {(['30d', '90d', '180d'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  period === p
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                {p.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Route Selector Panel */}
-        <div className="bg-[#12141C] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6 shadow-2xl obsidian-card">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            {/* Origin */}
-            <div className="flex-1 w-full">
-              <label className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-2 block font-mono">
-                Origin City
-              </label>
-              <select
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="w-full bg-[#161824] border border-white/[0.08] rounded-xl text-white px-4 py-3 text-sm focus:border-cyan-500/60 outline-none cursor-pointer"
-              >
-                {INDIAN_AIRPORTS.map((a) => (
-                  <option key={a.code} value={a.code} className="bg-[#12141C]">
-                    {a.code} — {a.city} ({a.name})
-                  </option>
-                ))}
-              </select>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold text-white">Price Trends</h1>
+              <DataSourceBadge />
             </div>
+            <p className="text-slate-400 text-sm mt-1">Observed fare history for a corridor. Only fares AeroNex has actually recorded since the data server started are shown.</p>
+          </div>
 
-            {/* Swap */}
-            <button
-              onClick={handleSwap}
-              title="Swap origin & destination"
-              className="mt-6 w-10 h-10 rounded-full bg-[#161824] border border-white/[0.08] hover:border-cyan-400 text-zinc-400 hover:text-cyan-400 flex items-center justify-center transition-all cursor-pointer shrink-0"
+          <div>
+            <label htmlFor="trend-route" className="block text-xs font-semibold text-slate-400 mb-1">Corridor</label>
+            <select
+              id="trend-route"
+              value={route ?? ''}
+              onChange={e => setParams({ route: e.target.value }, { replace: true })}
+              disabled={options.length === 0}
+              className="bg-[#0A1838] border border-slate-700 rounded-xl text-white px-3 py-2 outline-none focus:border-[#1788FF] cursor-pointer min-w-[240px]"
             >
-              <ArrowLeftRight size={16} />
-            </button>
-
-            {/* Destination */}
-            <div className="flex-1 w-full">
-              <label className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-2 block font-mono">
-                Destination City
-              </label>
-              <select
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="w-full bg-[#161824] border border-white/[0.08] rounded-xl text-white px-4 py-3 text-sm focus:border-cyan-500/60 outline-none cursor-pointer"
-              >
-                {INDIAN_AIRPORTS.map((a) => (
-                  <option key={a.code} value={a.code} className="bg-[#12141C]">
-                    {a.code} — {a.city} ({a.name})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* CTA */}
-            <div className="mt-6 w-full md:w-auto">
-              <button
-                onClick={() => navigate(`/search?from=${origin}&to=${destination}`)}
-                className="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 rounded-xl text-white px-6 py-3 font-semibold text-sm flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all cursor-pointer whitespace-nowrap shadow-lg"
-              >
-                <Search size={16} /> Search Flights
-              </button>
-            </div>
+              {options.map(o => (
+                <option key={o} value={o}>
+                  {city(o.split('-')[0])} → {city(o.split('-')[1])} ({o})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-cyan-500/10 via-[#12141C] to-[#12141C] border border-cyan-500/20 rounded-2xl p-5 shadow-xl">
-            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Current Lowest Fare</span>
-            <div className="text-2xl font-black text-cyan-300 font-mono">₹{currentPrice.toLocaleString('en-IN')}</div>
-            <div className="mt-2 text-xs flex items-center gap-1 font-mono">
-              <span className={`font-semibold flex items-center ${isDrop ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {isDrop ? <TrendingDown size={14} className="mr-0.5" /> : <TrendingUp size={14} className="mr-0.5" />}
-                {priceChangePercent}%
-              </span>
-              <span className="text-zinc-500">vs start of period</span>
+        {routes.isPending ? (
+          <LoadingBlock label="Loading corridors…" />
+        ) : routes.isError ? (
+          <ErrorBlock error={routes.error} onRetry={() => routes.refetch()} title="Couldn't load corridors" />
+        ) : options.length === 0 ? (
+          <EmptyBlock title="No corridors observed yet" description="Trends appear once the data feed records fares." />
+        ) : (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Stat label="Current" value={stats ? fmtINR(stats.last) : '—'} />
+              <Stat label="Lowest observed" value={stats ? fmtINR(stats.min) : '—'} />
+              <Stat label="Highest observed" value={stats ? fmtINR(stats.max) : '—'} />
+              <Stat
+                label="Change over window"
+                value={stats ? `${stats.change >= 0 ? '+' : ''}${stats.change.toFixed(1)}%` : '—'}
+                tone={stats ? (stats.change >= 0 ? 'bad' : 'good') : undefined}
+                icon={stats ? stats.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} /> : undefined}
+              />
             </div>
-          </div>
 
-          <div className="bg-gradient-to-br from-emerald-500/10 via-[#12141C] to-[#12141C] border border-emerald-500/20 rounded-2xl p-5 shadow-xl">
-            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Recorded Lowest</span>
-            <div className="text-2xl font-black text-emerald-400 font-mono">₹{minPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Optimal booking target</span>
-          </div>
+            <div className="bg-[#12141C]/90 rounded-2xl border border-white/[0.1] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 className="text-white font-bold">
+                  {from} → {to}
+                  <span className="text-xs font-normal text-zinc-500 ml-2">{points.length} observations</span>
+                </h2>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowDetail(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 text-xs font-semibold cursor-pointer">
+                    <Sparkles size={12} /> Details &amp; AI
+                  </button>
+                  <button onClick={() => navigate(`/price-alerts?from=${from}&to=${to}${stats ? `&target=${Math.round(stats.last * 0.93)}` : ''}`)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.12] text-white text-xs font-semibold cursor-pointer">
+                    <Bell size={12} /> Set alert
+                  </button>
+                  <button onClick={() => navigate(`/search?from=${from}&to=${to}`)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.12] text-white text-xs font-semibold cursor-pointer">
+                    <Search size={12} /> Search flights
+                  </button>
+                </div>
+              </div>
 
-          <div className="bg-gradient-to-br from-rose-500/10 via-[#12141C] to-[#12141C] border border-rose-500/20 rounded-2xl p-5 shadow-xl">
-            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Peak Recorded Fare</span>
-            <div className="text-2xl font-black text-rose-400 font-mono">₹{maxPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Holiday peak surge</span>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500/10 via-[#12141C] to-[#12141C] border border-purple-500/20 rounded-2xl p-5 shadow-xl">
-            <span className="text-xs uppercase font-bold text-zinc-400 block mb-1 font-mono">Period Average Fare</span>
-            <div className="text-2xl font-black text-purple-400 font-mono">₹{avgPrice.toLocaleString('en-IN')}</div>
-            <span className="text-[11px] text-zinc-500 mt-2 block font-mono">Benchmark baseline</span>
-          </div>
-        </div>
-
-        {/* Primary Trend Chart */}
-        <div className="bg-[#12141C] backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6 shadow-2xl obsidian-card">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 pb-4 border-b border-white/[0.06]">
-            <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2 font-mono">
-                {originAirport.city} ({origin}) ➔ {destAirport.city} ({destination})
-              </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Daily aggregated lowest nonstop fares over {period.toUpperCase()}
-              </p>
+              <div className="h-[340px] w-full">
+                {history.isPending ? (
+                  <LoadingBlock label="Loading fare history…" className="h-full" />
+                ) : history.isError ? (
+                  <ErrorBlock error={history.error} onRetry={() => history.refetch()} title="Couldn't load fare history" className="h-full" />
+                ) : points.length < 2 ? (
+                  <EmptyBlock title="Not enough observations yet" description="A trend needs at least two recorded fares. A new point is added at every data refresh." className="h-full" />
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={points} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#1788FF" stopOpacity={0.35} />
+                          <stop offset="100%" stopColor="#1788FF" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E2E8F0' : 'rgba(255,255,255,0.06)'} vertical={false} />
+                      <XAxis dataKey="at" stroke={axis} fontSize={11} tickLine={false} axisLine={false} minTickGap={40} />
+                      <YAxis domain={['auto', 'auto']} stroke={axis} fontSize={11} tickLine={false} axisLine={false} width={56} tickFormatter={v => `₹${v}`} />
+                      {stats && <ReferenceLine y={stats.avg} stroke="#F59E0B" strokeDasharray="4 4" label={{ value: `avg ${fmtINR(stats.avg)}`, fill: '#F59E0B', fontSize: 10, position: 'insideTopRight' }} />}
+                      <Tooltip
+                        contentStyle={{ backgroundColor: isLight ? '#fff' : '#0E1017', border: isLight ? '1px solid #CBD5E1' : '1px solid rgba(255,255,255,0.14)', borderRadius: 12 }}
+                        labelFormatter={(_l, payload) => (payload?.[0]?.payload?.date as string) ?? ''}
+                        itemStyle={{ color: isLight ? '#0F172A' : '#fff', fontWeight: 700 }}
+                        formatter={(v: any) => [fmtINR(Number(v)), `${from}→${to}`]}
+                      />
+                      <Area type="monotone" dataKey="fare" stroke="#1788FF" strokeWidth={2.5} fill="url(#trendGrad)" isAnimationActive={points.length < 200} activeDot={{ r: 5 }} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-3">History is held in the data server&apos;s memory and resets when it restarts; longer-term storage requires the database tables to be migrated.</p>
             </div>
-            <span className="text-xs px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full font-medium font-mono flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Volatility: Stable (14.2%)
-            </span>
-          </div>
-
-          <div className="h-[360px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="vibrantTrendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00E5FF" stopOpacity={0.45} />
-                    <stop offset="40%" stopColor="#8B5CF6" stopOpacity={0.2} />
-                    <stop offset="80%" stopColor="#3B82F6" stopOpacity={0.05} />
-                    <stop offset="100%" stopColor="#090A0F" stopOpacity={0.0} />
-                  </linearGradient>
-                  <linearGradient id="trendStrokeGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#00E5FF" />
-                    <stop offset="50%" stopColor="#818CF8" />
-                    <stop offset="100%" stopColor="#C084FC" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272A" vertical={false} opacity={0.5} />
-                <XAxis dataKey="date" stroke="#71717A" fontSize={11} tickMargin={10} axisLine={false} tickLine={false} />
-                <YAxis stroke="#71717A" fontSize={11} tickFormatter={(v) => `₹${v}`} domain={['auto', 'auto']} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0E1017', borderColor: 'rgba(255,255,255,0.12)', borderRadius: '16px', boxShadow: '0 16px 40px rgba(0,0,0,0.85)' }}
-                  itemStyle={{ color: '#fff', fontSize: '12px' }}
-                  labelStyle={{ color: '#A1A1AA', fontSize: '11px', marginBottom: '4px', fontWeight: 'bold' }}
-                  formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Fare']}
-                />
-                <ReferenceLine y={avgPrice} stroke="#F59E0B" strokeDasharray="4 4" label={{ value: `Avg ₹${avgPrice}`, fill: '#F59E0B', fontSize: 11 }} />
-                <Area 
-                  type="monotone" 
-                  dataKey="price" 
-                  stroke="url(#trendStrokeGrad)" 
-                  strokeWidth={3.5} 
-                  fillOpacity={1} 
-                  fill="url(#vibrantTrendGrad)" 
-                  isAnimationActive={true}
-                  animationDuration={1100}
-                  animationEasing="ease-in-out"
-                  activeDot={{ r: 6, fill: '#00E5FF', stroke: '#fff', strokeWidth: 2.5 }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Strategic Timing Recommendation */}
-        <div className="bg-[#12141C] border border-cyan-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 obsidian-card">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <Zap size={22} />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">Optimal Booking Advisory</h4>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Historical patterns show lowest fares for this route are released 14 to 21 days prior to departure.
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate(`/airfare-index`)}
-            className="px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
-          >
-            Analyze National Airfare Index →
-          </button>
-        </div>
-
+          </>
+        )}
       </div>
+      {showDetail && route && <RouteDetailModal route={route} onClose={() => setShowDetail(false)} />}
     </DashboardLayout>
+  );
+}
+
+function Stat({ label, value, tone, icon }: { label: string; value: string; tone?: 'good' | 'bad'; icon?: React.ReactNode }) {
+  return (
+    <div className="bg-[#12141C] rounded-2xl border border-white/[0.1] p-4">
+      <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">{label}</div>
+      <div className={`mt-1 flex items-center gap-1.5 text-xl font-mono font-bold ${tone === 'bad' ? 'text-rose-400' : tone === 'good' ? 'text-emerald-400' : 'text-white'}`}>
+        {icon}
+        {value}
+      </div>
+    </div>
   );
 }

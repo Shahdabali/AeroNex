@@ -23,12 +23,9 @@ aiRouter.post('/route-analysis', aiController.routeAnalysis);
 // Booking Recommendation
 aiRouter.post('/booking-recommendation', aiController.bookingRecommendation);
 
+// Grounded Q&A
+aiRouter.post('/chat', aiController.chat);
+
 // Regional Trend
 aiRouter.post('/regional-analysis', aiController.regionalAnalysis);
 
-// AI Trip Suggester — India Domestic
-import { tripSuggesterController } from '../controllers/tripSuggesterController';
-aiRouter.post('/trip-suggester', tripSuggesterController.suggestTrip);
-aiRouter.post('/parse-trip', tripSuggesterController.parseTrip);
-aiRouter.post('/recommendations', tripSuggesterController.suggestTrip);
-aiRouter.post('/booking-advice', tripSuggesterController.getBookingAdvice);

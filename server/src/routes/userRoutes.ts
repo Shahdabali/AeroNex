@@ -1,182 +1,94 @@
 import { Router } from 'express';
+import { requireAuth, supabaseAdmin } from '../middleware/auth';
 import { userService } from '../services/userService';
+import { alertService } from '../services/alertService';
 
 export const userRouter = Router();
+userRouter.use(requireAuth);
+
+const identity = (req: any) => ({ id: req.user.id, email: req.user.email, name: req.user.name });
+
+// Client-fixable problems (validation) come back as 400; everything else falls to the error handler.
+const guard = (fn: (req: any, res: any) => unknown) => (req: any, res: any, next: any) => {
+  try {
+    fn(req, res);
+  } catch (err: any) {
+    if (err instanceof Error && !(err as any).status) (err as any).status = 400;
+    next(err);
+  }
+};
 
 // GET /api/user/profile
-userRouter.get('/profile', (req, res) => {
-  try {
-    const email = (req.query.email as string) || (req.headers['x-user-email'] as string) || undefined;
-    const userData = userService.getUser(email);
-    res.json({
-      success: true,
-      data: userData,
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+userRouter.get('/profile', guard((req, res) => {
+  const { createdAt, ...data } = userService.getOrCreate(identity(req));
+  res.json({ success: true, data: { ...data, memberSince: createdAt } });
+}));
 
 // PUT /api/user/profile
-userRouter.put('/profile', (req, res) => {
-  try {
-    const { email, ...updates } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const updatedProfile = userService.updateProfile(userEmail, updates);
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: updatedProfile,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.put('/profile', guard((req, res) => {
+  const profile = userService.updateProfile(identity(req), req.body);
+  res.json({ success: true, message: 'Profile updated', data: profile });
+}));
 
 // POST /api/user/avatar
-userRouter.post('/avatar', (req, res) => {
-  try {
-    const { email, avatarUrl } = req.body;
-    if (!avatarUrl) {
-      return res.status(400).json({ success: false, error: 'avatarUrl is required' });
-    }
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const updatedProfile = userService.updateAvatar(userEmail, avatarUrl);
-    res.json({
-      success: true,
-      message: 'Avatar updated successfully',
-      data: updatedProfile,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.post('/avatar', guard((req, res) => {
+  const profile = userService.updateAvatar(identity(req), req.body?.avatarUrl);
+  res.json({ success: true, message: 'Avatar updated', data: profile });
+}));
 
 // PUT /api/user/preferences
-userRouter.put('/preferences', (req, res) => {
-  try {
-    const { email, preferences } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const updated = userService.updatePreferences(userEmail, preferences || req.body);
-    res.json({
-      success: true,
-      message: 'Travel preferences updated',
-      data: updated,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.put('/preferences', guard((req, res) => {
+  const prefs = userService.updatePreferences(identity(req), req.body?.preferences ?? req.body);
+  res.json({ success: true, message: 'Travel preferences updated', data: prefs });
+}));
 
 // PUT /api/user/notifications
-userRouter.put('/notifications', (req, res) => {
-  try {
-    const { email, notifications } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const updated = userService.updateNotifications(userEmail, notifications || req.body);
-    res.json({
-      success: true,
-      message: 'Notification settings updated',
-      data: updated,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.put('/notifications', guard((req, res) => {
+  const notifications = userService.updateNotifications(identity(req), req.body?.notifications ?? req.body);
+  res.json({ success: true, message: 'Notification settings updated', data: notifications });
+}));
 
 // PUT /api/user/appearance
-userRouter.put('/appearance', (req, res) => {
-  try {
-    const { email, appearance } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const updated = userService.updateAppearance(userEmail, appearance || req.body);
-    res.json({
-      success: true,
-      message: 'Appearance settings updated',
-      data: updated,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.put('/appearance', guard((req, res) => {
+  const appearance = userService.updateAppearance(identity(req), req.body?.appearance ?? req.body);
+  res.json({ success: true, message: 'Appearance settings updated', data: appearance });
+}));
 
 // POST /api/user/integrations/toggle
-userRouter.post('/integrations/toggle', (req, res) => {
-  try {
-    const { email, provider } = req.body;
-    if (!provider) {
-      return res.status(400).json({ success: false, error: 'Provider is required' });
-    }
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const integrations = userService.toggleIntegration(userEmail, provider);
-    res.json({
-      success: true,
-      message: `${provider} integration updated`,
-      data: integrations,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.post('/integrations/toggle', guard((req, res) => {
+  const integrations = userService.toggleIntegration(identity(req), String(req.body?.provider || ''));
+  res.json({ success: true, data: integrations });
+}));
 
 // POST /api/user/api-key/regenerate
-userRouter.post('/api-key/regenerate', (req, res) => {
-  try {
-    const { email } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const newKey = userService.regenerateApiKey(userEmail);
-    res.json({
-      success: true,
-      message: 'New API Key generated',
-      apiKey: newKey,
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
-
-// POST /api/user/change-password
-userRouter.post('/change-password', (req, res) => {
-  try {
-    const { email, currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, error: 'Both current and new password are required' });
-    }
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    userService.changePassword(userEmail, currentPassword, newPassword);
-    res.json({
-      success: true,
-      message: 'Password changed successfully',
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+userRouter.post('/api-key/regenerate', guard((req, res) => {
+  res.json({ success: true, message: 'New API key generated', apiKey: userService.regenerateApiKey(identity(req)) });
+}));
 
 // GET /api/user/export-data
-userRouter.get('/export-data', (req, res) => {
-  try {
-    const email = (req.query.email as string) || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    const data = userService.exportUserData(email);
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="aeronex-data-export-${Date.now()}.json"`);
-    res.json(data);
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+userRouter.get('/export-data', guard((req, res) => {
+  const id = identity(req);
+  const data = userService.exportUserData(id, {
+    priceAlerts: alertService.list(id.id),
+    notifications: alertService.listNotifications(id.id),
+  });
+  res.setHeader('Content-Disposition', `attachment; filename="aeronex-data-export-${Date.now()}.json"`);
+  res.json(data);
+}));
 
-// DELETE /api/user/account
-userRouter.delete('/account', (req, res) => {
+// DELETE /api/user/account — removes the Supabase auth user and all locally stored data
+userRouter.delete('/account', async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const userEmail = email || (req.headers['x-user-email'] as string) || 'shadab@aeronex.com';
-    userService.deleteAccount(userEmail);
-    res.json({
-      success: true,
-      message: 'Account deleted successfully',
-    });
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message });
+    const id = req.user!.id;
+    if (!supabaseAdmin) {
+      return res.status(503).json({ success: false, error: 'Account deletion is unavailable right now. Please try again later.' });
+    }
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+    if (error) throw error;
+    userService.deleteData(id);
+    alertService.deleteAllForUser(id);
+    res.json({ success: true, message: 'Your account and data have been deleted.' });
+  } catch (err) {
+    next(err);
   }
 });

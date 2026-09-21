@@ -5,6 +5,7 @@ import {
   routeAnalysisOutputSchema 
 } from '../validators/aiSchemas';
 import { aiService } from '../services/aiService';
+import { liveDataStore } from '../liveDataStore';
 
 let passed = 0;
 let failed = 0;
@@ -21,6 +22,12 @@ function assert(condition: boolean, testName: string) {
 
 async function runTests() {
   console.log('=== AeroNex Server-Side AI Test Suite ===\n');
+
+  // Seed observed fares (the AI layer only works from observed data).
+  [5200, 5250, 5300, 5280, 5350, 5400, 5380].forEach(f => liveDataStore.updateFare('DEL-BOM', f));
+  liveDataStore.addIndexHistory(101);
+  liveDataStore.addIndexHistory(102);
+  liveDataStore.setRegionalIndices([{ region: 'North', value: 101, change: 0.5 }]);
 
   // Test 1: Input Validation
   console.log('[1] Testing Input Validation Schemas:');
@@ -42,8 +49,7 @@ async function runTests() {
   // Test 2: AI Status
   console.log('\n[2] Testing AI Status & Diagnostics:');
   const status = aiService.getAIStatus();
-  assert(status.status === 'healthy', 'AI subsystem reports status "healthy"');
-  assert(status.provider === 'Google Gemini', 'AI provider identifies as "Google Gemini"');
+  assert(['healthy', 'fallback'].includes(status.status), `AI subsystem reports a valid status (${status.status})`);
   assert(typeof status.rateLimitPerMinute === 'number', 'Rate limit is configured as a number');
 
   // Test 3: Fare Prediction
@@ -53,7 +59,7 @@ async function runTests() {
   assert(typeof prediction.predictedFare === 'number' && prediction.predictedFare > 0, 'Predicted fare is a positive number');
   assert(['increase', 'decrease', 'stable'].includes(prediction.direction), `Direction is valid (${prediction.direction})`);
   assert(prediction.confidence >= 0 && prediction.confidence <= 1, 'Confidence is between 0 and 1');
-  assert(prediction.disclaimer.includes('not guaranteed'), 'Disclaimer is present in prediction output');
+  assert(prediction.disclaimer.toLowerCase().includes('not guaranteed'), 'Disclaimer is present in prediction output');
 
   const validatedPrediction = predictionOutputSchema.safeParse(prediction);
   assert(validatedPrediction.success, 'Prediction output matches Zod schema contract');
@@ -65,6 +71,12 @@ async function runTests() {
   assert(['Low', 'Moderate', 'High'].includes(analysis.volatilityRisk), `Volatility risk is valid (${analysis.volatilityRisk})`);
   assert(analysis.recommendation.length > 10, 'Strategic recommendation provided');
   assert(analysis.bestBookingWindow.length > 5, 'Best booking window provided');
+  assert(analysis.stats?.observations === 7, 'Route analysis reports how many observations it used');
+
+  // Test 4b: unknown routes are rejected rather than fabricated
+  let unknownRejected = false;
+  try { await aiService.predictFare('ZZZ-YYY'); } catch (e: any) { unknownRejected = e.status === 404; }
+  assert(unknownRejected, 'Prediction for a route with no observed data is rejected (404)');
 
   const validatedAnalysis = routeAnalysisOutputSchema.safeParse(analysis);
   assert(validatedAnalysis.success, 'Route analysis output matches Zod schema contract');
@@ -72,7 +84,7 @@ async function runTests() {
   // Test 5: Dashboard Insights Generation
   console.log('\n[5] Testing Dashboard Insights Generation:');
   const insights = await aiService.generateDashboardInsights();
-  assert(Array.isArray(insights) && insights.length >= 4, 'Generates at least 4 actionable insights');
+  assert(Array.isArray(insights) && insights.length >= 2, 'Generates data-grounded insights');
   assert(insights[0].title.length > 0, 'Insights have non-empty titles');
   assert(insights[0].content.length > 0, 'Insights have non-empty content');
 

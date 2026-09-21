@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef, lazy, Suspense, memo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../services/api';
+import { useRegionalIndex, useRoutes } from '../../hooks/useMarket';
+import { INDIAN_AIRPORTS } from '../../data/indianAviation';
+import { DataSourceBadge } from '../DataSourceBadge';
 import { 
   TrendingUp, TrendingDown, Globe, Map as MapIcon, 
   Radio, ArrowRight
@@ -64,20 +65,25 @@ export const RegionalMap = memo(function RegionalMap() {
   const [radarSweepEnabled, setRadarSweepEnabled] = useState<boolean>(true);
   const [hoveredSector, setHoveredSector] = useState<string | null>(null);
 
-  // Live real-time regional index data query (cache-coordinated)
-  const { data: regionalData } = useQuery({
-    queryKey: ['regionalIndex'],
-    queryFn: api.getRegionalIndex,
-    staleTime: 6000,
-  });
+  // Regional index data (shared, de-duplicated query; refreshed on the market cadence)
+  const { data: regionalData } = useRegionalIndex();
+  const { data: routeList } = useRoutes();
 
   const getRegionMetrics = (regionId: string) => {
     if (Array.isArray(regionalData) && regionalData.length > 0) {
       const found = regionalData.find((r: any) => r.region?.toLowerCase() === regionId.toLowerCase());
       if (found) return { value: found.value, change: found.change };
     }
-    const fallback = SECTOR_HUBS.find(h => h.id === regionId);
-    return { value: fallback?.defaultVal ?? 135.5, change: fallback?.defaultChange ?? 2.4 };
+    // No data for this region yet: show zeros rather than made-up numbers.
+    return { value: 0, change: 0 };
+  };
+
+  // Real per-region stats derived from observed routes departing the region's airports.
+  const regionStats = (regionId: string) => {
+    const codes = new Set(INDIAN_AIRPORTS.filter(a => a.region === regionId).map(a => a.code));
+    const rs = (Array.isArray(routeList) ? routeList : []).filter((r: any) => codes.has(String(r.route).split('-')[0]));
+    const avg = rs.length ? Math.round(rs.reduce((n: number, r: any) => n + r.currentFare, 0) / rs.length) : null;
+    return { count: rs.length, avg };
   };
 
   const selectedHub = useMemo(() => {
@@ -99,13 +105,10 @@ export const RegionalMap = memo(function RegionalMap() {
             <h3 className="text-white text-sm sm:text-base font-bold uppercase tracking-wider flex items-center gap-2">
               <span>AIRFARE INDEX BY REGION</span>
             </h3>
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-400">
-              <span className={`w-1.5 h-1.5 rounded-full bg-cyan-400 ${isAnimationActive ? 'animate-ping' : ''}`} />
-              LIVE RADAR
-            </span>
+            <DataSourceBadge />
           </div>
           <p className="text-zinc-400 text-xs mt-0.5">
-            Real-time regional movement of weighted domestic airfare indices
+            Regional movement of domestic airfare indices (baseline = 100)
           </p>
         </div>
 
@@ -437,16 +440,11 @@ export const RegionalMap = memo(function RegionalMap() {
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-white uppercase">{selectedHub.sectorName}</span>
               <span className="text-xs font-mono text-zinc-400">({selectedHub.name})</span>
-              <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-white/[0.06] text-zinc-300 font-semibold">
-                Carrier: {selectedHub.dominantAirline}
-              </span>
             </div>
             <div className="text-xs text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2">
-              <span>Avg Observed Fare: <strong className="text-white tabular-nums">{selectedHub.avgFare}</strong></span>
+              <span>Avg Observed Fare: <strong className="text-white tabular-nums">{regionStats(selectedHub.id).avg ? `₹${regionStats(selectedHub.id).avg!.toLocaleString('en-IN')}` : '—'}</strong></span>
               <span>•</span>
-              <span>Routes Monitored: <strong className="text-zinc-200 tabular-nums">{selectedHub.monitoredRoutesCount}</strong></span>
-              <span>•</span>
-              <span>Observations: <strong className="text-zinc-200 tabular-nums">{selectedHub.observationCount.toLocaleString('en-IN')}</strong></span>
+              <span>Routes Monitored: <strong className="text-zinc-200 tabular-nums">{regionStats(selectedHub.id).count}</strong></span>
             </div>
           </div>
         </div>
@@ -469,7 +467,7 @@ export const RegionalMap = memo(function RegionalMap() {
                 </span>
               </span>
             </div>
-            <div className="text-[9.5px] font-mono text-zinc-500 uppercase">DGCA Laspeyres Weighted</div>
+            <div className="text-[9.5px] font-mono text-zinc-500 uppercase">{selectedMetrics.value ? 'Regional index (baseline 100)' : 'No data for this region yet'}</div>
           </div>
 
           <div className="flex items-center gap-2">

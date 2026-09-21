@@ -6,19 +6,32 @@ import {
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../services/api';
+import { useDataStatus } from '../../hooks/useDataStatus';
 
 export function Sidebar() {
   const location = useLocation();
+  const feed = useDataStatus();
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: api.getNotifications,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+  const unread = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
+  const feedBadge = feed.state === 'live' ? 'LIVE' : feed.state === 'simulated' ? 'SIM' : undefined;
 
   const navItems = [
     { icon: Home, label: 'Overview', path: '/dashboard' },
-    { icon: LineChart, label: 'Airfare Index', path: '/airfare-index', badgeText: 'LIVE' },
-    { icon: Activity, label: 'Live Intelligence', path: '/data-scraping', badgeText: 'SYNC' },
+    { icon: LineChart, label: 'Airfare Index', path: '/airfare-index', badgeText: feedBadge },
+    { icon: Activity, label: 'Data Pipeline', path: '/data-scraping' },
     { icon: Map, label: 'Routes', path: '/routes' },
     { icon: Plane, label: 'Airlines', path: '/airlines' },
-    { icon: Search, label: 'Regions', path: '/search' },
+    { icon: Search, label: 'Flight Search', path: '/search' },
     { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
-    { icon: ShieldAlert, label: 'Anomalies', path: '/price-alerts', badge: 3 },
+    { icon: ShieldAlert, label: 'Price Alerts', path: '/price-alerts', badge: unread > 0 ? Math.min(unread, 9) : undefined },
     { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
     { icon: Brain, label: 'AI Analytics', path: '/ai-analytics', badgeText: 'NEW' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },
@@ -30,7 +43,8 @@ export function Sidebar() {
     <aside className="w-[64px] lg:w-[260px] h-screen bg-[#090A0F] border-r border-white/[0.08] flex flex-col overflow-y-auto transition-all duration-300">
       <div className="p-3 lg:p-5 lg:pb-4 flex flex-col items-center lg:items-start justify-center lg:justify-between">
         <div className="flex flex-col items-center lg:items-start">
-          <AeroNexLogo size={32} showTagline={false} />
+          <AeroNexLogo size={32} variant="icon" className="lg:hidden" />
+          <AeroNexLogo size={32} showTagline={false} className="hidden lg:inline-flex" />
           <div className="hidden lg:block mt-1.5 text-[10px] font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">
             Airfare Intelligence
           </div>
@@ -83,7 +97,7 @@ export function Sidebar() {
               )}
 
               {/* Mobile notification dot if item has badge */}
-              {(item.badge || item.badgeText) && (
+              {(item.badge) && (
                 <div className="lg:hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-rose-500" />
               )}
             </Link>

@@ -2,16 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { 
-  Bell, Plus, Trash2, ArrowRight, ArrowLeftRight, 
-  Sparkles, TrendingDown, Plane, ShieldCheck, Clock, Mail, 
-  Smartphone, MessageSquare, SlidersHorizontal, Search, ExternalLink, 
-  Play, Pause, Zap, CheckCircle2, DollarSign, Tag, Radio
+import {
+  Bell, Plus, Trash2, ArrowRight, ArrowLeftRight,
+  Sparkles, TrendingDown, Plane, ShieldCheck, Clock,
+  Smartphone, SlidersHorizontal, Search, ExternalLink,
+  Play, Pause, CheckCircle2, DollarSign, Tag, AlertCircle
 } from 'lucide-react';
 import { api } from '../services/api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { INDIAN_AIRPORTS, type IndianAirport } from '../data/indianAviation';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
+import { DataSourceBadge } from '../components/DataSourceBadge';
+import { useRoutes, useRouteChanges } from '../hooks/useMarket';
+import { useDataStatus } from '../hooks/useDataStatus';
 
 export function PriceAlerts() {
   usePageTitle('Autonomous Price Alerts — AERONEX');
@@ -27,42 +30,47 @@ export function PriceAlerts() {
   const [origin, setOrigin] = useState(initialFrom);
   const [destination, setDestination] = useState(initialTo === initialFrom ? 'BOM' : initialTo);
   const [targetPrice, setTargetPrice] = useState(initialTarget);
-  
+
   // Advanced Options
   const [selectedAirline, setSelectedAirline] = useState('Any Airline');
-  const [travelDate, setTravelDate] = useState('2026-09-25');
+  const [travelDate, setTravelDate] = useState(() => new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10));
   const [cabinClass, setCabinClass] = useState('Economy');
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(['Email', 'Push Notification']);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(['In-app']);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [discountPercent, setDiscountPercent] = useState<number>(10);
 
   // List Filter & Search State
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'triggered' | 'paused'>('all');
   const [searchFilter, setSearchFilter] = useState('');
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null);
+  const feed = useDataStatus();
 
-  const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+  const triggerToast = (text: string, tone: 'ok' | 'error' = 'ok') => {
+    setToastMessage({ text, tone });
+    setTimeout(() => setToastMessage(null), tone === 'error' ? 6000 : 3500);
   };
 
   // Fetch live alerts
-  const { data: alerts = [], isLoading } = useQuery({
+  const { data: alerts = [], isLoading, isError: alertsError, error: alertsErr, refetch: refetchAlerts } = useQuery({
     queryKey: ['alerts'],
     queryFn: () => api.getAlerts(),
+    refetchInterval: 30_000,
   });
+  const { data: routeList = [] } = useRoutes();
+  const { data: routeChanges = [] } = useRouteChanges();
 
   // Calculate live market fare for chosen route
-  const currentLiveFare = useMemo(() => {
-    return api.getEstimatedRouteFare(origin, destination);
-  }, [origin, destination]);
+  const currentLiveFare = useMemo<number | null>(() => {
+    const hit = (routeList as any[]).find(r => r.route === `${origin}-${destination}`);
+    return hit ? hit.currentFare : null;
+  }, [routeList, origin, destination]);
 
   // Sync target price when route or discount preset changes
   useEffect(() => {
-    if (!initialTarget || targetPrice === '') {
-      const discounted = Math.round(currentLiveFare * (1 - discountPercent / 100));
-      setTargetPrice(discounted.toString());
+    if ((!initialTarget || targetPrice === '') && currentLiveFare) {
+      setTargetPrice(Math.round(currentLiveFare * (1 - discountPercent / 100)).toString());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origin, destination, discountPercent, currentLiveFare]);
 
   // Airport Lookup Helper
@@ -99,8 +107,7 @@ export function PriceAlerts() {
   // Preset discount click
   const handlePresetClick = (percent: number) => {
     setDiscountPercent(percent);
-    const discounted = Math.round(currentLiveFare * (1 - percent / 100));
-    setTargetPrice(discounted.toString());
+    if (currentLiveFare) setTargetPrice(Math.round(currentLiveFare * (1 - percent / 100)).toString());
   };
 
   // Mutation: Create Alert
@@ -110,8 +117,7 @@ export function PriceAlerts() {
         origin,
         destination,
         route: `${origin}-${destination}`,
-        targetPrice: Number(targetPrice) || Math.round(currentLiveFare * 0.9),
-        currentFare: currentLiveFare,
+        targetPrice: Number(targetPrice),
         airline: selectedAirline,
         date: travelDate,
         cabinClass,
@@ -121,10 +127,10 @@ export function PriceAlerts() {
     },
     onSuccess: (newAlert: any) => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      triggerToast(`Price alert activated for ${newAlert.origin} → ${newAlert.destination}!`);
+      triggerToast(`Price alert set for ${newAlert.origin} → ${newAlert.destination} at ₹${Number(newAlert.targetPrice).toLocaleString('en-IN')}.`);
     },
-    onError: () => {
-      triggerToast('Could not create price alert. Please try again.');
+    onError: (err: any) => {
+      triggerToast(err?.message || 'Could not create price alert. Please try again.', 'error');
     }
   });
 
@@ -136,18 +142,8 @@ export function PriceAlerts() {
       if (updated) {
         triggerToast(`Alert for ${updated.origin} → ${updated.destination} is now ${updated.status}.`);
       }
-    }
-  });
-
-  // Mutation: Simulate Trigger
-  const triggerSimulationMutation = useMutation({
-    mutationFn: (id: string) => api.triggerAlertSimulation(id),
-    onSuccess: (triggered: any) => {
-      queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      if (triggered) {
-        triggerToast(`🎯 Price drop simulated! Fare reached ₹${triggered.currentFare} for ${triggered.origin} → ${triggered.destination}!`);
-      }
-    }
+    },
+    onError: (err: any) => triggerToast(err?.message || 'Could not update the alert.', 'error'),
   });
 
   // Mutation: Delete Alert
@@ -156,19 +152,20 @@ export function PriceAlerts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       triggerToast('Price alert deleted.');
-    }
+    },
+    onError: (err: any) => triggerToast(err?.message || 'Could not delete the alert.', 'error'),
   });
 
   // Filtered Alerts
   const filteredAlerts = useMemo(() => {
     return alerts.filter((alert: any) => {
-      const matchesTab = 
+      const matchesTab =
         activeTab === 'all' ? true :
         activeTab === 'active' ? alert.status === 'Active' :
         activeTab === 'triggered' ? alert.status === 'Triggered' :
         alert.status === 'Paused';
 
-      const matchesSearch = 
+      const matchesSearch =
         !searchFilter.trim() ||
         alert.origin?.toLowerCase().includes(searchFilter.toLowerCase()) ||
         alert.destination?.toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -187,51 +184,37 @@ export function PriceAlerts() {
     const active = alerts.filter((a: any) => a.status === 'Active').length;
     const triggered = alerts.filter((a: any) => a.status === 'Triggered').length;
     const savings = alerts.reduce((acc: number, curr: any) => {
-      const diff = (curr.currentFare || 5200) - curr.targetPrice;
+      const diff = (curr.currentFare ?? 0) - curr.targetPrice;
       return acc + (diff > 0 ? diff : 0);
     }, 0);
 
     return { total, active, triggered, savings };
   }, [alerts]);
 
-  // AI Recommended Smart Alerts
-  const aiRecommendations = [
-    {
-      origin: 'DEL',
-      destination: 'GOI',
-      airline: 'IndiGo (6E)',
-      currentFare: 6150,
-      recommendedTarget: 5200,
-      dropPercent: 15,
-      confidence: 91,
-      reason: 'Weekend tourist wave cooling off. Seat availability surges in 48h.',
-    },
-    {
-      origin: 'BOM',
-      destination: 'BLR',
-      airline: 'Akasa Air (QP)',
-      currentFare: 4280,
-      recommendedTarget: 3850,
-      dropPercent: 10,
-      confidence: 88,
-      reason: 'Low-cost carrier capacity expansion on mid-day departures.',
-    },
-    {
-      origin: 'DEL',
-      destination: 'BOM',
-      airline: 'Air India (AI)',
-      currentFare: 5420,
-      recommendedTarget: 4850,
-      dropPercent: 11,
-      confidence: 94,
-      reason: 'Golden corporate corridor mid-week inventory clearance window.',
-    },
-  ];
+  // Suggested alerts: derived only from fares the pipeline has observed (no canned suggestions).
+  const suggestions = (Array.isArray(routeChanges) ? routeChanges : [])
+    .filter((r: any) => r.currentFare > 0)
+    .slice(0, 3)
+    .map((r: any) => {
+      const [from, to] = String(r.route).replace(/\s*→\s*/, '-').split('-');
+      const dip = 7;
+      return {
+        origin: from,
+        destination: to,
+        currentFare: r.currentFare as number,
+        recommendedTarget: Math.round(r.currentFare * (1 - dip / 100)),
+        dropPercent: dip,
+        reason:
+          r.change === 0
+            ? 'No movement on the latest refresh. A target 7% below today\'s fare would only trigger on a real dip.'
+            : `${r.change > 0 ? 'Rose' : 'Fell'} ${Math.abs(r.change)}% on the latest refresh. A target 7% below the current fare only triggers on a genuine dip.`,
+      };
+    });
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-7 max-w-[1400px] mx-auto pb-12">
-        
+
         {/* ── 1. Page Header ── */}
         <ScrollReveal delay={0.1}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
@@ -245,42 +228,28 @@ export function PriceAlerts() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Price Alerts</h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
-                  <Radio size={11} className="animate-pulse" /> 5s Live Engine
-                </span>
+                <DataSourceBadge showAge />
               </div>
               <p className="text-sm text-slate-400 mt-1">
-                Autonomous high-frequency corridor price watchers. Instant notifications via Email, Push, WhatsApp & Discord.
-              </p>
+                Set a target fare for any corridor. After every data refresh AeroNex compares observed fares with your target and notifies you in-app when it is reached.</p>
             </div>
           </div>
 
-          {/* Quick Status Pill */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                const firstActive = alerts.find((a: any) => a.status === 'Active');
-                if (firstActive) {
-                  triggerSimulationMutation.mutate(firstActive.id);
-                } else {
-                  triggerToast('No active alerts to simulate. Create one below!');
-                }
-              }}
-              disabled={triggerSimulationMutation.isPending}
-              className="px-4 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(0,217,255,0.25)]"
-            >
-              <Zap size={14} className="text-amber-400" />
-              <span>Simulate Price Drop</span>
-            </button>
-          </div>
         </div>
         </ScrollReveal>
 
         {/* ── Toast Notification Banner ── */}
         {toastMessage && (
-          <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-sm font-medium shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-3">
-            <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
-            <span className="flex-1">{toastMessage}</span>
+          <div
+            role={toastMessage.tone === 'error' ? 'alert' : 'status'}
+            className={`flex items-center gap-3 px-5 py-3 rounded-2xl border text-sm font-medium shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-3 ${
+              toastMessage.tone === 'error'
+                ? 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+            }`}
+          >
+            {toastMessage.tone === 'error' ? <AlertCircle size={18} className="text-rose-400 shrink-0" /> : <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />}
+            <span className="flex-1">{toastMessage.text}</span>
           </div>
         )}
 
@@ -296,7 +265,7 @@ export function PriceAlerts() {
               {stats.active} <span className="text-xs font-normal text-slate-400">/ {stats.total} total</span>
             </div>
             <p className="text-[11px] text-cyan-400/90 mt-1 flex items-center gap-1 font-medium">
-              <ShieldCheck size={12} /> Real-time corridor telemetry
+              <ShieldCheck size={12} /> Checked after every data refresh
             </p>
           </div>
 
@@ -328,14 +297,14 @@ export function PriceAlerts() {
 
           <div className="p-4 rounded-2xl bg-[#090A0F]/90 border border-white/[0.08] backdrop-blur-xl shadow-lg relative overflow-hidden group hover:border-purple-500/40 transition-all">
             <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-              <span>Ingestion Cycle</span>
+              <span>Refresh Interval</span>
               <Clock size={14} className="text-purple-400" />
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-purple-300 tracking-tight">
-              5 Sec
+              {feed.status ? `${feed.status.refreshIntervalSec}s` : '—'}
             </div>
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-              <Sparkles size={12} className="text-amber-400" /> Continuous DGCA & GDS sweeps
+              <Sparkles size={12} className="text-amber-400" /> {feed.status ? feed.status.provider : 'Feed status unavailable'}
             </p>
           </div>
         </div>
@@ -344,7 +313,7 @@ export function PriceAlerts() {
         {/* ── 3. High-Tech Alert Creation Engine ── */}
         <ScrollReveal delay={0.3}>
         <div className="p-6 sm:p-7 rounded-2xl bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl relative overflow-hidden">
-          
+
           {/* Header */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
             <div className="flex items-center gap-3">
@@ -369,7 +338,7 @@ export function PriceAlerts() {
 
           {/* Form Fields Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-end">
-            
+
             {/* Origin Airport */}
             <div className="lg:col-span-3">
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
@@ -440,8 +409,8 @@ export function PriceAlerts() {
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Target Price (₹)
                 </label>
-                <span className="text-[11px] text-cyan-400 font-semibold">
-                  Live: ₹{currentLiveFare.toLocaleString('en-IN')}
+                <span className="text-[11px] text-cyan-400 font-semibold" aria-live="polite">
+                  {currentLiveFare ? `Observed: ₹${currentLiveFare.toLocaleString('en-IN')}` : 'Corridor not tracked yet'}
                 </span>
               </div>
               <div className="relative flex items-center">
@@ -461,7 +430,7 @@ export function PriceAlerts() {
               <button
                 type="button"
                 onClick={() => createAlertMutation.mutate(undefined)}
-                disabled={createAlertMutation.isPending || !targetPrice}
+                disabled={createAlertMutation.isPending || !targetPrice || Number(targetPrice) < 500}
                 className="w-full h-[48px] rounded-2xl bg-gradient-to-r from-cyan-500 via-[#00A3FF] to-[#0070F3] hover:shadow-[0_0_25px_rgba(0,163,255,0.45)] text-white text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all disabled:opacity-60"
               >
                 {createAlertMutation.isPending ? (
@@ -487,7 +456,7 @@ export function PriceAlerts() {
                 { percent: 20, label: '-20% Deep Discount' },
               ].map((chip) => {
                 const isSelected = discountPercent === chip.percent;
-                const calcPrice = Math.round(currentLiveFare * (1 - chip.percent / 100));
+                const calcPrice = currentLiveFare ? Math.round(currentLiveFare * (1 - chip.percent / 100)) : 0;
                 return (
                   <button
                     key={chip.percent}
@@ -499,14 +468,14 @@ export function PriceAlerts() {
                         : 'bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 border border-white/[0.08]'
                     }`}
                   >
-                    {chip.label} (₹{calcPrice.toLocaleString('en-IN')})
+                    {chip.label}{calcPrice ? ` (₹${calcPrice.toLocaleString('en-IN')})` : ''}
                   </button>
                 );
               })}
             </div>
 
             {/* Savings preview badge */}
-            {targetPrice && Number(targetPrice) < currentLiveFare && (
+            {targetPrice && currentLiveFare && Number(targetPrice) < currentLiveFare && (
               <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
                 <TrendingDown size={14} />
                 <span>
@@ -519,7 +488,7 @@ export function PriceAlerts() {
           {/* Advanced Options Drawer */}
           {showAdvanced && (
             <div className="mt-5 pt-5 border-t border-white/[0.08] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-              
+
               {/* Airline filter */}
               <div>
                 <label className="block text-xs text-slate-400 font-medium mb-1.5">Preferred Airline</label>
@@ -531,8 +500,7 @@ export function PriceAlerts() {
                   <option value="Any Airline">Any Airline (Cheapest)</option>
                   <option value="IndiGo (6E)">IndiGo (6E)</option>
                   <option value="Air India (AI)">Air India (AI)</option>
-                  <option value="Vistara (UK)">Vistara (UK)</option>
-                  <option value="Akasa Air (QP)">Akasa Air (QP)</option>
+                                    <option value="Akasa Air (QP)">Akasa Air (QP)</option>
                   <option value="SpiceJet (SG)">SpiceJet (SG)</option>
                 </select>
               </div>
@@ -542,6 +510,7 @@ export function PriceAlerts() {
                 <label className="block text-xs text-slate-400 font-medium mb-1.5">Travel Date</label>
                 <input
                   type="date"
+                  min={new Date().toISOString().slice(0, 10)}
                   value={travelDate}
                   onChange={(e) => setTravelDate(e.target.value)}
                   className="w-full h-[42px] bg-[#161824] border border-white/[0.1] rounded-xl px-3 text-xs text-white outline-none focus:border-cyan-400 cursor-pointer"
@@ -564,12 +533,10 @@ export function PriceAlerts() {
 
               {/* Alert channels */}
               <div>
-                <label className="block text-xs text-slate-400 font-medium mb-1.5">Alert Dispatch Channels</label>
+                <label className="block text-xs text-slate-400 font-medium mb-1.5">Delivery</label>
                 <div className="flex items-center gap-2 flex-wrap">
                   {[
-                    { id: 'Email', icon: Mail },
-                    { id: 'Push Notification', icon: Smartphone },
-                    { id: 'WhatsApp', icon: MessageSquare },
+                    { id: 'In-app', icon: Smartphone },
                   ].map((chan) => {
                     const isSelected = selectedChannels.includes(chan.id);
                     const IconComp = chan.icon;
@@ -604,17 +571,17 @@ export function PriceAlerts() {
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-amber-400" />
-              <h2 className="text-base font-bold text-white tracking-tight">AI Smart Recommendations</h2>
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
-                High Drop Probability
-              </span>
+              <h2 className="text-base font-bold text-white tracking-tight">Suggested Alerts</h2>
             </div>
-            <span className="text-xs text-slate-400">Based on historical demand curves & capacity</span>
+            <span className="text-xs text-slate-400">Based on the latest observed fare movements</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {aiRecommendations.map((rec, i) => (
-              <div 
+            {suggestions.length === 0 && (
+              <p className="md:col-span-3 text-xs text-slate-400 py-4">Suggestions appear once the data feed has produced observations.</p>
+            )}
+            {suggestions.map((rec, i) => (
+              <div
                 key={i}
                 className="p-4.5 rounded-2xl bg-[#090A0F]/80 border border-white/[0.08] hover:border-cyan-500/30 transition-all flex flex-col justify-between group"
               >
@@ -637,10 +604,10 @@ export function PriceAlerts() {
                   <div className="flex items-center justify-between text-xs py-2 border-t border-white/[0.06] mb-3">
                     <div>
                       <span className="text-slate-500 block text-[10px]">Current Fare</span>
-                      <span className="text-slate-300 font-semibold line-through">₹{rec.currentFare.toLocaleString('en-IN')}</span>
+                      <span className="text-slate-300 font-semibold">₹{rec.currentFare.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-slate-500 block text-[10px]">Projected Target</span>
+                      <span className="text-slate-500 block text-[10px]">Suggested Target</span>
                       <span className="text-cyan-400 font-bold text-sm">₹{rec.recommendedTarget.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
@@ -654,9 +621,8 @@ export function PriceAlerts() {
                       destination: rec.destination,
                       route: `${rec.origin}-${rec.destination}`,
                       targetPrice: rec.recommendedTarget,
-                      currentFare: rec.currentFare,
-                      airline: rec.airline,
-                      channels: ['Email', 'Push Notification'],
+                      channels: ['In-app'],
+                      date: travelDate,
                     });
                   }}
                   disabled={createAlertMutation.isPending}
@@ -674,10 +640,10 @@ export function PriceAlerts() {
         {/* ── 5. Active Alerts Management Table ── */}
         <ScrollReveal delay={0.5}>
         <div className="rounded-2xl bg-[#0E1017]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl overflow-hidden">
-          
+
           {/* Table Header Controls */}
           <div className="p-5 border-b border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            
+
             {/* Filter Tabs */}
             <div className="flex items-center gap-1.5 bg-[#161824] p-1 rounded-xl border border-white/[0.06]">
               {[
@@ -718,7 +684,14 @@ export function PriceAlerts() {
           </div>
 
           {/* Alerts Cards List */}
-          {isLoading ? (
+          {alertsError ? (
+            <div role="alert" className="p-12 text-center flex flex-col items-center justify-center gap-3">
+              <AlertCircle size={22} className="text-rose-400" />
+              <h3 className="text-white font-bold text-sm">Couldn't load your alerts</h3>
+              <p className="text-xs text-slate-400 max-w-sm">{(alertsErr as Error)?.message || 'Please try again.'}</p>
+              <button type="button" onClick={() => refetchAlerts()} className="px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-xs font-semibold text-white cursor-pointer">Try again</button>
+            </div>
+          ) : isLoading ? (
             <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
               <div className="w-8 h-8 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
               <p className="text-xs">Loading corridor monitors...</p>
@@ -738,14 +711,14 @@ export function PriceAlerts() {
               {filteredAlerts.map((alert: any) => {
                 const originInfo = getAirport(alert.origin || alert.route?.split('-')[0]);
                 const destInfo = getAirport(alert.destination || alert.route?.split('-')[1]);
-                const currentFare = alert.currentFare || api.getEstimatedRouteFare(originInfo.code, destInfo.code);
+                const currentFare: number | null = alert.currentFare ?? null;
                 const target = alert.targetPrice;
-                const isTriggered = alert.status === 'Triggered' || currentFare <= target;
-                const priceDiff = currentFare - target;
-                const proximityPercent = Math.min(100, Math.max(0, Math.round(((target) / currentFare) * 100)));
+                const isTriggered = alert.status === 'Triggered';
+                const priceDiff = currentFare === null ? 0 : currentFare - target;
+                const proximityPercent = currentFare ? Math.min(100, Math.max(0, Math.round((target / currentFare) * 100))) : 0;
 
                 return (
-                  <div 
+                  <div
                     key={alert.id}
                     className="p-5 hover:bg-white/[0.02] transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5"
                   >
@@ -792,16 +765,16 @@ export function PriceAlerts() {
                           Target: <strong className="text-white">₹{target.toLocaleString('en-IN')}</strong>
                         </span>
                         <span className="text-slate-400">
-                          Current: <strong className={isTriggered ? 'text-emerald-400' : 'text-cyan-400'}>₹{currentFare.toLocaleString('en-IN')}</strong>
+                          Current: <strong className={isTriggered ? 'text-emerald-400' : 'text-cyan-400'}>{currentFare === null ? 'Not tracked' : '₹' + currentFare.toLocaleString('en-IN')}</strong>
                         </span>
                       </div>
 
                       {/* Progress bar */}
                       <div className="w-full h-2 rounded-full bg-white/[0.08] overflow-hidden">
-                        <div 
+                        <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            isTriggered 
-                              ? 'bg-gradient-to-r from-emerald-500 to-green-400' 
+                            isTriggered
+                              ? 'bg-gradient-to-r from-emerald-500 to-green-400'
                               : 'bg-gradient-to-r from-[#1788FF] to-cyan-400'
                           }`}
                           style={{ width: `${isTriggered ? 100 : proximityPercent}%` }}
@@ -827,7 +800,7 @@ export function PriceAlerts() {
 
                     {/* Right: Status & Actions */}
                     <div className="flex items-center gap-2.5 self-end lg:self-center">
-                      
+
                       {/* Status badge */}
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${
                         isTriggered

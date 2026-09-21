@@ -18,6 +18,9 @@ export function AuthCallback() {
 
   useEffect(() => {
     let isCancelled = false;
+    let settled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let unsubscribe: (() => void) | undefined;
 
     async function handleAuthCallback() {
       // 1. Check for explicit OAuth error in search params
@@ -67,6 +70,7 @@ export function AuthCallback() {
         // If no session found after slight delay, check onAuthStateChange
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           if (event === 'SIGNED_IN' && currentSession?.user) {
+            settled = true;
             const mappedUser = await syncUserProfile(currentSession.user);
             login(mappedUser, currentSession.access_token);
             if (!isCancelled) {
@@ -77,9 +81,11 @@ export function AuthCallback() {
           }
         });
 
+        unsubscribe = () => subscription.unsubscribe();
+
         // Timeout fallback if no session received within 8 seconds
-        setTimeout(() => {
-          if (!isCancelled && status === 'loading') {
+        timeoutId = setTimeout(() => {
+          if (!isCancelled && !settled) {
             setStatus('error');
             setErrorMessage('Authentication session timed out. Please try signing in again.');
           }
@@ -97,13 +103,15 @@ export function AuthCallback() {
 
     return () => {
       isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      unsubscribe?.();
     };
   }, [searchParams, navigate, login]);
 
   return (
     <div className="min-h-screen w-full bg-[#020A1D] flex flex-col items-center justify-center p-6 text-white select-none">
       <div className="w-full max-w-md p-8 rounded-3xl bg-[#061126]/90 border border-blue-500/25 shadow-[0_25px_80px_rgba(0,0,0,0.7)] text-center flex flex-col items-center">
-        
+
         <div className="mb-6">
           <AeroNexLogo size={42} showTagline={true} />
         </div>
@@ -141,7 +149,7 @@ export function AuthCallback() {
                 {errorMessage || 'Google authentication could not be completed. Please try again.'}
               </p>
             </div>
-            
+
             <button
               onClick={() => navigate('/login', { replace: true })}
               className="mt-4 w-full h-11 rounded-xl bg-gradient-to-r from-[#1788FF] to-[#00A3FF] hover:shadow-[0_0_20px_rgba(23,136,255,0.4)] text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all"

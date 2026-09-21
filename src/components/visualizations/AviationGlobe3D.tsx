@@ -156,8 +156,7 @@ export const AviationGlobe3D = memo(function AviationGlobe3D({
       const found = regionalData.find(r => r.region.toLowerCase() === regionId.toLowerCase());
       if (found) return { value: found.value, change: found.change };
     }
-    const fallback = SECTOR_HUBS.find(h => h.id === regionId);
-    return { value: fallback?.defaultVal ?? 135.5, change: fallback?.defaultChange ?? 2.4 };
+    return { value: 0, change: 0 };
   }, [regionalData]);
 
   const focusOnHub = useCallback((hub: SectorHubData) => {

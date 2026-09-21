@@ -15,6 +15,8 @@ export interface AuthUser {
 export interface AuthResponse {
   user: AuthUser;
   token: string;
+  /** True when Supabase created the account but requires the email link to be clicked before a session exists. */
+  pendingConfirmation?: boolean;
 }
 
 /**
@@ -184,8 +186,11 @@ export const authService = {
 
     if (data?.user) {
       const user = await syncUserProfile(data.user, roleInput);
-      const token = data.session?.access_token || `aeronex_jwt_${Date.now()}_${user.id}`;
-      return { user, token };
+      if (!data.session) {
+        // Email confirmation is required: there is no session yet, so the user must not be treated as signed in.
+        return { user, token: '', pendingConfirmation: true };
+      }
+      return { user, token: data.session.access_token };
     }
 
     throw new Error('Could not complete registration. Please try again.');
@@ -320,12 +325,24 @@ export const authService = {
   /**
    * Change Password (for settings modal)
    */
-  changePassword: async (_emailInput: string, currentPassword: string, newPassword: string): Promise<boolean> => {
+  changePassword: async (emailInput: string, currentPassword: string, newPassword: string): Promise<boolean> => {
     if (!currentPassword) {
       throw new Error('Please enter your current password.');
     }
     if (!newPassword || newPassword.length < 6) {
       throw new Error('New password must be at least 6 characters long.');
+    }
+    if (newPassword === currentPassword) {
+      throw new Error('Your new password must be different from the current one.');
+    }
+
+    // Re-authenticate so a stolen/unattended session cannot change the password.
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: emailInput.trim().toLowerCase(),
+      password: currentPassword,
+    });
+    if (verifyError) {
+      throw new Error('Your current password is incorrect.');
     }
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
@@ -337,9 +354,9 @@ export const authService = {
   },
 
   /**
-   * Delete Account
+   * Clears local session data. Server-side deletion of the auth user happens in api.deleteAccount().
    */
-  deleteAccount: async (_emailInput: string): Promise<boolean> => {
+  deleteAccount: async (): Promise<boolean> => {
     localStorage.removeItem('aeronex_user');
     localStorage.removeItem('aeronex_token');
     try {

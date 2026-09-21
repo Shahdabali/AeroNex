@@ -59,19 +59,37 @@ npm install
 ```
 
 ### 2. Environment Variables
-In the `server/` directory, copy `.env.example` to `.env` and fill in your credentials:
+Copy `.env.example` (frontend) to `.env` and `server/.env.example` to `server/.env`, then fill in your credentials. See the comments in each file; the essentials are:
+
 ```env
-PORT=5000
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-GEMINI_API_KEY=your_gemini_api_key
-AI_MODEL=gemini-2.5-flash
-AI_RATE_LIMIT_PER_MINUTE=30
-AI_INSIGHT_CACHE_MINUTES=30
-DATA_REFRESH_INTERVAL_SECONDS=30
+# server/.env
+SUPABASE_URL=...                     # used to verify user sessions (service role, server-side only)
+SUPABASE_SERVICE_ROLE_KEY=...
+CORS_ORIGINS=https://your-frontend   # browser origins allowed to call the API
+GEMINI_API_KEY=...                   # optional; without it AI answers use deterministic analytics
+AMADEUS_CLIENT_ID=... / AMADEUS_CLIENT_SECRET=...   # optional; enables REAL market fares
+
+# .env (frontend)
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+VITE_API_BASE_URL=http://localhost:5000
 ```
 
-*Note: If Supabase or Gemini credentials are not provided, the server automatically operates in high-fidelity Demo Mode with deterministic algorithms and simulated live market fluctuations.*
+### Data honesty: live vs simulated
+AeroNex never presents modelled numbers as live. The server reports where fares come from at `GET /api/data-status`, and every "Live" indicator in the UI is driven by it:
+
+| Mode | When | UI badge |
+| --- | --- | --- |
+| `live` | Amadeus credentials configured and the last refresh is recent | **LIVE** |
+| `simulated` | No real fare source configured (default) | **SIMULATED** |
+| stale / unreachable | Last refresh is older than 3 intervals, or the API cannot be reached | **DELAYED** / **OFFLINE** |
+
+The Amadeus provider (`server/src/providers/AmadeusAirfareProvider.ts`) is implemented but has not been exercised against the live service in this repository (no credentials were available). Flight-search schedules are an indicative model anchored to observed corridor fares; AeroNex does not have live seat inventory.
+
+### Security model
+* All user data (`/api/user/*`, alerts, notifications, pipeline) requires a valid Supabase session token or personal API key; the user is taken from the verified token, never from request fields.
+* Secrets stay on the server. Only the Supabase anon key is bundled in the browser, so **Row Level Security must be enabled**: apply `server/supabase/migrations/003_secure_rls.sql` (the earlier migrations granted public read/write on every table).
+* CORS is restricted to `CORS_ORIGINS`; requests are rate limited; error responses never include stack traces.
 
 ### 3. Running Locally
 Run the backend API (from the `server/` directory):

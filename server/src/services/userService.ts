@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { JsonStore } from '../store/jsonStore';
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -7,7 +10,6 @@ export interface UserProfile {
   organization?: string;
   phone?: string;
   bio?: string;
-  verified?: boolean;
 }
 
 export interface TravelPreferences {
@@ -37,9 +39,7 @@ export interface AppearanceSettings {
 
 export interface IntegrationStatus {
   google: boolean;
-  calendar: boolean;
   email: boolean;
-  discord: boolean;
   apiAccess: boolean;
   apiKey: string;
 }
@@ -50,13 +50,7 @@ export interface FullUserData {
   notifications: NotificationSettings;
   appearance: AppearanceSettings;
   integrations: IntegrationStatus;
-  subscription: {
-    plan: string;
-    status: string;
-    renewalDate: string;
-    billingCycle: string;
-  };
-  passwordHash: string; // demo password tracking
+  createdAt: string;
 }
 
 export interface SupportTicket {
@@ -80,255 +74,206 @@ export interface FeedbackItem {
   createdAt: string;
 }
 
+export interface Identity {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+const newApiKey = () => `aeronex_live_sk_${crypto.randomBytes(16).toString('hex')}`;
+
+function defaultsFor(identity: Identity): FullUserData {
+  return {
+    profile: {
+      id: identity.id,
+      name: identity.name || identity.email.split('@')[0] || 'AeroNex Member',
+      email: identity.email,
+      role: 'Passenger',
+    },
+    preferences: {
+      departureCity: 'DEL',
+      destinationCity: 'BOM',
+      travelClass: 'Economy',
+      currency: 'INR (₹)',
+      language: 'English',
+      dateFormat: 'DD MMM YYYY',
+      showAltAirports: true,
+    },
+    notifications: {
+      priceDropAlerts: true,
+      routeUpdates: true,
+      travelDeals: false,
+      weeklyReports: false,
+      productUpdates: false,
+      marketingNotifs: false,
+    },
+    appearance: { theme: 'dark', accentColor: '#1788FF', fontSize: 'medium' },
+    integrations: { google: false, email: false, apiAccess: true, apiKey: newApiKey() },
+    createdAt: new Date().toISOString(),
+  };
+}
+
+// Whitelists guard against mass-assignment (clients can only touch known fields).
+const pick = <T extends object>(source: any, keys: (keyof T)[]): Partial<T> => {
+  const out: Partial<T> = {};
+  if (!source || typeof source !== 'object') return out;
+  for (const k of keys) if (source[k] !== undefined) (out as any)[k] = source[k];
+  return out;
+};
+
+const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : undefined);
+
+// Avatars arrive as data URLs; keep them bounded (~1.5 MB decoded).
+const MAX_AVATAR_CHARS = 2_000_000;
+
 class UserService {
-  private users: Map<string, FullUserData> = new Map();
-  private supportTickets: SupportTicket[] = [];
-  private feedbackList: FeedbackItem[] = [];
+  private users = new JsonStore<FullUserData>('users');
+  private supportTickets = new JsonStore<SupportTicket>('support_tickets');
+  private feedbackList = new JsonStore<FeedbackItem>('feedback');
 
-  constructor() {
-    // Pre-seed the primary user (Shadab Ali) matching frontend
-    const defaultUser: FullUserData = {
-      profile: {
-        id: 'usr_shadab',
-        name: 'Shadab Ali',
-        email: 'shadab@aeronex.com',
-        role: 'Researcher',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-        organization: 'Student / Researcher',
-        phone: '98765 43210',
-        bio: 'Exploring data-driven insights to make travel more accessible and affordable.',
-        verified: true,
-      },
-      preferences: {
-        departureCity: 'DEL',
-        destinationCity: 'BOM',
-        travelClass: 'Economy',
-        currency: 'INR (₹)',
-        language: 'English',
-        dateFormat: 'DD MMM YYYY (10 Sep 2026)',
-        showAltAirports: true,
-      },
-      notifications: {
-        priceDropAlerts: true,
-        routeUpdates: true,
-        travelDeals: true,
-        weeklyReports: true,
-        productUpdates: false,
-        marketingNotifs: false,
-      },
-      appearance: {
-        theme: 'dark',
-        accentColor: '#1788FF',
-        fontSize: 'medium',
-      },
-      integrations: {
-        google: false,
-        calendar: false,
-        email: false,
-        discord: false,
-        apiAccess: true,
-        apiKey: 'aeronex_live_sk_948f2c1b8e47a6d3f0',
-      },
-      subscription: {
-        plan: 'Researcher Tier (Pro)',
-        status: 'Active',
-        renewalDate: '10 Oct 2026',
-        billingCycle: 'Annual',
-      },
-      passwordHash: 'password123',
-    };
-
-    this.users.set(defaultUser.profile.email.toLowerCase(), defaultUser);
-    this.users.set('shadabali@example.com', {
-      ...defaultUser,
-      profile: { ...defaultUser.profile, email: 'shadabali@example.com' },
-    });
+  /** Returns the caller's record, creating it on first use. Keyed by verified auth user id. */
+  public getOrCreate(identity: Identity): FullUserData {
+    const existing = this.users.get(identity.id);
+    if (existing) return existing;
+    const created = defaultsFor(identity);
+    this.users.set(identity.id, created);
+    return created;
   }
 
-  public getUser(idOrEmail?: string): FullUserData {
-    if (!idOrEmail) {
-      return this.users.get('shadab@aeronex.com')!;
-    }
-    const emailKey = idOrEmail.toLowerCase();
-    for (const [key, user] of this.users.entries()) {
-      if (key === emailKey || user.profile.id === idOrEmail || user.profile.email.toLowerCase() === emailKey) {
-        return user;
-      }
-    }
-    // If not found, return or create a realistic default
-    const fallback: FullUserData = {
-      profile: {
-        id: `usr_${Date.now()}`,
-        name: idOrEmail.includes('@') ? idOrEmail.split('@')[0] : idOrEmail,
-        email: idOrEmail.includes('@') ? idOrEmail : `${idOrEmail}@aeronex.com`,
-        role: 'Passenger',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-        organization: 'AeroNex Member',
-        phone: '98765 43210',
-        bio: 'Passenger exploring real-time airfares.',
-        verified: true,
-      },
-      preferences: {
-        departureCity: 'DEL',
-        destinationCity: 'BOM',
-        travelClass: 'Economy',
-        currency: 'INR (₹)',
-        language: 'English',
-        dateFormat: 'DD MMM YYYY (10 Sep 2026)',
-        showAltAirports: true,
-      },
-      notifications: {
-        priceDropAlerts: true,
-        routeUpdates: true,
-        travelDeals: true,
-        weeklyReports: true,
-        productUpdates: false,
-        marketingNotifs: false,
-      },
-      appearance: {
-        theme: 'dark',
-        accentColor: '#1788FF',
-        fontSize: 'medium',
-      },
-      integrations: {
-        google: false,
-        calendar: false,
-        email: false,
-        discord: false,
-        apiAccess: true,
-        apiKey: `aeronex_live_sk_${Math.random().toString(36).substring(2, 12)}`,
-      },
-      subscription: {
-        plan: 'Passenger Tier (Free)',
-        status: 'Active',
-        renewalDate: 'Lifetime',
-        billingCycle: 'Free',
-      },
-      passwordHash: 'password123',
-    };
-    this.users.set(fallback.profile.email.toLowerCase(), fallback);
-    return fallback;
+  /** Read-only lookup that never creates a record. */
+  public peek(userId: string): FullUserData | undefined {
+    return this.users.get(userId);
   }
 
-  public updateProfile(idOrEmail: string, data: Partial<UserProfile>): UserProfile {
-    const user = this.getUser(idOrEmail);
-    user.profile = { ...user.profile, ...data };
+  public findByApiKey(key: string): UserProfile | null {
+    for (const [, u] of this.users.entries()) {
+      if (u.integrations.apiAccess && u.integrations.apiKey === key) return u.profile;
+    }
+    return null;
+  }
+
+  private save(user: FullUserData) {
+    this.users.set(user.profile.id, user);
+  }
+
+  public updateProfile(identity: Identity, data: any): UserProfile {
+    const user = this.getOrCreate(identity);
+    const updates = pick<UserProfile>(data, ['name', 'organization', 'phone', 'bio']);
+    const name = str(updates.name, 100);
+    if (updates.name !== undefined && (!name || name.length < 2)) {
+      throw new Error('Name must be at least 2 characters.');
+    }
+    user.profile = {
+      ...user.profile,
+      ...(name ? { name } : {}),
+      ...(updates.organization !== undefined ? { organization: str(updates.organization, 120) } : {}),
+      ...(updates.phone !== undefined ? { phone: str(updates.phone, 30) } : {}),
+      ...(updates.bio !== undefined ? { bio: str(updates.bio, 500) } : {}),
+    };
+    this.save(user);
     return user.profile;
   }
 
-  public updateAvatar(idOrEmail: string, avatarUrl: string): UserProfile {
-    const user = this.getUser(idOrEmail);
+  public updateAvatar(identity: Identity, avatarUrl: string): UserProfile {
+    if (typeof avatarUrl !== 'string' || avatarUrl.length > MAX_AVATAR_CHARS) {
+      throw new Error('Avatar image is too large. Please choose an image under 1.5 MB.');
+    }
+    if (!/^data:image\/(png|jpe?g|webp|gif);base64,/.test(avatarUrl) && !/^https:\/\//.test(avatarUrl)) {
+      throw new Error('Avatar must be a PNG, JPEG, WebP or GIF image.');
+    }
+    const user = this.getOrCreate(identity);
     user.profile.avatarUrl = avatarUrl;
+    this.save(user);
     return user.profile;
   }
 
-  public updatePreferences(idOrEmail: string, prefs: Partial<TravelPreferences>): TravelPreferences {
-    const user = this.getUser(idOrEmail);
-    user.preferences = { ...user.preferences, ...prefs };
+  public updatePreferences(identity: Identity, prefs: any): TravelPreferences {
+    const user = this.getOrCreate(identity);
+    const clean = pick<TravelPreferences>(prefs, [
+      'departureCity', 'destinationCity', 'travelClass', 'currency', 'language', 'dateFormat', 'showAltAirports',
+    ]);
+    for (const k of ['departureCity', 'destinationCity'] as const) {
+      const v = clean[k];
+      if (v !== undefined && !/^[A-Za-z]{3}$/.test(String(v))) throw new Error('Airport codes must be 3 letters.');
+      if (v !== undefined) clean[k] = String(v).toUpperCase();
+    }
+    user.preferences = { ...user.preferences, ...clean };
+    this.save(user);
     return user.preferences;
   }
 
-  public updateNotifications(idOrEmail: string, notifs: Partial<NotificationSettings>): NotificationSettings {
-    const user = this.getUser(idOrEmail);
-    user.notifications = { ...user.notifications, ...notifs };
+  public updateNotifications(identity: Identity, notifs: any): NotificationSettings {
+    const user = this.getOrCreate(identity);
+    const clean = pick<NotificationSettings>(notifs, [
+      'priceDropAlerts', 'routeUpdates', 'travelDeals', 'weeklyReports', 'productUpdates', 'marketingNotifs',
+    ]);
+    for (const k of Object.keys(clean) as (keyof NotificationSettings)[]) clean[k] = !!clean[k];
+    user.notifications = { ...user.notifications, ...clean };
+    this.save(user);
     return user.notifications;
   }
 
-  public updateAppearance(idOrEmail: string, app: Partial<AppearanceSettings>): AppearanceSettings {
-    const user = this.getUser(idOrEmail);
-    user.appearance = { ...user.appearance, ...app };
+  public updateAppearance(identity: Identity, app: any): AppearanceSettings {
+    const user = this.getOrCreate(identity);
+    const clean = pick<AppearanceSettings>(app, ['theme', 'accentColor', 'fontSize']);
+    if (clean.theme !== undefined && !['light', 'dark', 'system'].includes(clean.theme)) throw new Error('Invalid theme.');
+    if (clean.fontSize !== undefined && !['small', 'medium', 'large'].includes(clean.fontSize)) throw new Error('Invalid font size.');
+    if (clean.accentColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(clean.accentColor)) throw new Error('Invalid accent color.');
+    user.appearance = { ...user.appearance, ...clean };
+    this.save(user);
     return user.appearance;
   }
 
-  public toggleIntegration(idOrEmail: string, provider: keyof Omit<IntegrationStatus, 'apiKey'>): IntegrationStatus {
-    const user = this.getUser(idOrEmail);
-    user.integrations[provider] = !user.integrations[provider];
+  public toggleIntegration(identity: Identity, provider: string): IntegrationStatus {
+    if (!['google', 'email', 'apiAccess'].includes(provider)) throw new Error('Unknown integration.');
+    const user = this.getOrCreate(identity);
+    const key = provider as 'google' | 'email' | 'apiAccess';
+    user.integrations[key] = !user.integrations[key];
+    this.save(user);
     return user.integrations;
   }
 
-  public regenerateApiKey(idOrEmail: string): string {
-    const user = this.getUser(idOrEmail);
-    const newKey = `aeronex_live_sk_${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`;
-    user.integrations.apiKey = newKey;
-    return newKey;
+  public regenerateApiKey(identity: Identity): string {
+    const user = this.getOrCreate(identity);
+    user.integrations.apiKey = newApiKey();
+    this.save(user);
+    return user.integrations.apiKey;
   }
 
-  public changePassword(idOrEmail: string, oldPass: string, newPass: string): boolean {
-    const user = this.getUser(idOrEmail);
-    if (user.passwordHash && user.passwordHash !== oldPass) {
-      throw new Error('Current password does not match.');
-    }
-    if (!newPass || newPass.length < 6) {
-      throw new Error('New password must be at least 6 characters long.');
-    }
-    user.passwordHash = newPass;
-    return true;
+  public deleteData(userId: string): void {
+    this.users.delete(userId);
   }
 
-  public deleteAccount(idOrEmail: string): boolean {
-    const user = this.getUser(idOrEmail);
-    this.users.delete(user.profile.email.toLowerCase());
-    if (user.profile.id) this.users.delete(user.profile.id);
-    return true;
-  }
-
-  public exportUserData(idOrEmail: string): any {
-    const user = this.getUser(idOrEmail);
+  public exportUserData(identity: Identity, extra: Record<string, unknown> = {}) {
+    const user = this.getOrCreate(identity);
+    const { apiKey, ...integrations } = user.integrations;
     return {
       metadata: {
         exportedAt: new Date().toISOString(),
         service: 'AeroNex Airfare Intelligence Platform',
-        version: '1.0.0',
-        environment: 'Production',
       },
-      account: {
-        ...user.profile,
-      },
+      account: user.profile,
       preferences: user.preferences,
       notificationSettings: user.notifications,
       appearance: user.appearance,
-      activeIntegrations: {
-        googleConnected: user.integrations.google,
-        calendarConnected: user.integrations.calendar,
-        emailConnected: user.integrations.email,
-        discordConnected: user.integrations.discord,
-        apiKeyActive: !!user.integrations.apiKey,
-      },
-      subscription: user.subscription,
-      activity: {
-        recentSearches: [
-          { from: 'DEL', to: 'BOM', date: '2026-09-12', timestamp: '2026-09-10T14:30:00Z' },
-          { from: 'BOM', to: 'BLR', date: '2026-09-15', timestamp: '2026-09-09T18:22:00Z' },
-          { from: 'DEL', to: 'GOI', date: '2026-09-20', timestamp: '2026-09-08T11:05:00Z' },
-        ],
-        trackedAlerts: [
-          { route: 'DEL-BOM', targetFare: 5200, status: 'Active' },
-          { route: 'BOM-BLR', targetFare: 4100, status: 'Active' },
-        ],
-      },
+      integrations: { ...integrations, apiKeyActive: !!apiKey },
+      ...extra,
     };
   }
 
   // Support & Feedback
   public addSupportTicket(ticket: Omit<SupportTicket, 'id' | 'createdAt' | 'status'>): SupportTicket {
-    const newTicket: SupportTicket = {
-      id: `tkt_${Date.now()}`,
-      status: 'Open',
-      createdAt: new Date().toISOString(),
-      ...ticket,
-    };
-    this.supportTickets.push(newTicket);
+    const id = `tkt_${crypto.randomUUID()}`;
+    const newTicket: SupportTicket = { id, status: 'Open', createdAt: new Date().toISOString(), ...ticket };
+    this.supportTickets.set(id, newTicket);
     return newTicket;
   }
 
   public addFeedback(feedback: Omit<FeedbackItem, 'id' | 'createdAt'>): FeedbackItem {
-    const newFeedback: FeedbackItem = {
-      id: `fb_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      ...feedback,
-    };
-    this.feedbackList.push(newFeedback);
-    return newFeedback;
+    const id = `fb_${crypto.randomUUID()}`;
+    const item: FeedbackItem = { id, createdAt: new Date().toISOString(), ...feedback };
+    this.feedbackList.set(id, item);
+    return item;
   }
 }
 

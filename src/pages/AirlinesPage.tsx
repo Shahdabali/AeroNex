@@ -2,10 +2,10 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { 
-  Plane, Search, ShieldCheck, 
-  Layers, X, Wifi, Luggage, 
-  UtensilsCrossed, ArrowUpRight, BarChart3, 
+import {
+  Plane, Search, ShieldCheck,
+  Layers, X, Wifi, Luggage,
+  UtensilsCrossed, ArrowUpRight, BarChart3,
   ChevronRight, ExternalLink
 } from 'lucide-react';
 
@@ -297,7 +297,7 @@ export function AirlinesPage() {
   // Filter and sort airlines
   const filteredAirlines = useMemo(() => {
     return AIRLINES_DATABASE.filter(airline => {
-      const matchesSearch = 
+      const matchesSearch =
         airline.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         airline.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
         airline.hub.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -321,7 +321,7 @@ export function AirlinesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 pb-16">
-        
+
         {/* Header Hero Banner */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B0D14] via-[#12141F] to-[#161928] border border-white/[0.08] p-6 sm:p-8 shadow-2xl obsidian-card">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -356,6 +356,10 @@ export function AirlinesPage() {
             </div>
           </div>
 
+          <p className="mt-6 text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+            Reference data: fleet sizes, market shares and on-time figures are a static directory bundled with the app, not a live feed. Verify against DGCA or airline disclosures before relying on them.
+          </p>
+
           {/* Quick Aggregate Stats Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/[0.06]">
             <div>
@@ -367,7 +371,7 @@ export function AirlinesPage() {
               <span className="text-cyan-400 text-xl sm:text-2xl font-black font-mono">{totalFleet} Aircraft</span>
             </div>
             <div>
-              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Market Leader</span>
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider block font-mono">Largest carrier (directory)</span>
               <span className="text-white text-xl sm:text-2xl font-black font-mono">IndiGo (62.8%)</span>
             </div>
             <div>
@@ -436,7 +440,7 @@ export function AirlinesPage() {
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#12141C] border border-white/[0.08] text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-cyan-500/60 transition-colors"
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
               >
@@ -490,7 +494,7 @@ export function AirlinesPage() {
               }}
             >
               {/* Airline Top Color Accent Bar */}
-              <div 
+              <div
                 className="absolute top-0 left-0 right-0 h-1 transition-all duration-300 group-hover:h-1.5"
                 style={{ backgroundColor: airline.brandColor }}
               />
@@ -499,7 +503,7 @@ export function AirlinesPage() {
                 {/* Card Top Row: Logo Badge & Type */}
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center font-black font-mono text-white text-lg shadow-lg border border-white/[0.12] transition-transform group-hover:scale-105"
                       style={{ backgroundColor: airline.brandColor }}
                     >
@@ -518,8 +522,8 @@ export function AirlinesPage() {
                   </div>
 
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase border ${
-                    airline.type === 'LCC' 
-                      ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' 
+                    airline.type === 'LCC'
+                      ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
                       : airline.type === 'FSC'
                       ? 'bg-purple-500/10 text-purple-400 border-purple-500/30'
                       : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
@@ -541,9 +545,9 @@ export function AirlinesPage() {
                       <span className="text-white font-mono font-bold text-base">{airline.marketShare}%</span>
                     </div>
                     <div className="w-full h-1 bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${airline.marketShare * 1.5}%`, backgroundColor: airline.brandColor }} 
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${airline.marketShare * 1.5}%`, backgroundColor: airline.brandColor }}
                       />
                     </div>
                   </div>
@@ -620,7 +624,7 @@ export function AirlinesPage() {
         {activeModalAirline && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
             <div className="bg-[#0E1017] border border-white/[0.14] rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
-              
+
               {/* Close Button */}
               <button
                 onClick={() => setActiveModalAirline(null)}
@@ -631,7 +635,7 @@ export function AirlinesPage() {
 
               {/* Modal Header */}
               <div className="flex items-start gap-4">
-                <div 
+                <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center font-black font-mono text-white text-2xl shadow-xl border border-white/[0.15] shrink-0"
                   style={{ backgroundColor: activeModalAirline.brandColor }}
                 >

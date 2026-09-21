@@ -4,7 +4,8 @@ import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { AeroNexLogo } from '../components/AeroNexLogo';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAppContext } from '../context/AppProvider';
-import { api } from '../services/api';
+import { api, API_BASE_URL } from '../services/api';
+import { FAQS } from '../data/faqs';
 import type { Language } from '../i18n/translations';
 import {
   Settings as SettingsIcon, User, Sliders, Bell, Shield, Puzzle, Palette,
@@ -97,21 +98,21 @@ function ModalWrapper({ isOpen, onClose, title, subtitle, children, maxWidth = '
 export function Settings() {
   usePageTitle('Settings');
   const navigate = useNavigate();
-  const { 
-    user, 
-    logout, 
-    updateUser, 
-    theme, 
-    setTheme, 
-    accentColor, 
-    setAccentColor, 
-    fontSize, 
-    setFontSize, 
-    language, 
-    setLanguage, 
-    currency, 
-    setCurrency, 
-    t 
+  const {
+    user,
+    logout,
+    updateUser,
+    theme,
+    setTheme,
+    accentColor,
+    setAccentColor,
+    fontSize,
+    setFontSize,
+    language,
+    setLanguage,
+    currency,
+    setCurrency,
+    t
   } = useAppContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -206,6 +207,9 @@ export function Settings() {
   const [supportCategory, setSupportCategory] = useState('Data Inquiry');
   const [supportMessage, setSupportMessage] = useState('');
   const [supportSubmitted, setSupportSubmitted] = useState(false);
+  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
+  const [supportReceipt, setSupportReceipt] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(5);
@@ -230,7 +234,7 @@ export function Settings() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const data = await api.getUserProfile(user?.email || '');
+        const data = await api.getUserProfile();
         if (data?.profile) {
           if (data.profile.name) setFullName(data.profile.name);
           if (data.profile.organization) setOrganization(data.profile.organization);
@@ -277,8 +281,12 @@ export function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      triggerToast('Image file size must be less than 8MB.');
+    if (file.size > 1_500_000) {
+      triggerToast('Image must be smaller than 1.5 MB.');
+      return;
+    }
+    if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) {
+      triggerToast('Please choose a PNG, JPEG, WebP or GIF image.');
       return;
     }
 
@@ -290,9 +298,9 @@ export function Settings() {
         updateUser({ avatarUrl: dataUrl });
         try {
           await api.uploadAvatar(dataUrl, email);
-          triggerToast('Avatar photo updated and synchronized!');
-        } catch {
-          triggerToast('Avatar updated locally.');
+          triggerToast(user?.isGuest ? 'Avatar updated on this device.' : 'Avatar photo updated!');
+        } catch (err: any) {
+          triggerToast(err?.message ? `Avatar could not be saved: ${err.message}` : 'Avatar could not be saved. Please try again.');
         }
       }
     };
@@ -339,9 +347,11 @@ export function Settings() {
     if (key === 'showAltAirports') setShowAltAirports(value);
 
     try {
-      await api.updateUserPreferences(updated, email);
+      await api.updateUserPreferences(updated);
       triggerToast('Travel preferences saved');
-    } catch {}
+    } catch (err: any) {
+      triggerToast(err?.message || 'Could not save travel preferences.');
+    }
   };
 
   // 4. Notifications Update
@@ -363,8 +373,17 @@ export function Settings() {
     };
 
     try {
-      await api.updateUserNotifications(updated, email);
-    } catch {}
+      await api.updateUserNotifications(updated);
+    } catch (err: any) {
+      // Roll the toggle back so the UI never shows a setting that was not saved.
+      if (key === 'priceDropAlerts') setPriceDropAlerts(!val);
+      if (key === 'routeUpdates') setRouteUpdates(!val);
+      if (key === 'travelDeals') setTravelDeals(!val);
+      if (key === 'weeklyReports') setWeeklyReports(!val);
+      if (key === 'productUpdates') setProductUpdates(!val);
+      if (key === 'marketingNotifs') setMarketingNotifs(!val);
+      triggerToast(err?.message || 'Could not save notification settings.');
+    }
   };
 
   // 5. Language Change
@@ -392,35 +411,43 @@ export function Settings() {
     const displayName = providerNames[provider] || provider.toUpperCase();
 
     try {
-      await api.toggleIntegration(provider, email);
-      triggerToast(`${displayName} ${willConnect ? 'connected successfully!' : 'disconnected.'}`);
-    } catch {
-      triggerToast(`${displayName} state updated.`);
+      await api.toggleIntegration(provider);
+      triggerToast(`${displayName} ${willConnect ? 'enabled.' : 'disabled.'}`);
+    } catch (err: any) {
+      setIntegrations(integrations);
+      try {
+        localStorage.setItem('aeronex_integrations', JSON.stringify(integrations));
+      } catch {}
+      triggerToast(err?.message || `Could not update ${displayName}.`);
     }
   };
 
   // 7. Regenerate API Key
   const handleRegenerateKey = async () => {
     try {
-      const newKey = await api.regenerateApiKey(email);
+      const newKey = await api.regenerateApiKey();
       setApiKey(newKey);
-      triggerToast('New API access key generated!');
-    } catch {
-      triggerToast('Failed to regenerate key');
+      triggerToast('New API key generated. The previous key no longer works.');
+    } catch (err: any) {
+      triggerToast(err?.message || 'Failed to regenerate the key.');
     }
   };
 
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText(apiKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-    triggerToast('API Key copied to clipboard!');
+  const handleCopyApiKey = async () => {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+      triggerToast('API key copied to clipboard.');
+    } catch {
+      triggerToast('Could not copy automatically. Select the key and copy it manually.');
+    }
   };
 
   // 8. Download My Data
   const handleDownloadMyData = async () => {
     try {
-      const data = await api.exportUserData(email);
+      const data = await api.exportUserData();
       const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', jsonString);
@@ -475,9 +502,9 @@ export function Settings() {
     }
     setIsDeleting(true);
     try {
-      await api.deleteAccount(email);
+      await api.deleteAccount();
       logout();
-      navigate('/login');
+      navigate('/login', { replace: true });
     } catch (err: any) {
       triggerToast(err.message || 'Failed to delete account');
       setIsDeleting(false);
@@ -491,24 +518,33 @@ export function Settings() {
       triggerToast('Please fill out both subject and message.');
       return;
     }
+    if (supportSubject.trim().length < 3 || supportMessage.trim().length < 10) {
+      triggerToast('Add a subject (3+ characters) and describe the issue (10+ characters).');
+      return;
+    }
+    if (isSubmittingSupport) return;
+    setIsSubmittingSupport(true);
     try {
-      await api.submitSupportTicket({
+      const receipt: any = await api.submitSupportTicket({
         email,
         subject: supportSubject,
         category: supportCategory,
         message: supportMessage,
         userId: user?.id,
       });
+      setSupportReceipt(receipt?.data?.id ? `Reference: ${receipt.data.id}. We'll reply to ${email}.` : 'Your request was received.');
       setSupportSubmitted(true);
       setTimeout(() => {
         setSupportSubmitted(false);
         setShowSupportModal(false);
         setSupportSubject('');
         setSupportMessage('');
-        triggerToast('Support ticket dispatched to AeroNex Aviation Ops!');
+        triggerToast('Support request sent.');
       }, 1800);
-    } catch {
-      triggerToast('Failed to submit ticket. Please try again.');
+    } catch (err: any) {
+      triggerToast(err?.message || 'Failed to submit the request. Please try again.');
+    } finally {
+      setIsSubmittingSupport(false);
     }
   };
 
@@ -519,6 +555,8 @@ export function Settings() {
       triggerToast('Please provide your feedback comments.');
       return;
     }
+    if (isSubmittingFeedback) return;
+    setIsSubmittingFeedback(true);
     try {
       await api.submitFeedback({
         email,
@@ -532,10 +570,12 @@ export function Settings() {
         setFeedbackSubmitted(false);
         setShowFeedbackModal(false);
         setFeedbackComments('');
-        triggerToast('Thank you for shaping AeroNex!');
+        triggerToast('Thank you for your feedback!');
       }, 1800);
-    } catch {
-      triggerToast('Failed to record feedback.');
+    } catch (err: any) {
+      triggerToast(err?.message || 'Failed to record feedback.');
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -564,33 +604,7 @@ export function Settings() {
   const selectClass = 'settings-select w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all appearance-none text-sm cursor-pointer shadow-inner';
   const cardClass = 'settings-card obsidian-card bg-[#12141C]/80 backdrop-blur-xl border border-white/[0.08] rounded-[20px] p-6 shadow-sm hover:border-white/[0.16] flex flex-col justify-between transition-all';
 
-  const faqs = [
-    {
-      id: 1,
-      q: 'How is the AeroNex National Airfare Index calculated?',
-      a: 'The index is a weighted benchmark modeled after the Consumer Price Index (CPI) basket, factoring high-density metro corridors (DEL-BOM, BOM-BLR) and regional routes with real-time weights.',
-    },
-    {
-      id: 2,
-      q: 'How frequently is live route pricing updated?',
-      a: 'Our ingestion workers poll domestic airline networks and DGCA fare filings every 5 seconds for live tickers and every 30 seconds for deep fare matrix updates.',
-    },
-    {
-      id: 3,
-      q: 'How accurate are the AI price predictions?',
-      a: 'Our Gemini AI model combines historical booking curves, seasonal demand spikes, ATF fuel index, and real-time inventory to deliver 85-92% confidence recommendations.',
-    },
-    {
-      id: 4,
-      q: 'How do price drop alerts reach me?',
-      a: 'Alerts are dispatched via real-time WebSocket push notifications, browser alerts, and email summaries for your monitored corridors.',
-    },
-    {
-      id: 5,
-      q: 'Can I export my flight search history and saved data?',
-      a: 'Yes! In Settings > Data & Privacy, click "Download My Data" to immediately download a verified JSON or CSV export of all your records.',
-    },
-  ];
+  const faqs = FAQS;
 
   const filteredFaqs = faqs.filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase()));
 
@@ -614,9 +628,9 @@ export function Settings() {
         <div className="settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#090A0F] via-[#12141C] to-[#161924] border border-white/[0.08] p-6 md:p-8 shadow-xl">
           {/* Subtle Sunset Airplane backdrop on right */}
           <div className="absolute right-0 top-0 h-full w-1/2 overflow-hidden pointer-events-none rounded-r-2xl">
-            <img 
-              src="/assets/login-hero-clean.jpg" 
-              alt="AeroNex Aviation" 
+            <img
+              src="/assets/login-hero-clean.jpg"
+              alt="AeroNex Aviation"
               className="w-full h-full object-cover object-right opacity-20 mix-blend-screen"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/70 to-transparent" />
@@ -704,7 +718,7 @@ export function Settings() {
                         <span>{fullName ? fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (user?.isGuest ? 'G' : 'AN')}</span>
                       )}
                     </div>
-                    <button 
+                    <button
                       aria-label="Upload photo"
                       onClick={() => fileInputRef.current?.click()}
                       className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#1788FF] text-white flex items-center justify-center border-2 border-[#0A1838] shadow-md hover:bg-blue-600 transition-colors cursor-pointer"
@@ -723,7 +737,7 @@ export function Settings() {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => fileInputRef.current?.click()}
                   className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold flex items-center gap-1.5 hover:bg-blue-500/20 transition-all cursor-pointer shrink-0"
                 >
@@ -793,9 +807,9 @@ export function Settings() {
                   <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.defaultDepartureCity || 'Default Departure City'}</label>
                   <div className="relative">
                     <Plane size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
-                    <select 
-                      value={departureCity} 
-                      onChange={e => handlePreferenceChange('departureCity', e.target.value)} 
+                    <select
+                      value={departureCity}
+                      onChange={e => handlePreferenceChange('departureCity', e.target.value)}
                       className={`${selectClass} pl-10 pr-9`}
                     >
                       <option value="DEL">DEL  Delhi (Indira Gandhi)</option>
@@ -815,9 +829,9 @@ export function Settings() {
                   <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.defaultDestinationCity || 'Default Destination City'}</label>
                   <div className="relative">
                     <Plane size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
-                    <select 
-                      value={destinationCity} 
-                      onChange={e => handlePreferenceChange('destinationCity', e.target.value)} 
+                    <select
+                      value={destinationCity}
+                      onChange={e => handlePreferenceChange('destinationCity', e.target.value)}
                       className={`${selectClass} pl-10 pr-9`}
                     >
                       <option value="BOM">BOM  Mumbai (Chhatrapati Shivaji)</option>
@@ -837,9 +851,9 @@ export function Settings() {
                   <div>
                     <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.preferredTravelClass || 'Preferred Travel Class'}</label>
                     <div className="relative">
-                      <select 
-                        value={travelClass} 
-                        onChange={e => handlePreferenceChange('travelClass', e.target.value)} 
+                      <select
+                        value={travelClass}
+                        onChange={e => handlePreferenceChange('travelClass', e.target.value)}
                         className={`${selectClass} pr-8`}
                       >
                         <option value="Economy">Economy</option>
@@ -885,9 +899,9 @@ export function Settings() {
                     <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.dateFormatLabel || 'Date Format'}</label>
                     <div className="relative">
                       <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none" />
-                      <select 
-                        value={dateFormat} 
-                        onChange={e => handlePreferenceChange('dateFormat', e.target.value)} 
+                      <select
+                        value={dateFormat}
+                        onChange={e => handlePreferenceChange('dateFormat', e.target.value)}
                         className={`${selectClass} pl-8 pr-8`}
                       >
                         <option value="DD MMM YYYY (10 Sep 2026)">DD MMM YYYY (10 Sep 2026)</option>
@@ -1022,7 +1036,7 @@ export function Settings() {
 
               <div className="flex flex-col gap-1">
                 {/* Data Usage Modal Trigger */}
-                <button 
+                <button
                   onClick={() => setShowDataUsageModal(true)}
                   className="settings-row flex items-center justify-between py-3 px-2 border-b border-slate-800/80 hover:bg-white/5 transition-all rounded-xl cursor-pointer group text-left"
                 >
@@ -1039,7 +1053,7 @@ export function Settings() {
                 </button>
 
                 {/* Download My Data Trigger */}
-                <button 
+                <button
                   onClick={handleDownloadMyData}
                   className="settings-row flex items-center justify-between py-3 px-2 border-b border-slate-800/80 hover:bg-white/5 transition-all rounded-xl cursor-pointer group text-left"
                 >
@@ -1056,7 +1070,7 @@ export function Settings() {
                 </button>
 
                 {/* Delete Account Trigger */}
-                <button 
+                <button
                   onClick={() => setShowDeleteModal(true)}
                   className="settings-row flex items-center justify-between py-3 px-2 hover:bg-red-500/10 transition-all rounded-xl cursor-pointer group text-left"
                 >
@@ -1097,12 +1111,12 @@ export function Settings() {
                         key={opt.key}
                         onClick={() => {
                           setTheme(opt.key);
-                          api.updateUserAppearance({ theme: opt.key }, email);
+                          api.updateUserAppearance({ theme: opt.key }).catch(() => triggerToast('Theme applied here, but could not be saved to your account.'));
                           triggerToast(
-                            opt.key === 'light' 
-                              ? 'Light / Day mode activated' 
-                              : opt.key === 'dark' 
-                                ? 'Dark / Cockpit mode activated' 
+                            opt.key === 'light'
+                              ? 'Light / Day mode activated'
+                              : opt.key === 'dark'
+                                ? 'Dark / Cockpit mode activated'
                                 : 'System auto theme synchronized'
                           );
                         }}
@@ -1172,15 +1186,15 @@ export function Settings() {
                       key={color}
                       onClick={() => {
                         setAccentColor(color);
-                        api.updateUserAppearance({ accentColor: color }, email);
+                        api.updateUserAppearance({ accentColor: color }).catch(() => triggerToast('Colour applied here, but could not be saved to your account.'));
                         triggerToast('Accent color updated');
                       }}
                       className={`w-7 h-7 rounded-full transition-all cursor-pointer flex items-center justify-center ${
                         accentColor === color ? 'scale-110' : 'hover:scale-110'
                       }`}
-                      style={{ 
-                        backgroundColor: color, 
-                        boxShadow: accentColor === color ? `0 0 0 2px #0A1838, 0 0 0 4px ${color}` : undefined 
+                      style={{
+                        backgroundColor: color,
+                        boxShadow: accentColor === color ? `0 0 0 2px #0A1838, 0 0 0 4px ${color}` : undefined
                       }}
                       title={color}
                     >
@@ -1205,7 +1219,7 @@ export function Settings() {
                         key={opt.key}
                         onClick={() => {
                           setFontSize(opt.key);
-                          api.updateUserAppearance({ fontSize: opt.key }, email);
+                          api.updateUserAppearance({ fontSize: opt.key }).catch(() => triggerToast('Size applied here, but could not be saved to your account.'));
                           triggerToast(t.fontSizeUpdated || 'Font size updated');
                         }}
                         className={`py-2 px-2 rounded-xl border text-center font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
@@ -1270,10 +1284,10 @@ export function Settings() {
                     isActualUser: true
                   },
                 ].map((item) => {
-                  const isConnected = item.id === 'google' 
-                    ? (!!user && !user.isGuest) 
-                    : item.id === 'email' 
-                      ? !!user?.email 
+                  const isConnected = item.id === 'google'
+                    ? (!!user && !user.isGuest)
+                    : item.id === 'email'
+                      ? !!user?.email
                       : !!integrations[item.id];
                   return (
                     <div key={item.id} className="integration-row flex items-center justify-between py-3 border-b border-slate-800/80 last:border-0">
@@ -1300,7 +1314,7 @@ export function Settings() {
                           <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{item.desc}</p>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => {
                           if (item.action === 'manage') {
                             setShowApiKeyModal(true);
@@ -1317,8 +1331,8 @@ export function Settings() {
                         className={`settings-action-btn px-4 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                           item.action === 'manage'
                             ? 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
-                            : isConnected 
-                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' 
+                            : isConnected
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                               : 'bg-[#081530] border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/60 hover:text-white'
                         }`}
                       >
@@ -1344,19 +1358,19 @@ export function Settings() {
               <p className="text-xs text-slate-400 mb-4">{t.accountSectionDesc || 'Manage your account settings.'}</p>
 
               <div className="flex flex-wrap gap-2.5">
-                <button 
+                <button
                   onClick={() => setShowPasswordModal(true)}
                   className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
                 >
                   <Lock size={14} className="text-blue-400" />
                   {t.changePasswordBtn || 'Change Password'}
                 </button>
-                <button 
+                <button
                   onClick={() => setShowSubscriptionModal(true)}
                   className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
                 >
                   <CreditCard size={14} className="text-emerald-400" />
-                  {t.manageSubscriptionBtn || 'Manage Subscription'}
+                  View plan
                 </button>
                 <button
                   onClick={handleSignOut}
@@ -1376,21 +1390,21 @@ export function Settings() {
               <p className="text-xs text-slate-400 mb-4">{t.helpSupportDesc || 'Get help or contact our support team.'}</p>
 
               <div className="flex flex-wrap gap-2.5">
-                <button 
+                <button
                   onClick={() => setShowFaqsModal(true)}
                   className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
                 >
                   <FileQuestion size={14} className="text-blue-400" />
                   {t.faqsBtn || 'FAQs'}
                 </button>
-                <button 
+                <button
                   onClick={() => setShowSupportModal(true)}
                   className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
                 >
                   <Headphones size={14} className="text-emerald-400" />
                   {t.contactSupportBtn || 'Contact Support'}
                 </button>
-                <button 
+                <button
                   onClick={() => setShowFeedbackModal(true)}
                   className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
                 >
@@ -1410,22 +1424,22 @@ export function Settings() {
               <p className="text-white font-bold text-xs mb-2 tracking-wide">{t.appVersion || 'AERONEX v1.0.0'}</p>
 
               <div className="flex items-center gap-3 text-xs text-blue-400 mb-4 font-medium flex-wrap">
-                <button 
-                  onClick={() => setShowTermsModal(true)} 
+                <button
+                  onClick={() => setShowTermsModal(true)}
                   className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
                 >
                   {t.termsOfService || 'Terms of Service'}
                 </button>
                 <span className="text-slate-600">|</span>
-                <button 
-                  onClick={() => setShowPrivacyModal(true)} 
+                <button
+                  onClick={() => setShowPrivacyModal(true)}
                   className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
                 >
                   {t.privacyPolicyLink || 'Privacy Policy'}
                 </button>
                 <span className="text-slate-600">|</span>
-                <button 
-                  onClick={() => setShowAboutModal(true)} 
+                <button
+                  onClick={() => setShowAboutModal(true)}
                   className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
                 >
                   {t.aboutLink || 'About AeroNex'}
@@ -1664,8 +1678,8 @@ export function Settings() {
           <div>
             <label className="text-xs text-slate-400 font-medium block mb-1">Example Request</label>
             <div className="p-3 bg-[#030A1D] border border-slate-800 rounded-xl font-mono text-[11px] text-slate-300 overflow-x-auto">
-              <code>{`curl -X GET "https://api.aeronex.com/v1/routes" \\
-  -H "Authorization: Bearer ${apiKey}"`}</code>
+              <code>{`curl -X GET "${API_BASE_URL || 'https://YOUR-AERONEX-SERVER'}/api/alerts" \\
+  -H "X-API-Key: ${apiKey}"`}</code>
             </div>
           </div>
 
@@ -1680,51 +1694,26 @@ export function Settings() {
         </div>
       </ModalWrapper>
 
-      {/* 5. Manage Subscription Modal */}
+      {/* 5. Plan Modal */}
       <ModalWrapper
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
-        title="Subscription & Billing"
-        subtitle="Manage your AeroNex access tier and privileges"
+        title="Plan"
+        subtitle="Your AeroNex access"
       >
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0B254E] to-[#081736] border border-blue-500/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-wider border border-cyan-500/40">
-                Active Tier
-              </span>
-              <span className="text-xs font-mono text-emerald-400">₹4,999 / Year</span>
-            </div>
-            <h4 className="text-lg font-bold text-white">Researcher / Pro Member</h4>
-            <p className="text-xs text-slate-400 mt-1">Renewal Date: 10 Oct 2026 • Auto-renews annually</p>
-
+            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-wider border border-cyan-500/40">Current plan</span>
+            <h4 className="text-lg font-bold text-white mt-2">AeroNex Free</h4>
+            <p className="text-xs text-slate-400 mt-1">AeroNex does not charge or bill accounts at the moment, so there are no invoices or renewals to manage.</p>
             <ul className="mt-3 space-y-1.5 text-xs text-slate-300 border-t border-slate-700/60 pt-3">
-              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Live 5-second polling on all Indian airfare corridors</li>
-              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Full CPI inflation analytics & historical regression models</li>
-              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Gemini ML predictive confidence breakdown</li>
-              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> 10,000 requests/month Developer API Access</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Airfare index, route trends and price alerts</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> AI analysis grounded in observed data</li>
+              <li className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Personal API key for read access to market data</li>
             </ul>
           </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              onClick={() => {
-                setShowSubscriptionModal(false);
-                triggerToast('Invoice history dispatched to your email.');
-              }}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 cursor-pointer"
-            >
-              Download Invoices
-            </button>
-            <button
-              onClick={() => {
-                setShowSubscriptionModal(false);
-                triggerToast('Subscription is active and in good standing.');
-              }}
-              className="px-5 py-2 rounded-xl bg-[#1788FF] text-white text-xs font-semibold hover:bg-blue-600 cursor-pointer"
-            >
-              Manage Plan
-            </button>
+          <div className="flex justify-end pt-2">
+            <button onClick={() => setShowSubscriptionModal(false)} className="px-5 py-2 rounded-xl bg-[#1788FF] text-white text-xs font-semibold hover:bg-blue-600 cursor-pointer">Close</button>
           </div>
         </div>
       </ModalWrapper>
@@ -1778,8 +1767,8 @@ export function Settings() {
           {supportSubmitted ? (
             <div className="p-4 bg-emerald-500/15 border border-emerald-500/40 rounded-xl text-center space-y-2">
               <Check size={24} className="text-emerald-400 mx-auto" />
-              <h5 className="font-bold text-white text-sm">Ticket Registered Successfully</h5>
-              <p className="text-xs text-slate-300">Reference: #TKT-{Date.now().toString().slice(-6)}. Check your email for confirmation.</p>
+              <h5 className="font-bold text-white text-sm">Request received</h5>
+              <p className="text-xs text-slate-300">{supportReceipt || 'Your request was received.'}</p>
             </div>
           ) : (
             <>
@@ -1793,8 +1782,7 @@ export function Settings() {
                   <option value="Data Inquiry">Real-Time Airfare Data Inquiry</option>
                   <option value="AI Accuracy">AI Prediction / Methodology</option>
                   <option value="API Integration">API Access & Rate Limits</option>
-                  <option value="Billing">Billing & Subscription</option>
-                  <option value="Bug Report">Platform Bug Report</option>
+                                    <option value="Bug Report">Platform Bug Report</option>
                 </select>
               </div>
 

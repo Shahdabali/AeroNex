@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "seed": "ts-node src/seed.ts",
     "sync-db": "ts-node src/syncSupabase.ts",
-    "test": "ts-node src/tests/aiSystem.test.ts"
+    "test": "ts-node src/tests/aiSystem.test.ts && ts-node src/tests/appSystem.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.21.0",

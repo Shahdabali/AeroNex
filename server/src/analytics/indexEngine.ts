@@ -31,13 +31,18 @@ export class AirfareIndexEngine {
     'HYD-BLR': 3000,
   };
   
-  private lastIndexValue: number = 135.2;
-  private lastRegionalIndices: Record<string, number> = {
-    North: 134.8,
-    South: 142.1,
-    East: 126.5,
-    West: 138.2
-  };
+  private lastIndexValue: number | null = null;
+  private lastRegionalIndices: Record<string, number> = {};
+
+  /** The fixed basket behind the index: baseline fare and weight (share of baseline total) per corridor. */
+  public getBasket() {
+    const total = Object.values(this.baselineFares).reduce((a, b) => a + b, 0);
+    return Object.entries(this.baselineFares).map(([route, baseline]) => ({
+      route,
+      baseline,
+      weightPct: parseFloat(((baseline / total) * 100).toFixed(1)),
+    }));
+  }
 
   public calculateIndex(currentFares: FareDataInput[]): IndexCalculationResult {
     let totalBaseline = 0;
@@ -57,8 +62,8 @@ export class AirfareIndexEngine {
 
     if (totalBaseline === 0) {
       return {
-        index_value: this.lastIndexValue,
-        previous_index_value: this.lastIndexValue,
+        index_value: this.lastIndexValue ?? 0,
+        previous_index_value: this.lastIndexValue ?? 0,
         change_percent: 0,
         sample_size: 0,
       };
@@ -67,11 +72,12 @@ export class AirfareIndexEngine {
     const rawIndex = (totalCurrent / totalBaseline) * 100;
     const indexValue = parseFloat(rawIndex.toFixed(2));
     
-    const changePercent = parseFloat(((indexValue - this.lastIndexValue) / this.lastIndexValue * 100).toFixed(2));
+    const previous = this.lastIndexValue ?? indexValue;
+    const changePercent = previous ? parseFloat(((indexValue - previous) / previous * 100).toFixed(2)) : 0;
     
     const result = {
       index_value: indexValue,
-      previous_index_value: this.lastIndexValue,
+      previous_index_value: previous,
       change_percent: changePercent,
       sample_size: sampleSize,
     };
@@ -102,15 +108,15 @@ export class AirfareIndexEngine {
       }
     }
 
-    const prevIndex = this.lastRegionalIndices[region] || 100;
+    const prevIndex = this.lastRegionalIndices[region] ?? null;
 
     if (totalBaseline === 0) {
-      return { index_value: prevIndex, change_percent: 0 };
+      return { index_value: prevIndex ?? 0, change_percent: 0 };
     }
 
     const rawIndex = (totalCurrent / totalBaseline) * 100;
     const indexValue = parseFloat(rawIndex.toFixed(2));
-    const changePercent = parseFloat(((indexValue - prevIndex) / prevIndex * 100).toFixed(2));
+    const changePercent = prevIndex ? parseFloat(((indexValue - prevIndex) / prevIndex * 100).toFixed(2)) : 0;
 
     this.lastRegionalIndices[region] = indexValue;
     

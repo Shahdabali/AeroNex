@@ -8,13 +8,11 @@ import { DataIngestionMonitor } from '../../components/dashboard/DataIngestionMo
 import { QuickInsights } from '../../components/dashboard/QuickInsights';
 import { AirfareVsCPI } from '../../components/dashboard/AirfareVsCPI';
 import { AnomalyMonitor } from '../../components/dashboard/AnomalyMonitor';
-import { useAirfareRealtime } from '../../hooks/useAirfareRealtime';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { ScrollReveal } from '../../components/ui/ScrollReveal';
 
 export function Dashboard() {
   usePageTitle('Dashboard');
-  useAirfareRealtime();
 
   return (
     <DashboardLayout>

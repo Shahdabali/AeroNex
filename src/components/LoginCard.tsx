@@ -136,6 +136,13 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
 
     try {
       const response = await authService.register(fullName, signupEmail, signupPassword, role);
+      if (response.pendingConfirmation) {
+        // No session yet: ask the user to confirm their email instead of pretending they are signed in.
+        setSuccess(`Account created! We sent a confirmation link to ${signupEmail.trim()}. Open it, then sign in.`);
+        setIsSignUpMode(false);
+        setEmail(signupEmail.trim());
+        return;
+      }
       login(response.user, response.token);
       setSuccess('Account successfully created! Welcome to AeroNex.');
       setTimeout(() => {

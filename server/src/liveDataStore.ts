@@ -15,61 +15,24 @@ export interface ChartDataPoint {
   value: number;
 }
 
+export const TIMEFRAME_MS: Record<string, number> = {
+  '24h': 86_400_000,
+  '7d': 7 * 86_400_000,
+  '30d': 30 * 86_400_000,
+  '6m': 182 * 86_400_000,
+  '1y': 365 * 86_400_000,
+};
+
 export class LiveDataStore {
   private currentFares: Map<string, RouteFare> = new Map();
   private fareHistory: { route: string; fare: number; timestamp: Date }[] = [];
-  private indexHistory: { value: number; timestamp: Date }[] = [];
+  private indexHistory: { value: number; averageFare: number; timestamp: Date }[] = [];
   private regionalIndices: { region: string; value: number; change: number }[] = [];
-  private lastUpdatedAt: Date = new Date();
+  private lastUpdatedAt: Date | null = null;
+  private observationsTracked = 0;
   private insights: any[] = [
     { id: '1', title: 'Market Overview (2026)', content: 'Tracking 2026 live Indian domestic airfare dynamics in real time.', type: 'summary' }
   ];
-
-  constructor() {
-    // Pre-populate with 2026 realistic baseline data
-    const initial2026Fares: Record<string, number> = {
-      'DEL-BOM': 5680,
-      'BOM-DEL': 5620,
-      'BOM-BLR': 4450,
-      'BLR-BOM': 4480,
-      'DEL-BLR': 7120,
-      'BLR-DEL': 7080,
-      'MAA-DEL': 5350,
-      'DEL-MAA': 5350,
-      'HYD-DEL': 4680,
-      'DEL-HYD': 4680,
-      'CCU-DEL': 5490,
-      'DEL-CCU': 5490,
-      'GOI-BOM': 3620,
-      'BOM-GOI': 3620,
-      'DEL-GOI': 6750,
-      'GOI-DEL': 6750,
-      'BLR-CCU': 5850,
-      'CCU-BLR': 5850,
-      'BLR-HYD': 3450,
-      'HYD-BLR': 3450,
-    };
-
-    for (const [route, fare] of Object.entries(initial2026Fares)) {
-      this.currentFares.set(route, {
-        route,
-        currentFare: fare,
-        previousFare: Math.round(fare * 0.97),
-        lastUpdated: new Date()
-      });
-      this.fareHistory.push({ route, fare, timestamp: new Date() });
-    }
-
-    this.indexHistory.push({ value: 135.2, timestamp: new Date(Date.now() - 3600000) });
-    this.indexHistory.push({ value: 138.4, timestamp: new Date() });
-
-    this.regionalIndices = [
-      { region: 'North', value: 134.8, change: 2.4 },
-      { region: 'West', value: 138.2, change: 1.9 },
-      { region: 'East', value: 126.5, change: 1.5 },
-      { region: 'South', value: 142.1, change: 3.6 }
-    ];
-  }
 
   updateFare(route: string, fare: number) {
     const existing = this.currentFares.get(route);
@@ -81,6 +44,7 @@ export class LiveDataStore {
     });
     this.fareHistory.push({ route, fare, timestamp: new Date() });
     this.lastUpdatedAt = new Date();
+    this.observationsTracked++;
     // Keep history manageable
     if (this.fareHistory.length > 5000) {
       this.fareHistory.shift();
@@ -88,7 +52,9 @@ export class LiveDataStore {
   }
 
   addIndexHistory(value: number) {
-    this.indexHistory.push({ value, timestamp: new Date() });
+    const fares = Array.from(this.currentFares.values());
+    const averageFare = fares.length ? Math.round(fares.reduce((n, f) => n + f.currentFare, 0) / fares.length) : 0;
+    this.indexHistory.push({ value, averageFare, timestamp: new Date() });
     if (this.indexHistory.length > 1000) {
       this.indexHistory.shift();
     }
@@ -110,16 +76,17 @@ export class LiveDataStore {
     const routes = Array.from(this.currentFares.values());
     if (routes.length === 0) {
       return {
-        airfareIndex: { value: 138.4, change: 3.2 },
-        averageFare: { value: 6450, change: 1.8 },
-        flightsTracked: { value: 2840, change: 6.2 },
-        routesTracked: { value: 246, change: 3.4 },
+        hasData: false,
+        airfareIndex: { value: 0, change: 0 },
+        averageFare: { value: 0, change: 0 },
+        flightsTracked: { value: 0, change: 0 },
+        routesTracked: { value: 0, change: 0 },
         secondary: {
-          lowestFare: { fare: 3620, route: 'BOM → GOI' },
-          highestFare: { fare: 7120, route: 'DEL → BLR' },
-          biggestIncrease: { change: 14.2, route: 'DEL → GOI' },
-          biggestDecrease: { change: -7.8, route: 'MAA → DEL' }
-        }
+          lowestFare: { fare: 0, route: '' },
+          highestFare: { fare: 0, route: '' },
+          biggestIncrease: { change: 0, route: '' },
+          biggestDecrease: { change: 0, route: '' },
+        },
       };
     }
 
@@ -145,14 +112,19 @@ export class LiveDataStore {
       }
     }
 
-    const latestIndex = this.indexHistory.length > 0 ? this.indexHistory[this.indexHistory.length - 1].value : 100;
+    const latestIndex = this.indexHistory.length > 0 ? this.indexHistory[this.indexHistory.length - 1].value : 0;
     const prevIndex = this.indexHistory.length > 1 ? this.indexHistory[this.indexHistory.length - 2].value : latestIndex;
     const indexChange = prevIndex === 0 ? 0 : ((latestIndex - prevIndex) / prevIndex) * 100;
 
+    const avgNow = Math.round(sumFare / routes.length);
+    const prevAvg = this.indexHistory.length > 1 ? this.indexHistory[this.indexHistory.length - 2].averageFare : avgNow;
+    const avgChange = prevAvg ? ((avgNow - prevAvg) / prevAvg) * 100 : 0;
+
     return {
+      hasData: true,
       airfareIndex: { value: parseFloat(latestIndex.toFixed(1)), change: parseFloat(indexChange.toFixed(1)) },
-      averageFare: { value: Math.round(sumFare / routes.length), change: 0 },
-      flightsTracked: { value: routes.length * 10, change: 0 },
+      averageFare: { value: avgNow, change: parseFloat(avgChange.toFixed(1)) },
+      flightsTracked: { value: this.observationsTracked, change: 0 },
       routesTracked: { value: routes.length, change: 0 },
       secondary: {
         lowestFare: { fare: minFare === Infinity ? 0 : minFare, route: minFareRoute },
@@ -185,12 +157,20 @@ export class LiveDataStore {
     return this.regionalIndices;
   }
 
-  getChartData(_timeframe?: string) {
-    // Return the latest index history formatted for charts
-    return this.indexHistory.map(h => ({
-      time: h.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      value: parseFloat(h.value.toFixed(1))
-    })).slice(-24); // Return last 24 points to keep it manageable
+  /** Index history within the requested window (only what has actually been observed). */
+  getChartData(timeframe: string = '24h') {
+    const windowMs = TIMEFRAME_MS[timeframe] ?? TIMEFRAME_MS['24h'];
+    const cutoff = Date.now() - windowMs;
+    const sameDay = windowMs <= TIMEFRAME_MS['24h'];
+    return this.indexHistory
+      .filter(h => h.timestamp.getTime() >= cutoff)
+      .map(h => ({
+        time: sameDay
+          ? h.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : h.timestamp.toLocaleDateString([], { day: '2-digit', month: 'short' }),
+        timestamp: h.timestamp.toISOString(),
+        value: parseFloat(h.value.toFixed(1)),
+      }));
   }
 
   getAiInsights() {
@@ -208,8 +188,8 @@ export class LiveDataStore {
     return Array.from(this.currentFares.values());
   }
 
-  getRouteHistory(route: string) {
-    return this.fareHistory.filter(h => h.route === route).slice(-20);
+  getRouteHistory(route: string, limit = 20) {
+    return this.fareHistory.filter(h => h.route === route).slice(-limit);
   }
 
   getLastUpdatedAt() {

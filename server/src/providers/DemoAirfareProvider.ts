@@ -2,6 +2,9 @@ import { AirfareProvider } from './AirfareProvider';
 import { FareDataInput } from '../utils/validation';
 
 export class DemoAirfareProvider implements AirfareProvider {
+  readonly name = 'AeroNex Simulated Market Model';
+  readonly mode = 'simulated' as const;
+
   private basePrices: Record<string, number> = {
     'DEL-BOM': 5680,
     'BOM-DEL': 5620,
@@ -25,6 +28,8 @@ export class DemoAirfareProvider implements AirfareProvider {
     'HYD-BLR': 3450,
   };
 
+  private anchors: Record<string, number> = { ...this.basePrices };
+
   async fetchLatestFares(): Promise<FareDataInput[]> {
     const results: FareDataInput[] = [];
     const airlines = ['6E', 'AI', 'QP', 'UK', 'SG'];
@@ -36,7 +41,9 @@ export class DemoAirfareProvider implements AirfareProvider {
       const sign = Math.random() > 0.5 ? 1 : -1;
       const pct = (1 + Math.random() * 3.5) / 100;
       const fluctuation = 1 + (sign * pct);
-      const newFare = Math.round(base * fluctuation);
+      // Clamp to +/-20% of the anchor so the simulation mean-reverts instead of wandering off.
+      const anchor = this.anchors[route];
+      const newFare = Math.round(Math.min(anchor * 1.2, Math.max(anchor * 0.8, base * fluctuation)));
       
       // Update base for next tick so it drifts naturally around 2026 levels
       this.basePrices[route] = newFare;
@@ -54,7 +61,7 @@ export class DemoAirfareProvider implements AirfareProvider {
         currency: 'INR',
         departure_time: now.toISOString(),
         arrival_time: arrival.toISOString(),
-        source: 'DemoAirfareProvider-2026',
+        source: 'simulated-market-model',
       });
     }
 

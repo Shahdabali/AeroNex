@@ -26,7 +26,7 @@ export function LoginPage({ initialMode = 'signin' }: LoginPageProps) {
 
   return (
     <div className="login-page-bg min-h-screen w-full bg-gradient-to-br from-[#061536] via-[#030C22] to-[#020817] relative overflow-hidden flex flex-col font-['Inter',sans-serif] select-none transition-colors duration-300">
-      
+
       {/* Upper Atmospheric Glow & Ambient Lighting */}
       <div className="absolute top-0 left-0 right-0 h-[450px] bg-gradient-to-b from-[#0E285F]/40 via-[#061840]/20 to-transparent pointer-events-none z-0" />
       <div className="login-ambient-orb absolute -top-24 left-[12%] w-[550px] h-[550px] bg-[#00A3FF]/18 rounded-full blur-[140px] pointer-events-none z-0 transition-opacity duration-300" />
@@ -46,7 +46,7 @@ export function LoginPage({ initialMode = 'signin' }: LoginPageProps) {
 
       {/* Main Content Container */}
       <div className="w-full max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-14 flex-1 flex flex-col lg:flex-row items-center justify-between relative z-20 py-4 lg:py-6 gap-8">
-        
+
         {/* LEFT COLUMN: HERO INFORMATION */}
         <div className="w-full lg:w-[50%] flex flex-col justify-center h-full relative z-20 py-4">
           <motion.div
@@ -59,11 +59,11 @@ export function LoginPage({ initialMode = 'signin' }: LoginPageProps) {
               <span className="text-[#00D2FF]">Intelligence</span> Platform
             </h1>
             <p className="login-hero-subtitle text-slate-300 text-[15px] sm:text-[16px] leading-relaxed max-w-md mt-4 transition-colors duration-300">
-              Access real-time airfare analytics, price index tracking, and route intelligence powered by advanced AI and automated ingestion.
+              Access airfare analytics, price index tracking, and route intelligence powered by advanced AI and automated ingestion.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
@@ -74,7 +74,7 @@ export function LoginPage({ initialMode = 'signin' }: LoginPageProps) {
                 <LineChart size={19} />
               </div>
               <span className="text-white font-bold text-sm mt-3 leading-tight block">Airfare Index</span>
-              <span className="text-slate-400 text-xs mt-1 leading-snug block">Real-time DGCA benchmarks</span>
+              <span className="text-slate-400 text-xs mt-1 leading-snug block">Fixed-basket benchmark index</span>
             </div>
 
             <div className="login-feature-card flex flex-col items-start p-4 rounded-2xl bg-[#061434]/80 backdrop-blur-md border border-blue-500/20 shadow-lg group hover:border-cyan-400/50 transition-all cursor-default">

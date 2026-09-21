@@ -209,7 +209,7 @@ export const translations = {
     // Login Card
     welcomeBack: "Welcome Back",
     createYourAccount: "Create Your Account",
-    signInSubtitle: "Sign in to access live fares, indices & predictive analytics",
+    signInSubtitle: "Sign in to access airfare indices, route trends & analytics",
     signUpSubtitle: "Join AeroNex for real-time airfare intelligence across India",
     signInTab: "Sign In",
     createAccountTab: "Create Account",
@@ -492,7 +492,7 @@ export const translations = {
     // Login Card
     welcomeBack: "वापसी पर स्वागत है",
     createYourAccount: "अपना खाता बनाएं",
-    signInSubtitle: "लाइव किराया, सूचकांक और विश्लेषिकी के लिए साइन इन करें",
+    signInSubtitle: "एयरफेयर सूचकांक, रूट ट्रेंड और विश्लेषिकी के लिए साइन इन करें",
     signUpSubtitle: "पूरे भारत में रीयल-टाइम किराया बुद्धिमत्ता के लिए AeroNex से जुड़ें",
     signInTab: "साइन इन करें",
     createAccountTab: "खाता बनाएं",
