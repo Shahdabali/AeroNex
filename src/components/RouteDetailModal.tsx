@@ -9,6 +9,7 @@ import { useAppContext } from '../context/AppProvider';
 import { useRoutes, splitRoute, fmtINR } from '../hooks/useMarket';
 import { LoadingBlock, ErrorBlock } from './StateViews';
 import { DataSourceBadge } from './DataSourceBadge';
+import { RouteIntelligence } from './RouteIntelligence';
 
 const airport = (code: string) => INDIAN_AIRPORTS.find(a => a.code === code);
 
@@ -121,6 +122,12 @@ export function RouteDetailModal({ route, onClose }: Props) {
               AeroNex has not observed any fares on this corridor yet, so price data and analysis are unavailable.
             </p>
           )}
+
+          {/* Route intelligence: stored scrape statistics */}
+          <section>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Route intelligence</h3>
+            <RouteIntelligence from={from} to={to} />
+          </section>
 
           {/* History */}
           <section>

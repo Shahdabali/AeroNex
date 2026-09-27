@@ -1,8 +1,12 @@
 export interface RouteFare {
   route: string;
+  /** Typical fare on the route (median of the latest scrape). */
   currentFare: number;
   previousFare: number | null;
   lastUpdated: Date;
+  /** Cheapest fare in the latest scrape - what a traveller can actually buy. Only set when the source reports it. */
+  cheapestFare?: number;
+  flightCount?: number;
 }
 
 export interface MetricChange {
@@ -30,6 +34,7 @@ export class LiveDataStore {
   private regionalIndices: { region: string; value: number; change: number }[] = [];
   private lastUpdatedAt: Date | null = null;
   private observationsTracked = 0;
+  private flightsTracked: number | null = null;
   private insights: any[] = [
     { id: '1', title: 'Market Overview (2026)', content: 'Tracking 2026 live Indian domestic airfare dynamics in real time.', type: 'summary' }
   ];
@@ -49,6 +54,54 @@ export class LiveDataStore {
     if (this.fareHistory.length > 5000) {
       this.fareHistory.shift();
     }
+  }
+
+  /**
+   * Records a route observation reported by the scraper, with the scraper's own timestamp and previous value.
+   * Unlike updateFare this never invents a "previous" fare or a timestamp.
+   */
+  setRouteFare(route: string, o: { current: number; previous: number | null; cheapest?: number; observedAt: Date; flightCount?: number }) {
+    this.currentFares.set(route, {
+      route,
+      currentFare: o.current,
+      previousFare: o.previous,
+      lastUpdated: o.observedAt,
+      cheapestFare: o.cheapest,
+      flightCount: o.flightCount,
+    });
+    if (!this.fareHistory.some(h => h.route === route && h.timestamp.getTime() === o.observedAt.getTime())) {
+      this.fareHistory.push({ route, fare: o.current, timestamp: o.observedAt });
+      this.fareHistory.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+      if (this.fareHistory.length > 20000) this.fareHistory.splice(0, this.fareHistory.length - 20000);
+    }
+    this.observationsTracked++;
+    this.lastUpdatedAt = o.observedAt;
+  }
+
+  /** Loads persisted route history (from the scraper database) so a server restart does not lose it. */
+  seedRouteHistory(route: string, points: { at: Date; fare: number }[]) {
+    const keep = this.fareHistory.filter(h => h.route !== route);
+    this.fareHistory = [...keep, ...points.map(p => ({ route, fare: p.fare, timestamp: p.at }))].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
+  }
+
+  seedIndexHistory(points: { at: Date; value: number }[]) {
+    this.indexHistory = points.map(p => ({ value: p.value, averageFare: 0, timestamp: p.at })).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
+  addIndexPoint(value: number, at: Date) {
+    const last = this.indexHistory[this.indexHistory.length - 1];
+    if (last && last.timestamp.getTime() >= at.getTime()) return;
+    const fares = Array.from(this.currentFares.values());
+    const averageFare = fares.length ? Math.round(fares.reduce((n, f) => n + f.currentFare, 0) / fares.length) : 0;
+    this.indexHistory.push({ value, averageFare, timestamp: at });
+    if (this.indexHistory.length > 5000) this.indexHistory.shift();
+  }
+
+  /** Number of distinct flights the scraper reports as tracked; when unset, metrics fall back to the observation count. */
+  setFlightsTracked(n: number) {
+    this.flightsTracked = n;
   }
 
   addIndexHistory(value: number) {
@@ -124,7 +177,7 @@ export class LiveDataStore {
       hasData: true,
       airfareIndex: { value: parseFloat(latestIndex.toFixed(1)), change: parseFloat(indexChange.toFixed(1)) },
       averageFare: { value: avgNow, change: parseFloat(avgChange.toFixed(1)) },
-      flightsTracked: { value: this.observationsTracked, change: 0 },
+      flightsTracked: { value: this.flightsTracked ?? this.observationsTracked, change: 0 },
       routesTracked: { value: routes.length, change: 0 },
       secondary: {
         lowestFare: { fare: minFare === Infinity ? 0 : minFare, route: minFareRoute },

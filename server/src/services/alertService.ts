@@ -69,7 +69,7 @@ class AlertService {
       destination,
       route,
       targetPrice: Math.round(targetPrice),
-      currentFare: tracked ? tracked.currentFare : null,
+      currentFare: tracked ? (tracked.cheapestFare ?? tracked.currentFare) : null,
       previousFare: tracked ? tracked.previousFare : null,
       airline: String(input?.airline || 'Any Airline').slice(0, 60),
       date,
@@ -130,10 +130,12 @@ class AlertService {
         const fare = fares.get(alert.route);
         if (!fare) continue;
         alert.previousFare = alert.currentFare;
-        alert.currentFare = fare.currentFare;
+        // Compare against the cheapest fare actually observed on the route (what a traveller can buy), not the typical fare.
+        const observed = fare.cheapestFare ?? fare.currentFare;
+        alert.currentFare = observed;
         alert.lastCheckedAt = new Date().toISOString();
         changed = true;
-        if (alert.status === 'Active' && fare.currentFare <= alert.targetPrice) {
+        if (alert.status === 'Active' && observed <= alert.targetPrice) {
           alert.status = 'Triggered';
           alert.triggeredAt = new Date().toISOString();
           triggered++;
@@ -141,7 +143,7 @@ class AlertService {
           if (pref) {
             this.notify(
               userId,
-              `Target reached for ${alert.origin} → ${alert.destination}: ₹${fare.currentFare.toLocaleString('en-IN')} (your target ₹${alert.targetPrice.toLocaleString('en-IN')}).`,
+              `Target reached for ${alert.origin} → ${alert.destination}: ₹${observed.toLocaleString('en-IN')} (your target ₹${alert.targetPrice.toLocaleString('en-IN')}).`,
               alert.id,
             );
           }

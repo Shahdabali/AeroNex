@@ -1,17 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import { FlightDetailModal } from '../components/FlightDetailModal';
+import { clock, dayOf, durationLabel } from '../utils/flightTime';
 import { DataSourceBadge } from '../components/DataSourceBadge';
 import { ErrorBlock } from '../components/StateViews';
+import { SearchBanner, SearchProgress } from '../components/SearchStatus';
+import { useFlightSearch } from '../hooks/useFlightSearch';
 import {
   Search, Calendar, Users, Briefcase, ArrowLeftRight, Plane,
-  Check, Bookmark, Clock, ChevronDown, Bell, Info
+  Check, Bookmark, Clock, ChevronDown, Bell
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { api } from '../services/api';
-import { INDIAN_AIRPORTS, type IndianAirport, type FlightItem } from '../data/indianAviation';
+import { api, type LiveFlight } from '../services/api';
+import { INDIAN_AIRPORTS, type IndianAirport } from '../data/indianAviation';
+
+/** Calendar date in India (IST) `n` days from now, as YYYY-MM-DD. Fares are for Indian departures, so "today" is the IST day. */
+const istDay = (n = 0) => new Date(Date.now() + 19_800_000 + n * 86_400_000).toISOString().slice(0, 10);
+/** A date the fare source can be asked about: well-formed, not in the past, within the booking horizon. */
+const isSearchableDate = (d: string | null): d is string => !!d && /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= istDay(0) && d <= istDay(330);
 
 export function FlightSearch() {
   usePageTitle('Flight Search');
@@ -22,13 +29,11 @@ export function FlightSearch() {
 
   const [fromCode, setFromCode] = useState(initialFrom);
   const [toCode, setToCode] = useState(initialTo);
+  // The URL is the source of truth for a shared/bookmarked search; without a usable date, default to tomorrow (IST).
   const [departDate, setDepartDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const fromUrl = searchParams.get('date');
+    return isSearchableDate(fromUrl) ? fromUrl : istDay(1);
   });
-  const [passengers, setPassengers] = useState(1);
-  const [cabinClass, setCabinClass] = useState('Economy');
 
   // Dropdown UI states
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -39,12 +44,12 @@ export function FlightSearch() {
   // Sorting & Filtering
   const [sortBy, setSortBy] = useState<'cheapest' | 'fastest' | 'departure'>('cheapest');
   const [filterStops, setFilterStops] = useState<'all' | 'nonstop'>('all');
-  const [filterMaxPrice, setFilterMaxPrice] = useState<number>(15000);
   const [filterAirline, setFilterAirline] = useState<string>(searchParams.get('airline') || 'all');
 
   // Tracking notifications
   const [savedFlightIds, setSavedFlightIds] = useState<string[]>([]);
-  const [detailFlight, setDetailFlight] = useState<FlightItem | null>(null);
+  const [detailFlight, setDetailFlight] = useState<LiveFlight | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -69,8 +74,10 @@ export function FlightSearch() {
   useEffect(() => {
     const paramFrom = searchParams.get('from');
     const paramTo = searchParams.get('to');
+    const paramDate = searchParams.get('date');
     if (paramFrom) setFromCode(paramFrom.toUpperCase());
     if (paramTo) setToCode(paramTo.toUpperCase());
+    if (isSearchableDate(paramDate)) setDepartDate(paramDate);
   }, [searchParams]);
 
   // Keep the URL in sync with the search so it survives refresh and can be shared.
@@ -83,16 +90,20 @@ export function FlightSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromCode, toCode, departDate]);
 
-  const { data: flights = [], isLoading, isError, error, refetch } = useQuery<FlightItem[]>({
-    queryKey: ['flights', fromCode, toCode, departDate, cabinClass],
-    queryFn: () => api.searchFlights(fromCode, toCode, departDate, cabinClass),
-    enabled: Boolean(fromCode && toCode),
-    staleTime: 30_000,
-  });
+  const { flights, meta, phase, error, refresh, refetch } = useFlightSearch(fromCode, toCode, departDate);
+  const today = istDay(0);
+  const maxDate = istDay(330);
 
-  const minutes = (d: string) => {
-    const m = d.match(/(\d+)h\s*(\d+)?m?/);
-    return m ? Number(m[1]) * 60 + Number(m[2] || 0) : 0;
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } catch (err: any) {
+      setToastMessage(err?.message || 'Could not refresh fares.');
+      setTimeout(() => setToastMessage(null), 4500);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const getAirportInfo = (code: string) => {
@@ -130,20 +141,20 @@ export function FlightSearch() {
   };
 
   // "Track" creates a real price alert for the corridor at 10% below this fare.
-  const handleTrackFlight = async (flight: FlightItem) => {
+  const handleTrackFlight = async (flight: LiveFlight) => {
     if (savedFlightIds.includes(flight.id)) return;
     try {
       await api.createAlert({
-        origin: flight.from,
-        destination: flight.to,
+        origin: flight.origin,
+        destination: flight.destination,
         targetPrice: Math.round(flight.price * 0.9),
         airline: flight.airline,
         date: departDate,
-        cabinClass,
+        cabinClass: 'Economy',
         channels: ['In-app'],
       });
       setSavedFlightIds(ids => [...ids, flight.id]);
-      setToastMessage(`Price alert set for ${flight.from} → ${flight.to} below ₹${Math.round(flight.price * 0.9).toLocaleString('en-IN')}. Manage it in Price Alerts.`);
+      setToastMessage(`Price alert set for ${flight.origin} → ${flight.destination} below ₹${Math.round(flight.price * 0.9).toLocaleString('en-IN')}. Manage it in Price Alerts.`);
     } catch (err: any) {
       setToastMessage(err?.message || 'Could not set the price alert.');
     }
@@ -164,21 +175,23 @@ export function FlightSearch() {
   );
 
   // Filtered & Sorted Flights
-  const processedFlights = (flights || [])
+  const processedFlights = flights
     .filter(f => {
-      if (filterStops === 'nonstop' && f.stops !== 'Non-stop') return false;
-      if (f.price > filterMaxPrice) return false;
+      if (filterStops === 'nonstop' && f.stops !== 0) return false;
       if (filterAirline !== 'all' && f.airlineCode !== filterAirline) return false;
       return true;
     })
     .sort((a, b) => {
       if (sortBy === 'cheapest') return a.price - b.price;
-      if (sortBy === 'fastest') return minutes(a.duration) - minutes(b.duration) || a.price - b.price;
-      if (sortBy === 'departure') return a.departureTime.localeCompare(b.departureTime);
+      if (sortBy === 'fastest') return a.durationMin - b.durationMin || a.price - b.price;
+      if (sortBy === 'departure') return a.departureAt.localeCompare(b.departureAt);
       return 0;
     });
 
+  // Filter options come from the flights actually returned, not a hard-coded airline list.
+  const airlineOptions = [...new Map(flights.map(f => [f.airlineCode, f.airline] as const)).entries()].sort((a, b) => a[1].localeCompare(b[1]));
   const lowestPrice = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.price)) : 0;
+  const fastestMin = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.durationMin)) : 0;
   const fromInfo = getAirportInfo(fromCode);
   const toInfo = getAirportInfo(toCode);
 
@@ -210,7 +223,7 @@ export function FlightSearch() {
               <DataSourceBadge />
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Compare indicative fares across Indian domestic corridors and set price alerts. Prices are anchored to fares AeroNex has observed.
+              Fares collected from a live fare source for Indian domestic routes. Every result shows how recently it was collected; nothing here is estimated.
             </p>
           </div>
 
@@ -401,6 +414,8 @@ export function FlightSearch() {
                 <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
                 <input
                   type="date"
+                  min={today}
+                  max={maxDate}
                   value={departDate}
                   onChange={(e) => setDepartDate(e.target.value)}
                   className="w-full bg-[#0A1838] border border-slate-700 rounded-2xl text-white pl-10 pr-4 py-3 text-sm focus:border-[#1788FF] focus:outline-none"
@@ -412,39 +427,38 @@ export function FlightSearch() {
           {/* Secondary Options (Passengers, Class, Search Button) */}
           <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2" title="Fares are collected for one adult passenger at the moment">
                 <Users size={16} className="text-slate-400" />
                 <span className="text-xs text-slate-400">Travelers:</span>
                 <select
-                  value={passengers}
-                  onChange={(e) => setPassengers(Number(e.target.value))}
+                  value={1}
+                  onChange={() => undefined}
+                  aria-label="Passengers"
                   className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer"
                 >
                   <option value={1} className="bg-[#0A1838]">1 Passenger</option>
-                  <option value={2} className="bg-[#0A1838]">2 Passengers</option>
-                  <option value={3} className="bg-[#0A1838]">3 Passengers</option>
-                  <option value={4} className="bg-[#0A1838]">4+ Group</option>
+                  <option value={2} disabled className="bg-[#0A1838]">2+ (not collected)</option>
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 bg-[#0A1838] border border-slate-700 rounded-xl px-3 py-2" title="Only economy fares are collected at the moment">
                 <Briefcase size={16} className="text-slate-400" />
                 <span className="text-xs text-slate-400">Cabin:</span>
                 <select
-                  value={cabinClass}
-                  onChange={(e) => setCabinClass(e.target.value)}
+                  value="Economy"
+                  onChange={() => undefined}
+                  aria-label="Cabin"
                   className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer"
                 >
                   <option value="Economy" className="bg-[#0A1838]">Economy</option>
-                  <option value="Premium Economy" className="bg-[#0A1838]">Premium Economy</option>
-                  <option value="Business" className="bg-[#0A1838]">Business</option>
-                  <option value="First" className="bg-[#0A1838]">First Class</option>
+                  <option value="Premium Economy" disabled className="bg-[#0A1838]">Premium Economy (not collected)</option>
+                  <option value="Business" disabled className="bg-[#0A1838]">Business (not collected)</option>
                 </select>
               </div>
             </div>
 
             <button
-              onClick={() => refetch()}
+              onClick={() => void refetch()}
               className="w-full md:w-auto bg-gradient-to-r from-cyan-500 via-[#1788FF] to-[#4E55F5] text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-[0_0_25px_rgba(23,136,255,0.4)] transition-all cursor-pointer"
             >
               <Search size={18} />
@@ -453,13 +467,7 @@ export function FlightSearch() {
           </div>
         </div>
 
-        <p className="flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
-          <Info size={14} className="shrink-0 mt-0.5" />
-          <span>
-            Schedules and fares below are an <strong>indicative model</strong>, not live airline inventory. Where AeroNex has observed a fare for the corridor, prices are scaled to it. Open a flight for the details
-            and caveats.
-          </span>
-        </p>
+        <SearchBanner phase={phase} meta={meta} onRefresh={() => void handleRefresh()} refreshing={refreshing} />
 
         {/* Results Toolbar (Filters & Sorters) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,24,56,0.4)] p-4 rounded-2xl border border-slate-800/80">
@@ -467,7 +475,7 @@ export function FlightSearch() {
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               Available Flights
               <span className="text-xs font-mono px-2 py-0.5 bg-blue-500/20 text-[#1788FF] rounded-full">
-                {processedFlights.length} Flights
+                {processedFlights.length === flights.length ? `${flights.length} Flights` : `${processedFlights.length} of ${flights.length} Flights`}
               </span>
             </h2>
             <span className="text-xs text-slate-400">
@@ -521,10 +529,9 @@ export function FlightSearch() {
               className="bg-[#0A1838] border border-slate-700 rounded-xl text-slate-300 px-3 py-2 outline-none"
             >
               <option value="all">All Airlines</option>
-              <option value="6E">IndiGo</option>
-              <option value="AI">Air India</option>
-              <option value="QP">Akasa Air</option>
-              <option value="SG">SpiceJet</option>
+              {airlineOptions.map(([code, name]) => (
+                <option key={code} value={code}>{name}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -554,58 +561,56 @@ export function FlightSearch() {
         </div>
 
         {/* Flight Cards Grid */}
-        {isLoading ? (
-          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-12 text-center text-slate-400 flex flex-col items-center justify-center">
-            <Plane className="w-8 h-8 text-[#1788FF] animate-pulse mb-3" />
-            <span className="text-sm font-medium">Loading fares…</span>
-          </div>
-        ) : isError ? (
+        {phase === 'searching' ? (
+          <SearchProgress meta={meta} />
+        ) : phase === 'error' ? (
           <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px]">
-            <ErrorBlock error={error} onRetry={() => refetch()} title="Couldn't load fares" />
+            <ErrorBlock error={error} onRetry={() => void refetch()} title="Couldn't reach live fares" />
           </div>
         ) : processedFlights.length > 0 ? (
           <div className="space-y-4">
             {processedFlights.map((flight) => {
               const isSaved = savedFlightIds.includes(flight.id);
+              const nextDay = dayOf(flight.arrivalAt) !== dayOf(flight.departureAt);
+              const badge = flight.price === lowestPrice ? 'Cheapest' : flight.durationMin === fastestMin ? 'Fastest' : null;
+              const listed = flight.availability !== 'not_listed';
 
               return (
                 <div
                   key={flight.id}
-                  className="bg-[rgba(10,24,56,0.65)] hover:bg-[rgba(10,24,56,0.85)] border border-blue-500/20 hover:border-blue-500/40 rounded-[20px] p-5 transition-all shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 group"
+                  className={`bg-[rgba(10,24,56,0.65)] hover:bg-[rgba(10,24,56,0.85)] border border-blue-500/20 hover:border-blue-500/40 rounded-[20px] p-5 transition-all shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 group ${listed ? '' : 'opacity-60'}`}
                 >
-                  {/* Airline & Aircraft */}
+                  {/* Airline */}
                   <div className="flex items-center gap-4 w-full md:w-1/4">
                     <div className="w-12 h-12 rounded-2xl bg-[#081533] border border-slate-700 flex items-center justify-center font-bold text-sm font-mono text-cyan-400 shadow-inner">
                       {flight.airlineCode}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-white text-base">{flight.airline}</span>
-                        {flight.badge && (
+                        {badge && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                            {flight.badge}
+                            {badge}
                           </span>
                         )}
                       </div>
                       <span className="text-xs text-slate-400 font-mono block">
-                        {flight.flightNumber}
+                        {flight.flightNumber}{flight.aircraft ? ` · ${flight.aircraft.replace(/\s*\(.*\)/, '')}` : ''}
                       </span>
                     </div>
                   </div>
 
                   {/* Flight Timing & Corridor */}
                   <div className="flex items-center justify-center gap-6 w-full md:w-2/5">
-                    {/* Departure */}
                     <div className="text-right">
-                      <span className="text-xl font-bold text-white block">{flight.departureTime}</span>
-                      <span className="text-xs font-mono text-cyan-400 font-semibold">{flight.from}</span>
+                      <span className="text-xl font-bold text-white block">{clock(flight.departureAt)}</span>
+                      <span className="text-xs font-mono text-cyan-400 font-semibold">{flight.origin}</span>
                       <span className="text-[10px] text-slate-400 block">{fromInfo.city}</span>
                     </div>
 
-                    {/* Flight Arc & Duration */}
-                    <div className="flex flex-col items-center flex-1 max-w-[140px]">
+                    <div className="flex flex-col items-center flex-1 max-w-[150px]">
                       <span className="text-[11px] text-slate-400 font-medium mb-1 flex items-center gap-1">
-                        <Clock size={11} /> {flight.duration}
+                        <Clock size={11} /> {durationLabel(flight.durationMin)}
                       </span>
                       <div className="w-full flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-[#1788FF]" />
@@ -614,26 +619,35 @@ export function FlightSearch() {
                         <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-500 to-[#1788FF]" />
                         <div className="w-2 h-2 rounded-full bg-purple-500" />
                       </div>
-                      <span className="text-[10px] text-emerald-400 font-medium mt-1">
-                        {flight.stops}
+                      <span className="text-[10px] text-emerald-400 font-medium mt-1 text-center">
+                        {flight.stopsLabel}
                       </span>
                     </div>
 
-                    {/* Arrival */}
                     <div className="text-left">
-                      <span className="text-xl font-bold text-white block">{flight.arrivalTime}</span>
-                      <span className="text-xs font-mono text-purple-400 font-semibold">{flight.to}</span>
+                      <span className="text-xl font-bold text-white block">
+                        {clock(flight.arrivalAt)}
+                        {nextDay && <sup className="text-[10px] text-amber-400 ml-0.5">+1</sup>}
+                      </span>
+                      <span className="text-xs font-mono text-purple-400 font-semibold">{flight.destination}</span>
                       <span className="text-[10px] text-slate-400 block">{toInfo.city}</span>
                     </div>
                   </div>
 
-                  {/* Pricing & Booking CTA */}
+                  {/* Pricing & Actions */}
                   <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-1/3 pt-4 md:pt-0 border-t md:border-t-0 border-slate-800">
                     <div className="text-left md:text-right">
                       <div className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">
                         ₹{flight.price.toLocaleString('en-IN')}
                       </div>
-                      <span className="text-[11px] text-slate-400 block">{flight.priceBasis === 'observed' ? 'Scaled to observed fare' : 'Model estimate'}</span>
+                      <span className="text-[11px] text-slate-400 block">
+                        {!listed ? 'No longer listed' : flight.seatsLeft ? `${flight.seatsLeft} seats left` : 'per adult, taxes incl.'}
+                      </span>
+                      {flight.priceChangePct !== null && flight.priceChangePct !== 0 && (
+                        <span className={`text-[10px] font-semibold ${flight.priceChangePct < 0 ? 'text-emerald-400' : 'text-rose-400'}`} title={`Previously ₹${flight.previousPrice?.toLocaleString('en-IN')}`}>
+                          {flight.priceChangePct < 0 ? '▼' : '▲'} {Math.abs(flight.priceChangePct)}% since last change
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -662,20 +676,28 @@ export function FlightSearch() {
               );
             })}
           </div>
-        ) : (
+        ) : flights.length > 0 ? (
           <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-12 text-center text-slate-400">
             <p className="text-base text-white font-medium mb-1">No flights match the active filters.</p>
-            <p className="text-xs text-slate-400">Try adjusting your price ceiling, airline filter, or choose non-stop.</p>
+            <p className="text-xs text-slate-400">{flights.length} flights were found for this search. Try another airline or include connecting flights.</p>
             <button
               onClick={() => {
                 setFilterAirline('all');
                 setFilterStops('all');
-                setFilterMaxPrice(15000);
               }}
               className="mt-4 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-cyan-400 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
+          </div>
+        ) : (phase === 'ready' || phase === 'stale' || phase === 'refreshing') && meta?.noFlights ? (
+          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-12 text-center text-slate-400">
+            <p className="text-base text-white font-medium mb-1">No flights were found for this route and date.</p>
+            <p className="text-xs text-slate-400">{fromInfo.city} ({fromCode}) → {toInfo.city} ({toCode}) on {departDate}. Try a nearby date.</p>
+          </div>
+        ) : phase === 'failed' || phase === 'timeout' || phase === 'stale' ? null : (
+          <div className="bg-[rgba(10,24,56,0.6)] border border-blue-500/20 rounded-[20px] p-12 text-center text-slate-400">
+            <p className="text-sm">Choose a route and date to see live fares.</p>
           </div>
         )}
       </div>

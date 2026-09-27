@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { authService, type AuthUser } from './authService';
-import { generateRouteFlights, INDIAN_AIRPORTS } from '../data/indianAviation';
+import { INDIAN_AIRPORTS } from '../data/indianAviation';
 import { FAQS } from '../data/faqs';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -241,22 +241,84 @@ class StandaloneSimulation {
   historyFor(route: string) { this.tick(); return [...(this.routeHistory.get(route) ?? [])]; }
 }
 
+/**
+ * The simulation is a DEVELOPMENT aid. A production build never serves modelled fares: without a server it reports
+ * that no data source is connected (VITE_ALLOW_SIMULATION=true re-enables it for a clearly-labelled demo deployment).
+ */
+const SIMULATION_ALLOWED = Boolean(import.meta.env.DEV) || import.meta.env.VITE_ALLOW_SIMULATION === 'true';
+
 let sim: StandaloneSimulation | null = null;
-const simulation = () => (sim ||= new StandaloneSimulation());
+const simulation = () => {
+  if (!SIMULATION_ALLOWED) throw needsServer('Live airfare data');
+  return (sim ||= new StandaloneSimulation());
+};
 
 /* ────────────────────────────────────────────────────────────────────────────
    Public API
    ──────────────────────────────────────────────────────────────────────────── */
 
 export interface DataStatus {
-  mode: 'live' | 'simulated';
+  mode: 'live' | 'simulated' | 'unconfigured';
   provider: string;
   lastCycleAt: string | null;
   ageSec: number | null;
+  /** live: recently collected; delayed / stale: older than the source's freshness limits; unavailable: nothing collected. */
+  freshness: 'live' | 'delayed' | 'stale' | 'unavailable';
   stale: boolean;
   refreshIntervalSec: number;
   lastError: string | null;
 }
+
+/* ── Live flight data (collected by the scraper service, read through the AeroNex server) ── */
+export interface LiveFlightLeg {
+  airlineCode: string; airline: string; flightNumber: string; origin: string; destination: string;
+  departureAt: string; arrivalAt: string; durationLabel: string | null; aircraft: string | null;
+}
+export interface LiveFlight {
+  id: string; airlineCode: string; airline: string; flightNumber: string;
+  origin: string; destination: string; route: string;
+  /** ISO-8601 with an explicit +05:30 (IST) offset. */
+  departureAt: string; arrivalAt: string; durationMin: number;
+  stops: number; stopsLabel: string; cabin: string; fareType: string | null; aircraft: string | null; baggage: string | null;
+  legs: LiveFlightLeg[];
+  price: number; currency: string; baseFare: number | null; taxes: number | null;
+  availability: 'available' | 'limited' | 'not_listed' | string; seatsLeft: number | null; isOutlier: boolean;
+  previousPrice: number | null; priceChangedAt: string | null; priceChangePct: number | null;
+  lowestSeen: number; highestSeen: number; firstSeenAt: string; lastSeenAt: string;
+  source: string; sourceUrl: string | null;
+}
+export type SearchStatus = 'ready' | 'refreshing' | 'pending' | 'failed' | 'ready_stale';
+export type Freshness = 'live' | 'delayed' | 'stale' | 'unavailable';
+export interface JobInfo {
+  id: string; status: 'queued' | 'running' | 'succeeded' | 'failed'; stage: string; kind: string; source: string; attempts: number;
+  queuedAt: string; startedAt: string | null; completedAt: string | null; durationMs: number | null;
+  found: number | null; accepted: number | null; rejected: number | null; errorKind: string | null; error: string | null;
+}
+export interface SearchMeta {
+  status: SearchStatus; servedFrom: 'cache' | 'fresh' | 'stale' | 'pending' | 'failed'; freshness: Freshness;
+  lastUpdated: string | null; ageSec: number | null; refreshing: boolean; job: JobInfo | null; noFlights: boolean;
+  sourceCount: number; sources: { name: string; found: number; accepted: number; rejected: number }[]; count: number;
+  error: { kind: string; message: string } | null; errorMessage: string | null; retryAfterSec: number | null; cacheTtlSec: number;
+}
+export interface LiveSearchResult { data: LiveFlight[]; meta: SearchMeta }
+export interface FlightDetail {
+  flight: LiveFlight;
+  history: { t: string; price: number; availability: string | null }[];
+  priceChanges: { at: string; oldPrice: number; newPrice: number; diff: number; pct: number }[];
+}
+export interface RouteIntel {
+  route: string; origin: string; destination: string; originCity: string; destinationCity: string;
+  insufficientData: boolean; reason?: string; windowDays?: number; travelDate?: string;
+  lastUpdated?: string; ageSec?: number | null; freshness?: Freshness;
+  stats?: { cheapest: number; median: number; average: number; highest: number; cheapestNonstop: number | null; flightCount: number; airlineCount: number };
+  airlines?: { airline: string; flights: number; cheapest: number; average: number }[];
+  departureTimes?: { morning: number; afternoon: number; evening: number; night: number };
+  stops?: { nonstop: number; oneStop: number; twoPlus: number };
+  cabins?: string[];
+  trend?: { direction: 'up' | 'down' | 'flat' | null; changePct: number | null; points: number; since?: string; insufficientData: boolean };
+  flights: LiveFlight[];
+}
+export interface FareHistoryPoint { t: string; windowDays: number; travelDate: string; min: number; median: number; avg: number; max: number; nFlights: number }
 
 const localKey = (name: string) => `aeronex_${name}`;
 const readLocal = <T>(name: string, fallback: T): T => {
@@ -279,6 +341,12 @@ export const api = {
   /* ── Data provenance ─────────────────────────────────────────────── */
   getDataStatus: async (): Promise<DataStatus> => {
     if (!hasBackend) {
+      if (!SIMULATION_ALLOWED) {
+        return {
+          mode: 'unconfigured', provider: 'No AeroNex server connected', lastCycleAt: null, ageSec: null, freshness: 'unavailable',
+          stale: true, refreshIntervalSec: 0, lastError: null,
+        };
+      }
       const s = simulation();
       s.tick();
       return {
@@ -286,6 +354,7 @@ export const api = {
         provider: 'Built-in simulation (no server connected)',
         lastCycleAt: s.lastUpdated,
         ageSec: Math.round((Date.now() - new Date(s.lastUpdated).getTime()) / 1000),
+        freshness: 'live',
         stale: false,
         refreshIntervalSec: 5,
         lastError: null,
@@ -350,30 +419,45 @@ export const api = {
   /** Latest observed fare for a corridor, or null when AeroNex does not track it. */
   getEstimatedRouteFare: (origin: string, destination: string): number | null => {
     const key = `${origin}-${destination}`.toUpperCase();
-    if (hasBackend) return null; // server-observed fares are read via getRoutes()
+    if (hasBackend || !SIMULATION_ALLOWED) return null; // server-observed fares are read via getRoutes()
     const s = simulation().routes().find(r => r.route === key);
     return s ? s.currentFare : null;
   },
 
+  /* ── Live flight data (scraper-backed; every value has a stored, timestamped source) ─────────── */
   /**
-   * Flight search. AeroNex has no live inventory feed, so the schedule is an indicative model.
-   * Prices are anchored to the fare AeroNex actually observed on the corridor when there is one.
+   * Search fares for one route and date. Returns immediately with whatever is stored (flagged with its freshness) and,
+   * when a refresh is needed, tells the caller it is in progress so the UI can poll instead of blocking.
    */
-  searchFlights: async (from: string, to: string, date?: string, cabinClass: string = 'Economy') => {
-    const flights = generateRouteFlights(from, to, date, cabinClass);
-    let observed: number | null = null;
-    try {
-      const hit = ((await api.getRoutes()) as any[]).find(r => r.route === `${from.toUpperCase()}-${to.toUpperCase()}`);
-      observed = hit ? hit.currentFare : null;
-    } catch {
-      /* fall back to the model */
-    }
-    if (!observed) return flights.map(f => ({ ...f, priceBasis: 'model' as const }));
-    const cabinMultiplier = cabinClass === 'Business' ? 2.8 : cabinClass === 'Premium Economy' ? 1.6 : cabinClass === 'First' ? 4.2 : 1;
-    const sorted = flights.map(f => f.price).sort((x, y) => x - y);
-    const median = sorted[Math.floor(sorted.length / 2)] || 1;
-    const ratio = (observed * cabinMultiplier) / median;
-    return flights.map(f => ({ ...f, price: Math.round(f.price * ratio), priceBasis: 'observed' as const }));
+  searchFlightsLive: async (p: { from: string; to: string; date: string; refresh?: boolean }): Promise<LiveSearchResult> => {
+    if (!hasBackend) throw needsServer('Live flight search');
+    const qs = new URLSearchParams({ from: p.from, to: p.to, date: p.date, pax: '1', cabin: 'economy' });
+    if (p.refresh) qs.set('refresh', '1');
+    return get<LiveSearchResult>(`/api/flights/search?${qs}`);
+  },
+  getFlightDetail: async (id: string): Promise<{ data: FlightDetail }> => {
+    if (!hasBackend) throw needsServer('Flight details');
+    return get(`/api/flights/${encodeURIComponent(id)}`);
+  },
+  getRouteIntel: async (origin: string, destination: string): Promise<{ data: RouteIntel }> => {
+    if (!hasBackend) throw needsServer('Route intelligence');
+    return get(`/api/routes/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`);
+  },
+  getFareHistory: async (route: string, windowDays?: number, hours = 168): Promise<{ data: { route: string; points: FareHistoryPoint[] } }> => {
+    if (!hasBackend) throw needsServer('Fare history');
+    return get(`/api/fares/history?route=${encodeURIComponent(route)}&hours=${hours}${windowDays ? `&window=${windowDays}` : ''}`);
+  },
+  getFareTrends: async (hours = 24): Promise<{ data: any }> => {
+    if (!hasBackend) throw needsServer('Fare trends');
+    return get(`/api/fares/trends?hours=${hours}`);
+  },
+  getAirPriceIndex: async (): Promise<{ data: any; meta: any }> => {
+    if (!hasBackend) throw needsServer('The air price index');
+    return get('/api/air-price-index');
+  },
+  getDataFreshness: async (): Promise<{ data: any; meta: any }> => {
+    if (!hasBackend) throw needsServer('Data freshness');
+    return get('/api/data/freshness');
   },
 
   /* ── AI ──────────────────────────────────────────────────────────── */
@@ -606,8 +690,4 @@ export const api = {
     return send('POST', '/api/scraper/trigger', {}, true);
   },
 
-  /** @deprecated kept so older callers compile; the standalone simulation ticks itself on read. */
-  tickRealtimeEngine: () => {
-    if (!hasBackend) simulation().tick();
-  },
 };

@@ -14,7 +14,7 @@ import { INDIAN_AIRPORTS, type IndianAirport } from '../data/indianAviation';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { DataSourceBadge } from '../components/DataSourceBadge';
 import { useRoutes, useRouteChanges } from '../hooks/useMarket';
-import { useDataStatus } from '../hooks/useDataStatus';
+import { useDataStatus, formatInterval } from '../hooks/useDataStatus';
 
 export function PriceAlerts() {
   usePageTitle('Autonomous Price Alerts — AERONEX');
@@ -301,7 +301,7 @@ export function PriceAlerts() {
               <Clock size={14} className="text-purple-400" />
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-purple-300 tracking-tight">
-              {feed.status ? `${feed.status.refreshIntervalSec}s` : '—'}
+              {feed.status ? formatInterval(feed.status.refreshIntervalSec) : '—'}
             </div>
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
               <Sparkles size={12} className="text-amber-400" /> {feed.status ? feed.status.provider : 'Feed status unavailable'}

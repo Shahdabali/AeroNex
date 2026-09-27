@@ -3,7 +3,9 @@ import cors from 'cors';
 import { dbService } from './dbService';
 import { config } from './config';
 import { liveDataStore } from './liveDataStore';
-import { startIngestionWorker } from './workers/fareIngestionWorker';
+import { startIngestionWorker, sourceKind } from './workers/fareIngestionWorker';
+import { getLatestIndex } from './workers/scraperSync';
+import { flightRouter } from './routes/flightRoutes';
 import { aiRouter } from './routes/aiRoutes';
 import { userRouter } from './routes/userRoutes';
 import { supportRouter } from './routes/supportRoutes';
@@ -28,6 +30,7 @@ app.use('/api/user', userRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/scraper', scraperRouter);
 app.use('/api', alertRouter);
+app.use('/api', flightRouter);
 
 const asyncRoute =
   (fn: (req: express.Request, res: express.Response) => Promise<unknown>) =>
@@ -55,6 +58,27 @@ app.get('/api/dashboard/chart-data', asyncRoute(async (req, res) => {
 /** The basket of corridors behind the index, joined with the latest observed fares. */
 app.get('/api/dashboard/basket', (_req, res) => {
   const fares = new Map(liveDataStore.getAllRoutes().map(r => [r.route, r]));
+  if (sourceKind === 'scraper') {
+    // The real basket: the routes and lead-time windows behind the index, each measured against its own base fare.
+    const idx = getLatestIndex();
+    if (!idx) return res.json([]);
+    return res.json(
+      idx.components.map((c: any) => {
+        const w = c.windows['15'] ?? c.windows[Object.keys(c.windows)[0]];
+        const f = fares.get(c.route);
+        return {
+          route: c.route,
+          region: c.region,
+          baseline: Math.round(w.base),
+          weightPct: parseFloat((100 / idx.nRoutes).toFixed(1)),
+          currentFare: Math.round(w.current),
+          changePct: f && f.previousFare ? parseFloat((((f.currentFare - f.previousFare) / f.previousFare) * 100).toFixed(1)) : null,
+          vsBaselinePct: parseFloat(((c.relative - 1) * 100).toFixed(1)),
+          windows: c.windows,
+        };
+      }),
+    );
+  }
   res.json(
     indexEngine
       .getBasket()
@@ -87,11 +111,13 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
   res.json({
     brand: 'AeroNex',
     tagline: 'FLY BEYOND LIMITS',
-    status: dbHealth.connected && !ds.stale ? 'ok' : 'degraded',
+    // A pipeline error (e.g. the scraper is unreachable) degrades health even while the last data is still recent.
+    status: dbHealth.connected && !ds.stale && !ds.lastError ? 'ok' : 'degraded',
     services: {
       db: dbHealth.connected ? 'ok' : 'degraded',
       dbDetails: { provider: dbHealth.provider, connected: dbHealth.connected, message: dbHealth.message },
       worker: ds.stale ? 'stale' : 'ok',
+      dataSource: sourceKind === 'scraper' ? (ds.lastError ? 'scraper-unreachable' : ds.freshness) : sourceKind,
       ai: process.env.GEMINI_API_KEY ? 'ok' : 'deterministic-only',
     },
     dataSource: ds,
@@ -125,26 +151,6 @@ app.get('/api/routes/:id', (req, res) => {
   if (!/^[A-Z]{3}-[A-Z]{3}$/.test(id)) return res.status(400).json({ success: false, error: 'Route must look like DEL-BOM.' });
   const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 200));
   res.json(liveDataStore.getRouteHistory(id, limit));
-});
-
-// Flight search returns the fares the pipeline has actually observed for the corridor.
-app.get('/api/flights/search', (req, res) => {
-  const from = String(req.query.from || '').toUpperCase();
-  const to = String(req.query.to || '').toUpperCase();
-  if (!/^[A-Z]{3}$/.test(from) || !/^[A-Z]{3}$/.test(to)) {
-    return res.status(400).json({ success: false, error: 'from and to must be 3-letter airport codes.' });
-  }
-  const observed = ingestionMonitor
-    .getStatus()
-    .recentObservations.filter(o => o.origin === from && o.destination === to)
-    .map(o => ({
-      flight: o.flightNumber,
-      airline: o.airlineCode,
-      price: o.fare,
-      observedAt: o.capturedAt,
-      source: o.source,
-    }));
-  res.json(observed);
 });
 
 app.use('/api', (_req, res) => {

@@ -7,19 +7,44 @@ import { liveDataStore } from '../liveDataStore';
 import { dbService } from '../dbService';
 import { alertService } from '../services/alertService';
 import { ingestionMonitor, Observation } from '../services/ingestionMonitor';
+import { config } from '../config';
+import { scraperConfigured } from '../services/scraperClient';
+import { syncFromScraper, requestScrape, SCRAPER_PROVIDER_NAME } from './scraperSync';
 
 // Fares that move more than this between consecutive observations are flagged as outliers.
 const OUTLIER_THRESHOLD_PCT = 12;
 
 const isAmadeusConfigured = Boolean(process.env.AMADEUS_CLIENT_ID && process.env.AMADEUS_CLIENT_SECRET);
 
-const provider: AirfareProvider = isAmadeusConfigured
-  ? new AmadeusAirfareProvider(process.env.AMADEUS_CLIENT_ID!, process.env.AMADEUS_CLIENT_SECRET!)
-  : new DemoAirfareProvider();
+/**
+ * Where fares come from, in order of preference:
+ *   scraper    the AeroNex scraper service (real fares collected from a live source)          [SCRAPER_API_URL]
+ *   amadeus    the Amadeus Self-Service API (real fares)                                      [AMADEUS_CLIENT_ID/SECRET]
+ *   simulated  a market MODEL for development only - refused in production unless ALLOW_SIMULATED_DATA=true
+ *   none       nothing configured: the app says so instead of showing invented numbers
+ */
+export type SourceKind = 'scraper' | 'amadeus' | 'simulated' | 'none';
+export const sourceKind: SourceKind = scraperConfigured()
+  ? 'scraper'
+  : isAmadeusConfigured
+    ? 'amadeus'
+    : config.allowSimulatedData
+      ? 'simulated'
+      : 'none';
+
+const provider: AirfareProvider | null =
+  sourceKind === 'amadeus'
+    ? new AmadeusAirfareProvider(process.env.AMADEUS_CLIENT_ID!, process.env.AMADEUS_CLIENT_SECRET!)
+    : sourceKind === 'simulated'
+      ? new DemoAirfareProvider()
+      : null;
 
 const configuredInterval = parseInt(process.env.DATA_REFRESH_INTERVAL_SECONDS || '30', 10);
-// Live providers are quota-limited; never poll faster than once a minute.
-const INTERVAL_SEC = Math.max(provider.mode === 'live' ? 60 : 5, Number.isFinite(configuredInterval) ? configuredInterval : 30);
+// Live providers are quota-limited; never poll faster than once a minute. Reading the scraper's stored data is cheap.
+const INTERVAL_SEC =
+  sourceKind === 'scraper'
+    ? Math.max(10, parseInt(process.env.SCRAPER_POLL_SECONDS || '30', 10) || 30)
+    : Math.max(provider?.mode === 'live' ? 60 : 5, Number.isFinite(configuredInterval) ? configuredInterval : 30);
 
 let running = false;
 
@@ -28,6 +53,13 @@ let running = false;
  * Guarded so a slow provider can never cause overlapping cycles.
  */
 export async function runIngestionCycle(reason: 'scheduled' | 'manual' = 'scheduled') {
+  if (sourceKind === 'scraper') {
+    if (reason === 'manual') await requestScrape().catch(() => undefined);
+    return syncFromScraper(reason);
+  }
+  if (!provider) {
+    return { skipped: false as const, reason, error: 'No live airfare source is configured on this server.' };
+  }
   if (running) return { skipped: true as const, reason: 'A cycle is already in progress.' };
   running = true;
   const startedAt = Date.now();
@@ -123,12 +155,19 @@ export async function runIngestionCycle(reason: 'scheduled' | 'manual' = 'schedu
 }
 
 export function getProviderInfo() {
-  return { name: provider.name, mode: provider.mode, refreshIntervalSec: INTERVAL_SEC };
+  if (sourceKind === 'scraper') return { name: SCRAPER_PROVIDER_NAME, mode: 'live' as const, refreshIntervalSec: INTERVAL_SEC, sourceKind };
+  if (!provider) return { name: 'No data source configured', mode: 'unconfigured' as const, refreshIntervalSec: INTERVAL_SEC, sourceKind };
+  return { name: provider.name, mode: provider.mode, refreshIntervalSec: INTERVAL_SEC, sourceKind };
 }
 
 export async function startIngestionWorker() {
-  ingestionMonitor.configure(provider.name, provider.mode, INTERVAL_SEC);
-  console.log(`[Worker] ${provider.name} (${provider.mode}) — refresh every ${INTERVAL_SEC}s`);
+  const info = getProviderInfo();
+  ingestionMonitor.configure(info.name, info.mode, INTERVAL_SEC);
+  if (sourceKind === 'none') {
+    console.warn('[Worker] No fare source configured (set SCRAPER_API_URL, AMADEUS_*, or ALLOW_SIMULATED_DATA=true for development). The app will report "no data source" instead of showing made-up fares.');
+    return;
+  }
+  console.log(`[Worker] ${info.name} (${info.mode}) - refresh every ${INTERVAL_SEC}s`);
   await runIngestionCycle('scheduled');
   setInterval(() => void runIngestionCycle('scheduled'), INTERVAL_SEC * 1000);
 }

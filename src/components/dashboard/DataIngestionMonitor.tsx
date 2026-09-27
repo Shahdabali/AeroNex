@@ -1,6 +1,6 @@
 import { Database, CheckCircle2, AlertTriangle, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useDataStatus } from '../../hooks/useDataStatus';
+import { useDataStatus, formatInterval } from '../../hooks/useDataStatus';
 import { LoadingBlock } from '../StateViews';
 
 export function DataIngestionMonitor() {
@@ -38,7 +38,7 @@ export function DataIngestionMonitor() {
             value={s?.ageSec != null ? (s.ageSec < 90 ? `${s.ageSec}s ago` : `${Math.round(s.ageSec / 60)} min ago`) : '—'}
             icon={<Activity size={10} className="text-cyan-500" />}
           />
-          <Row label="Refresh interval" value={s ? `${s.refreshIntervalSec}s` : '—'} />
+          <Row label="Refresh interval" value={s ? formatInterval(s.refreshIntervalSec) : '—'} />
           {s?.lastError && <p className="text-amber-400 pt-1">Last error: {s.lastError}</p>}
           {feed.state === 'offline' && <p className="text-rose-400 pt-1">{feed.detail}</p>}
         </div>

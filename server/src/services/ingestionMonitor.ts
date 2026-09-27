@@ -4,7 +4,8 @@
  * ran and whether it failed. Nothing in here is synthetic — the Data Pipeline
  * page and `/api/data-status` read straight from these counters.
  */
-export type DataMode = 'live' | 'simulated';
+export type DataMode = 'live' | 'simulated' | 'unconfigured';
+export type Freshness = 'live' | 'delayed' | 'stale' | 'unavailable';
 
 export interface Observation {
   id: string;
@@ -38,6 +39,8 @@ export interface CycleReport {
   indexValue?: number;
   indexChangePercent?: number;
   error?: string;
+  /** When the underlying data was collected (the scraper's newest scrape), as opposed to when this server polled it. */
+  dataAsOf?: string | null;
 }
 
 const MAX_LOGS = 60;
@@ -53,6 +56,7 @@ class IngestionMonitor {
   private totalAccepted = 0;
   private totalFlagged = 0;
   private lastCycleAt: Date | null = null;
+  private dataThresholds: { liveMaxSec: number; delayedMaxSec: number } | null = null;
   private lastDurationMs: number | null = null;
   private lastError: string | null = null;
   private observations: Observation[] = [];
@@ -63,7 +67,14 @@ class IngestionMonitor {
     this.provider = provider;
     this.mode = mode;
     this.intervalSec = intervalSec;
-    this.log('INFO', `Pipeline configured: ${provider} (${mode === 'live' ? 'live market data' : 'simulated market model'}), refresh every ${intervalSec}s.`);
+    const what = mode === 'live' ? 'live market data' : mode === 'simulated' ? 'simulated market model' : 'no data source configured';
+    this.log('INFO', `Pipeline configured: ${provider} (${what}), refresh every ${intervalSec}s.`);
+  }
+
+  /** A provider that knows how old its data is (the scraper) supplies its own freshness thresholds. */
+  setFreshnessThresholds(liveMaxSec: number, delayedMaxSec: number, intervalSec?: number) {
+    this.dataThresholds = { liveMaxSec, delayedMaxSec };
+    if (intervalSec) this.intervalSec = intervalSec;
   }
 
   log(level: PipelineLog['level'], message: string) {
@@ -72,6 +83,9 @@ class IngestionMonitor {
   }
 
   recordCycle(report: CycleReport) {
+    // The report is authoritative for what actually produced this data.
+    this.provider = report.provider;
+    this.mode = report.mode;
     this.cycles++;
     this.totalAttempted += report.attempted;
     this.totalAccepted += report.accepted;
@@ -83,7 +97,7 @@ class IngestionMonitor {
       this.log('ERROR', `Cycle failed after ${report.durationMs}ms: ${report.error}`);
       return;
     }
-    this.lastCycleAt = new Date();
+    this.lastCycleAt = report.dataAsOf ? new Date(report.dataAsOf) : new Date();
     this.lastError = null;
     this.observations = [...report.observations, ...this.observations].slice(0, MAX_OBSERVATIONS);
     const idx = report.indexValue !== undefined
@@ -101,13 +115,18 @@ class IngestionMonitor {
   getDataSource() {
     const now = Date.now();
     const ageSec = this.lastCycleAt ? Math.round((now - this.lastCycleAt.getTime()) / 1000) : null;
-    // Data older than three refresh intervals is considered stale.
-    const stale = ageSec === null || ageSec > this.intervalSec * 3;
+    // Older than the provider's own limit (default: three refresh intervals) is stale.
+    const liveMax = this.dataThresholds?.liveMaxSec ?? this.intervalSec * 3;
+    const delayedMax = this.dataThresholds?.delayedMaxSec ?? this.intervalSec * 12;
+    const freshness: Freshness =
+      this.mode === 'unconfigured' || ageSec === null ? 'unavailable' : ageSec <= liveMax ? 'live' : ageSec <= delayedMax ? 'delayed' : 'stale';
+    const stale = freshness !== 'live';
     return {
       mode: this.mode,
       provider: this.provider,
       lastCycleAt: this.lastCycleAt ? this.lastCycleAt.toISOString() : null,
       ageSec,
+      freshness,
       stale,
       refreshIntervalSec: this.intervalSec,
       lastError: this.lastError,

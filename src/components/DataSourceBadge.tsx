@@ -1,4 +1,4 @@
-import { useDataStatus, type FeedState } from '../hooks/useDataStatus';
+import { useDataStatus, formatAge, type FeedState } from '../hooks/useDataStatus';
 
 const STYLES: Record<FeedState, { dot: string; wrap: string }> = {
   live: { dot: 'bg-emerald-400', wrap: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
@@ -18,7 +18,7 @@ interface Props {
 export function DataSourceBadge({ className = '', showAge = false }: Props) {
   const feed = useDataStatus();
   const s = STYLES[feed.state];
-  const age = showAge && feed.status?.ageSec != null ? ` · ${feed.status.ageSec < 90 ? `${feed.status.ageSec}s` : `${Math.round(feed.status.ageSec / 60)}m`} ago` : '';
+  const age = showAge && feed.status?.ageSec != null ? ` · ${formatAge(feed.status.ageSec)}` : '';
   return (
     <span
       title={feed.detail}
