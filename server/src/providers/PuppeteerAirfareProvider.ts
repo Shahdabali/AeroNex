@@ -48,7 +48,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         
         // Kayak obfuscates classes, so the most robust way is to scan the text content for Rupee symbols
         const text = document.body.innerText;
-        const matches = text.match(/₹\s*[\d,]+/g) || [];
+        const matches = text.match(/\u20B9\s*[\d,]+/g) || [];
         
         // Deduplicate and parse
         const uniquePrices = Array.from(new Set(matches.map(m => parseInt(m.replace(/[^0-9]/g, ''), 10))));
