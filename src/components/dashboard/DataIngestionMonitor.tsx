@@ -7,7 +7,7 @@ export function DataIngestionMonitor() {
   const feed = useDataStatus();
   const navigate = useNavigate();
   const s = feed.status;
-  const healthy = feed.state === 'live' || feed.state === 'simulated';
+  const healthy = feed.state === 'live';
 
   return (
     <div className="bg-[#0A0C13] rounded-xl border border-white/[0.08] p-5 h-full flex flex-col">

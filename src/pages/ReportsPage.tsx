@@ -87,8 +87,7 @@ export function ReportsPage() {
       const meta = [
         [`# AeroNex report: ${report.title}`],
         [`# Generated: ${new Date().toISOString()}`],
-        [`# Data source: ${feed.status ? `${feed.status.provider} (${feed.status.mode})` : 'unknown'}`],
-        ...(feed.status?.mode === 'simulated' ? [['# NOTE: simulated market model, not real airline fares']] : []),
+        [`# Data source: ${feed.status ? `${feed.status.provider} (${feed.status.mode})` : 'unknown'}`]
       ];
       const csv = `${toCsv(meta)}\n${toCsv([header, ...rows])}\n`;
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));

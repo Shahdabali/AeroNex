@@ -106,9 +106,7 @@ function gatherEvidence(route: string): RouteEvidence {
 
 function dataModeNote(): string {
   const ds = ingestionMonitor.getDataSource();
-  return ds.mode === 'live'
-    ? `Fares come from ${ds.provider} (live).`
-    : `Fares come from ${ds.provider}, a simulated feed, so this is not based on real airline prices.`;
+  return `Fares come from ${ds.provider}.`;
 }
 
 const CITY_TO_IATA: Record<string, string> = {
@@ -194,7 +192,6 @@ export const aiService = {
       caveats: [
         'Projection is a damped extrapolation of recent movement, not a model of airline pricing.',
         'Confidence reflects how much history is stored, not a statistical probability.',
-        ...(ingestionMonitor.getDataSource().mode === 'simulated' ? ['The underlying feed is simulated; do not use this for real purchase decisions.'] : []),
       ],
       source: 'deterministic',
     };

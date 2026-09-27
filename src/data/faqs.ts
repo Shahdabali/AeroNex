@@ -10,7 +10,7 @@ export const FAQS = [
     id: 2,
     category: 'Data Freshness',
     q: 'How frequently is route pricing updated?',
-    a: 'The ingestion worker refreshes on a fixed interval (30 seconds by default). The Data Pipeline page shows the active data source, the time of the last successful refresh, and whether the feed is live or simulated.',
+    a: 'The ingestion worker refreshes on a fixed interval (30 seconds by default). The Data Pipeline page shows the active data source and the time of the last successful refresh.',
   },
   {
     id: 3,

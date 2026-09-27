@@ -21,7 +21,7 @@ export function Sidebar() {
     retry: false,
   });
   const unread = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
-  const feedBadge = feed.state === 'live' ? 'LIVE' : feed.state === 'simulated' ? 'SIM' : undefined;
+  const feedBadge = feed.state === 'live' ? 'LIVE' : undefined;
 
   const navItems = [
     { icon: Home, label: 'Overview', path: '/dashboard' },

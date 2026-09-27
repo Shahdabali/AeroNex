@@ -366,7 +366,7 @@ export const api = {
   /** Kept for existing callers; same payload as getDataStatus plus `status` for legacy checks. */
   getFreshness: async () => {
     const s = await api.getDataStatus();
-    return { ...s, lastUpdatedAt: s.lastCycleAt, status: s.mode === 'live' && !s.stale ? 'live' : s.stale ? 'stale' : 'simulated' };
+    return { ...s, lastUpdatedAt: s.lastCycleAt, status: s.mode === 'live' && !s.stale ? 'live' : s.stale ? 'stale' : 'unconfigured' };
   },
 
   /* ── Market data ─────────────────────────────────────────────────── */

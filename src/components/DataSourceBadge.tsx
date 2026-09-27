@@ -2,7 +2,7 @@ import { useDataStatus, formatAge, type FeedState } from '../hooks/useDataStatus
 
 const STYLES: Record<FeedState, { dot: string; wrap: string }> = {
   live: { dot: 'bg-emerald-400', wrap: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-  simulated: { dot: 'bg-amber-400', wrap: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+
   delayed: { dot: 'bg-orange-400', wrap: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
   offline: { dot: 'bg-rose-400', wrap: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
   loading: { dot: 'bg-zinc-500', wrap: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30' },

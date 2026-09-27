@@ -71,11 +71,6 @@ export function DataScrapingPage() {
                   <strong>No fare source is configured</strong> on this server, so no fares are shown. Set <code>SCRAPER_API_URL</code> (or Amadeus credentials) on the server - see the README.
                 </p>
               )}
-              {feed.status?.mode === 'simulated' && (
-                <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 max-w-2xl">
-                  This deployment is running on a <strong>simulated market model</strong>, not real airline fares. To ingest real fares, set Amadeus credentials on the server (see the README).
-                </p>
-              )}
             </div>
 
             <div className="flex flex-col gap-3 shrink-0">

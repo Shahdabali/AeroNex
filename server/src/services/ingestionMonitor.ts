@@ -4,7 +4,7 @@
  * ran and whether it failed. Nothing in here is synthetic — the Data Pipeline
  * page and `/api/data-status` read straight from these counters.
  */
-export type DataMode = 'live' | 'simulated' | 'unconfigured';
+export type DataMode = 'live' | 'unconfigured';
 export type Freshness = 'live' | 'delayed' | 'stale' | 'unavailable';
 
 export interface Observation {
@@ -48,7 +48,7 @@ const MAX_OBSERVATIONS = 40;
 
 class IngestionMonitor {
   private provider = 'not started';
-  private mode: DataMode = 'simulated';
+  private mode: DataMode = 'unconfigured';
   private intervalSec = 30;
   private cycles = 0;
   private failures = 0;
@@ -67,7 +67,7 @@ class IngestionMonitor {
     this.provider = provider;
     this.mode = mode;
     this.intervalSec = intervalSec;
-    const what = mode === 'live' ? 'live market data' : mode === 'simulated' ? 'simulated market model' : 'no data source configured';
+    const what = mode === 'live' ? 'live market data' : 'no data source configured';
     this.log('INFO', `Pipeline configured: ${provider} (${what}), refresh every ${intervalSec}s.`);
   }
 
