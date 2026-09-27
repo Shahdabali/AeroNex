@@ -23,8 +23,9 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
     date.setDate(date.getDate() + 2);
     const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
     
-    // Target Kayak or another generic flight search page
-    const url = `https://www.kayak.co.in/flights/${origin}-${dest}/${dateStr}?sort=price_a`;
+    // Target Ixigo which is much more friendly to cloud scrapers than Kayak
+    const ixigoDate = dateStr.split('-').reverse().join(''); // DDMMYYYY
+    const url = `https://www.ixigo.com/search/result/flight/${origin}/${dest}/${ixigoDate}/1/0/0/e`;
     console.log(`[Scraper] Fetching real-time fares for ${route} at ${url}`);
 
     const browser = await puppeteer.launch({
@@ -72,7 +73,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
             currency: 'INR',
             departure_time: new Date(new Date(dateString).getTime() + (8 + i) * 3600 * 1000).toISOString(),
             arrival_time: new Date(new Date(dateString).getTime() + (10 + i) * 3600 * 1000).toISOString(),
-            source: 'puppeteer-kayak',
+            source: 'puppeteer-ixigo',
           });
         });
 
