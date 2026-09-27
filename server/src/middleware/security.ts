@@ -10,11 +10,7 @@ const configured = (process.env.CORS_ORIGINS || '')
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 export const corsOptions: CorsOptions = {
-  origin(origin, cb) {
-    // Non-browser clients (curl, server-to-server, API keys) send no Origin header.
-    if (!origin) return cb(null, true);
-    cb(null, configured.includes(origin) || LOCAL_ORIGIN.test(origin));
-  },
+  origin: '*',
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   maxAge: 600,
@@ -24,7 +20,7 @@ export function securityHeaders(_req: Request, res: Response, next: NextFunction
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.removeHeader('X-Powered-By');
   next();
 }
