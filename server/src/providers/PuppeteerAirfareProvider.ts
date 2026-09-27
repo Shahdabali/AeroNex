@@ -48,13 +48,17 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         
         // Kayak obfuscates classes, so the most robust way is to scan the text content for Rupee symbols
         const text = document.body.innerText;
-        const matches = text.match(/\u20B9\s*[\d,]+/g) || [];
+        const matches = text.match(/(?:\u20B9|\$)\s*[\d,]+/g) || [];
         
-        // Deduplicate and parse
-        const uniquePrices = Array.from(new Set(matches.map(m => parseInt(m.replace(/[^0-9]/g, ''), 10))));
+        const validPrices: number[] = [];
+        matches.forEach(m => {
+          let num = parseInt(m.replace(/[^0-9]/g, ''), 10);
+          if (m.includes('$')) num = num * 83; // Convert USD to INR if hosted in US (like Render)
+          if (num > 1500 && num < 150000) validPrices.push(num);
+        });
         
-        // Filter out absurd prices (too low to be flights, or too high)
-        const validPrices = uniquePrices.filter(p => p > 1500 && p < 150000).sort((a, b) => a - b);
+        // Deduplicate and sort
+        const uniquePrices = Array.from(new Set(validPrices)).sort((a, b) => a - b);
         
         // Take top 5 lowest prices
         validPrices.slice(0, 5).forEach((price, i) => {
