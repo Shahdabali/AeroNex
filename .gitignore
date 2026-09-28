@@ -28,3 +28,5 @@ dist-ssr
 
 # Local runtime data (per-user settings, alerts, tickets)
 server/data/*.json
+brag-output/work/frames/
+brag-output/work/still_*.png

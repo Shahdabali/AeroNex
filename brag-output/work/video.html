@@ -1,0 +1,99 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#090A0F;font-family:Inter,sans-serif;color:#fff}
+#bg{position:absolute;inset:0;background:radial-gradient(1200px 700px at 70% 20%,rgba(23,136,255,.16),transparent 60%),radial-gradient(900px 600px at 15% 90%,rgba(0,229,255,.10),transparent 60%),#090A0F}
+#grid{position:absolute;inset:-200px;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:80px 80px}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0}
+.big{font-weight:900;font-size:96px;letter-spacing:-2px;text-transform:uppercase;text-align:center;line-height:1.02}
+.grad{background:linear-gradient(90deg,#22d3ee,#1788FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card{background:#0A0C13;border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.search{width:1000px;padding:28px 34px;display:flex;align-items:center;gap:22px}
+.field{flex:1;background:#0A1838;border:1px solid #334155;border-radius:16px;padding:22px 26px;font-size:40px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;min-height:96px}
+.caret{display:inline-block;width:4px;height:44px;background:#1788FF;vertical-align:middle;margin-left:4px}
+.btn{background:linear-gradient(90deg,#1788FF,#4E55F5);border-radius:16px;padding:24px 34px;font-size:30px;font-weight:800}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;border:1px solid;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.chip .dot{width:12px;height:12px;border-radius:50%;background:currentColor}
+.live{color:#34d399;background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35)}
+.stale{color:#fbbf24;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35)}
+.status{width:1300px;padding:22px 28px;display:flex;align-items:center;gap:18px;font-size:26px;color:#cbd5e1;border-radius:18px;border:1px solid rgba(51,65,85,.6);background:rgba(10,24,56,.5)}
+.status.amber{color:#fde68a;background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.25)}
+.row{width:1300px;display:flex;align-items:center;padding:24px 34px;margin-top:14px;font-size:30px}
+.row .al{width:300px;font-weight:800}
+.row .tm{flex:1;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+.row .pr{font-weight:900;font-size:38px;font-variant-numeric:tabular-nums}
+.cap{position:absolute;bottom:90px;font-size:56px;font-weight:900;text-transform:uppercase;letter-spacing:-1px}
+</style></head><body>
+<div id="bg"></div><div id="grid"></div>
+
+<div class="scene" id="s1">
+  <div class="card search" id="s1search"><div class="field"><span id="typed"></span><span class="caret" id="caret"></span></div><div class="btn">Search</div></div>
+  <div class="big" id="s1q" style="margin-top:80px">Where did that <span class="grad">fare</span><br>come from?</div>
+</div>
+
+<div class="scene" id="s2">
+  <img src="aeronex-horizontal.png" id="s2logo" style="width:1200px">
+  <div class="big" id="s2t" style="font-size:64px;margin-top:30px">India Airfare <span class="grad">Intelligence</span></div>
+</div>
+
+<div class="scene" id="s3">
+  <div style="width:1300px;font-size:30px;font-weight:800;color:#94a3b8;margin-bottom:8px;letter-spacing:3px">DEL → BOM · DOMESTIC</div>
+  <div class="status" id="st"><span class="chip live" id="chip"><span class="dot" id="dot"></span><span id="chiplbl">Live</span></span><span id="note">Source: <b>EaseMyTrip</b> · Freshly collected for this search.</span></div>
+  <div class="card row" id="r0"><span class="al">IndiGo</span><span class="tm">06:10 → 08:25</span><span class="pr">₹4,812</span></div>
+  <div class="card row" id="r1"><span class="al">Akasa Air</span><span class="tm">09:40 → 11:55</span><span class="pr">₹5,105</span></div>
+  <div class="card row" id="r2"><span class="al">Air India</span><span class="tm">13:15 → 15:30</span><span class="pr">₹5,640</span></div>
+  <div class="cap" id="cap3">Scraped. Validated. <span class="grad">Timestamped.</span></div>
+  <div class="cap" id="cap4" style="opacity:0">And it tells you when it's <span style="color:#fbbf24">stale.</span></div>
+</div>
+
+<div class="scene" id="s5">
+  <div class="big" id="s5a" style="font-size:80px">Every number traces back<br>to a <span class="grad">real observation.</span></div>
+  <img src="aeronex-horizontal.png" id="s5logo" style="width:1000px;position:absolute;opacity:0">
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo=x=>1-Math.pow(1-cl(x),3);            // ease-out
+const ramp=(t,a,d)=>eo((t-a)/d);
+// scene envelope: fade in over .35s at a, fade out over .3s ending at b
+const env=(t,a,b)=>Math.min(ramp(t,a,.35),1-cl((t-(b-.3))/.3));
+function set(el,o,y=0,s=1){el.style.opacity=o;el.style.transform=`translateY(${y}px) scale(${s})`}
+
+window.render=function(t){
+  $('grid').style.transform=`translate(${-t*6}px,${-t*3}px)`;
+  // S1 0-3.2
+  set($('s1'),env(t,0,3.2));
+  const txt='DEL → BOM', n=Math.floor(cl((t-.25)/.8)*txt.length);
+  $('typed').textContent=txt.slice(0,n);
+  $('caret').style.opacity=(Math.floor(t*2.5)%2)?0:1;
+  const q=ramp(t,1.1,.5); set($('s1q'),q,(1-q)*40);
+  // S2 3.2-6.8
+  set($('s2'),env(t,3.2,6.8));
+  const l=ramp(t,3.3,.9); set($('s2logo'),l,0,.92+.08*l);
+  const tt=ramp(t,4.0,.5); set($('s2t'),tt,(1-tt)*30);
+  // S3+S4 6.8-15.8
+  set($('s3'),env(t,6.8,15.8));
+  set($('st'),ramp(t,6.9,.4),(1-ramp(t,6.9,.4))*-20);
+  for(let i=0;i<3;i++){const r=ramp(t,7.3+i*.22,.45);set($('r'+i),r,(1-r)*50)}
+  const c3=ramp(t,8.3,.4)*(1-cl((t-11.3)/.3)); set($('cap3'),c3,(1-ramp(t,8.3,.4))*20);
+  const stale=t>=11.8;
+  $('chip').className='chip '+(stale?'stale':'live');
+  $('chiplbl').textContent=stale?'Stale':'Live';
+  $('st').className='status'+(stale?' amber':'');
+  $('note').innerHTML=stale?'Source: <b>EaseMyTrip</b> · These are older stored fares; a refresh has not completed.':'Source: <b>EaseMyTrip</b> · Freshly collected for this search.';
+  $('dot').style.opacity=stale?1:.5+.5*Math.cos(t*6);
+  const flip=Math.exp(-Math.max(0,t-11.8)*6)*(t>=11.8?1:0);
+  $('chip').style.transform=`scale(${1+.35*flip})`;
+  for(let i=0;i<3;i++)$('r'+i).querySelector('.pr').style.color=stale?'#94a3b8':'#fff';
+  const c4=ramp(t,12.1,.4); set($('cap4'),c4,(1-c4)*20);
+  // S5 15.8-20
+  set($('s5'),env(t,15.8,20.5));
+  const a=ramp(t,16,.5)*(1-cl((t-18.4)/.3)); set($('s5a'),a,(1-ramp(t,16,.5))*30);
+  const g=ramp(t,18.7,.7); set($('s5logo'),g,0,.94+.06*g);
+};
+window.ready=Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]);
+render(0);
+</script></body></html>
