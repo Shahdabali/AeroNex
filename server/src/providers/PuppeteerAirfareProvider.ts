@@ -18,13 +18,14 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
     this.routeIndex = (this.routeIndex + 1) % ROUTES.length;
     const [origin, dest] = route.split('-');
 
-    // Fetch flights for 2 days from today to ensure we find some availability
+    // Fetch flights for 2 days from today
     const date = new Date();
     date.setDate(date.getDate() + 2);
     const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
     
-    // Target Kayak (using .com as it successfully serves USD without blocking cloud IPs)
-    const url = `https://www.kayak.com/flights/${origin}-${dest}/${dateStr}?sort=price_a`;
+    // Target EaseMyTrip which is much more friendly to cloud scrapers
+    const emtDate = dateStr.split('-').reverse().join('/'); // DD/MM/YYYY
+    const url = `https://flight.easemytrip.com/FlightList/Index?srch=${origin}-1|${dest}-1|${emtDate}&px=1-0-0&cbn=0&ar=undefined&isow=true&isdst=false&isrf=true`;
     console.log(`[Scraper] Fetching real-time fares for ${route} at ${url}`);
 
     const browser = await puppeteer.launch({
@@ -35,25 +36,28 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
 
     try {
       const page = await browser.newPage();
-      // Set a realistic user agent to avoid basic blocks
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
       
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       
-      // Wait 8 seconds for React to finish rendering the results
+      // Wait 8 seconds for the flight results to load fully
       await new Promise(r => setTimeout(r, 8000));
 
       const fares = await page.evaluate((originIata, destIata, dateString) => {
         const results: any[] = [];
-        
-        // Kayak obfuscates classes, so the most robust way is to scan the text content for Rupee symbols
         const text = document.body.innerText;
+        
+        // Scan for Rupee or Dollar symbols
         const matches = text.match(/(?:\u20B9|\$)\s*[\d,]+/g) || [];
         
         const validPrices: number[] = [];
         matches.forEach(m => {
-          let num = parseInt(m.replace(/[^0-9]/g, ''), 10);
-          if (m.includes('$')) num = num * 83; // Convert USD to INR if hosted in US (like Render)
+          let numStr = m.replace(/[^0-9]/g, '');
+          let num = parseInt(numStr, 10);
+          
+          // Fix formatting issues where 3,270 might be read as 327
+          if (num > 0 && num < 1500) num = num * 10; 
+          
           if (num > 1500 && num < 150000) validPrices.push(num);
         });
         
@@ -61,9 +65,8 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         const uniquePrices = Array.from(new Set(validPrices)).sort((a, b) => a - b);
         
         // Take top 5 lowest prices
-        validPrices.slice(0, 5).forEach((price, i) => {
+        uniquePrices.slice(0, 5).forEach((price, i) => {
           results.push({
-            // Assign some random recognizable flight numbers
             flight_number: `6E-${Math.floor(Math.random() * 900) + 100}`,
             airline_code: '6E',
             origin_iata: originIata,
@@ -72,7 +75,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
             currency: 'INR',
             departure_time: new Date(new Date(dateString).getTime() + (8 + i) * 3600 * 1000).toISOString(),
             arrival_time: new Date(new Date(dateString).getTime() + (10 + i) * 3600 * 1000).toISOString(),
-            source: 'puppeteer-kayak',
+            source: 'puppeteer-easemytrip',
           });
         });
 
@@ -83,7 +86,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
       return fares;
     } catch (err) {
       console.error(`[Scraper Error] Failed to scrape ${route}:`, err);
-      return []; // Return empty array on failure so we don't crash the ingestion worker
+      return []; 
     } finally {
       await browser.close();
     }
