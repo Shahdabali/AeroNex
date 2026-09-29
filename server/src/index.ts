@@ -165,4 +165,13 @@ app.listen(config.port, () => {
     console.warn('[auth] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing: authenticated endpoints will reject all requests.');
   }
   void startIngestionWorker();
+  
+  // Keep-Alive Ping to prevent Render from sleeping
+  setInterval(() => {
+    const backendUrl = 'https://aeronex-backend-qzfu.onrender.com/api/data-status';
+    console.log(`[Keep-Alive] Pinging self at ${backendUrl} to prevent sleep...`);
+    fetch(backendUrl)
+      .then(res => console.log(`[Keep-Alive] Success: ${res.status}`))
+      .catch(err => console.error(`[Keep-Alive] Failed:`, err.message));
+  }, 14 * 60 * 1000); // 14 minutes
 });
