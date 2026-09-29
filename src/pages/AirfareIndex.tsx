@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell } from 'recharts';
 import { Activity, TrendingUp, ArrowUpRight, ArrowDownRight, Layers, ShieldCheck, ChevronDown, ChevronUp, FileSpreadsheet, FileJson, BookOpen, Database } from 'lucide-react';
 import { api } from '../services/api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAppContext } from '../context/AppProvider';
-import { useMetrics, useChartData, MARKET_REFRESH_MS, fmtINR } from '../hooks/useMarket';
+import { useMetrics, useChartData, useRegionalIndex, MARKET_REFRESH_MS, fmtINR } from '../hooks/useMarket';
 import { RegionalMap } from '../components/dashboard/RegionalMap';
 import { DataSourceBadge } from '../components/DataSourceBadge';
 import { LoadingBlock, ErrorBlock, EmptyBlock } from '../components/StateViews';
@@ -30,6 +30,7 @@ export function AirfareIndex() {
 
   const metrics = useMetrics();
   const chart = useChartData(timeframe);
+  const regional = useRegionalIndex();
   const basket = useQuery({ queryKey: ['indexBasket'], queryFn: api.getIndexBasket, refetchInterval: MARKET_REFRESH_MS, staleTime: 10_000, retry: 1 });
 
   const hasMetrics = metrics.data && metrics.data.hasData !== false;
@@ -245,6 +246,49 @@ export function AirfareIndex() {
               </ResponsiveContainer>
             )}
           </div>
+
+          {/* Regional Graph */}
+          <div className="mt-8 pt-8 border-t border-white/[0.08]">
+            <div className="mb-4">
+              <h3 className="text-white text-lg font-bold tracking-tight">Regional Index Performance</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Current index values broken down by geographic region.</p>
+            </div>
+            <div className="w-full h-[250px]">
+              {regional.isPending ? (
+                <LoadingBlock label="Loading regional data..." className="h-full" />
+              ) : regional.isError ? (
+                <ErrorBlock error={regional.error} onRetry={() => regional.refetch()} title="Couldn't load regional data" className="h-full" />
+              ) : regional.data?.length === 0 ? (
+                <EmptyBlock title="No regional data" description="Try again later." className="h-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={regional.data}
+                    margin={{ top: 12, right: 12, left: -15, bottom: 0 }}
+                    layout="vertical"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E2E8F0' : '#27272A'} horizontal={true} vertical={false} opacity={0.6} />
+                    <XAxis type="number" domain={['auto', 'auto']} stroke={isLight ? '#94a3b8' : '#52525B'} fontSize={11} tickLine={false} axisLine={false} dx={-10} />
+                    <YAxis dataKey="region" type="category" stroke={isLight ? '#94a3b8' : '#52525B'} fontSize={11} tickLine={false} axisLine={false} dx={-10} width={80} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: isLight ? '#fff' : '#0E1017', border: isLight ? '1px solid #CBD5E1' : '1px solid rgba(255,255,255,0.14)', borderRadius: 12 }}
+                      labelStyle={{ color: isLight ? '#475569' : '#a1a1aa', fontSize: 11 }}
+                      itemStyle={{ color: isLight ? '#0F172A' : '#fff', fontWeight: 700 }}
+                      formatter={(v) => [`${Number(v).toFixed(1)} pt`, 'Index Value']}
+                    />
+                    <Bar dataKey="index" radius={[0, 4, 4, 0]} maxBarSize={40}>
+                      {
+                        (regional.data || []).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={entry.index > 100 ? (isLight ? '#ef4444' : '#f87171') : (isLight ? '#10b981' : '#34d399')} />
+                        ))
+                      }
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
 
           <div className="mt-3 min-h-[40px] rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[12px]" aria-live="polite">
             {picked ? (
