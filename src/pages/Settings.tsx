@@ -10,7 +10,7 @@ import { FAQS } from '../data/faqs';
 import type { Language } from '../i18n/translations';
 import {
   Settings as SettingsIcon, User, Sliders, Bell, Shield, Puzzle, Palette,
-  KeyRound, HelpCircle, ChevronRight, Camera, BadgeCheck,
+  KeyRound, HelpCircle, Info, ChevronRight, Camera, BadgeCheck,
   Globe, Calendar, Monitor, Moon, Sun,
   Download, Trash2, Lock, CreditCard, LogOut, MessageSquare,
   Code2, Mail, Check, Database, Plane, FileQuestion,
