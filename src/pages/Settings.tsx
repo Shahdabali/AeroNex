@@ -793,107 +793,31 @@ export function Settings() {
           </div>
 
           {/* ── TRAVEL PREFERENCES ── */}
-          <div ref={sectionRefs.notifications} className={cardClass}>
+          
+          {/* —— INTEGRATIONS —— */}
+          <div ref={sectionRefs.integrations} className={cardClass}>
             <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.notifSettingsTitle || 'Notification Settings'}</h2>
-              <p className="text-xs text-slate-400 mb-4">{t.notifSettingsDesc || 'Choose what you want to be notified about.'}</p>
-
-              <div className="flex flex-col gap-0.5">
-                {/* 1. Price Drop Alerts */}
-                <div className="flex items-center justify-between py-2.5 border-b border-slate-800/80">
+              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">Integrations</h2>
+              <p className="text-xs text-slate-400 mb-5">Connect AeroNex with third-party tools.</p>
+              
+              <div className="space-y-3">
+                <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#0E352B] border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                      <Bell size={15} />
+                    <div className="w-10 h-10 rounded-lg bg-[#5865F2]/20 flex items-center justify-center text-[#5865F2]">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
                     </div>
                     <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.priceDropAlerts || 'Price Drop Alerts'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.priceDropAlertsDesc || 'Get notified when fares drop'}</p>
+                      <p className="text-sm font-semibold text-white">Discord Webhooks</p>
+                      <p className="text-xs text-slate-400">Receive price alerts in your Discord server</p>
                     </div>
                   </div>
-                  <ToggleSwitch checked={priceDropAlerts} onChange={v => handleNotificationToggle('priceDropAlerts', v)} />
-                </div>
-
-                {/* 2. Route Updates */}
-                <div className="flex items-center justify-between py-2.5 border-b border-slate-800/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#0B254E] border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
-                      <Plane size={15} />
-                    </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.routeUpdatesLabel || 'Route Updates'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.routeUpdatesDesc || 'New routes and schedule changes'}</p>
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={routeUpdates} onChange={v => handleNotificationToggle('routeUpdates', v)} />
-                </div>
-
-                {/* 3. Travel Deals & Offers */}
-                <div className="flex items-center justify-between py-2.5 border-b border-slate-800/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#231A4E] border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
-                      <Tag size={15} />
-                    </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.travelDealsOffers || 'Travel Deals & Offers'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.travelDealsDesc || 'Exclusive deals and discounts'}</p>
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={travelDeals} onChange={v => handleNotificationToggle('travelDeals', v)} />
-                </div>
-
-                {/* 4. Weekly Reports */}
-                <div className="flex items-center justify-between py-2.5 border-b border-slate-800/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#36260E] border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                      <FileText size={15} />
-                    </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.weeklyReportsLabel || 'Weekly Reports'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.weeklyReportsDesc || 'Summary of price trends'}</p>
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={weeklyReports} onChange={v => handleNotificationToggle('weeklyReports', v)} />
-                </div>
-
-                {/* 5. Product Updates */}
-                <div className="flex items-center justify-between py-2.5 border-b border-slate-800/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#351520] border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
-                      <Package size={15} />
-                    </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.productUpdatesLabel || 'Product Updates'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.productUpdatesDesc || 'New features and improvements'}</p>
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={productUpdates} onChange={v => handleNotificationToggle('productUpdates', v)} />
-                </div>
-
-                {/* 6. Marketing Notifications */}
-                <div className="flex items-center justify-between py-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-xl bg-[#0C2A38] border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                      <Megaphone size={15} />
-                    </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold leading-tight">{t.marketingNotifsLabel || 'Marketing Notifications'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{t.marketingNotifsDesc || 'Tips, news and promotional content'}</p>
-                    </div>
-                  </div>
-                  <ToggleSwitch checked={marketingNotifs} onChange={v => handleNotificationToggle('marketingNotifs', v)} />
+                  <button className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition-colors">Connect</button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* ══════════════════════════════════════════════════════════
-           ROW 2: Data & Privacy | Appearance | Integrations
-           ══════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* ── DATA & PRIVACY ── */}
-          <div ref={sectionRefs['data-privacy']} className={cardClass}>
+<div ref={sectionRefs['data-privacy']} className={cardClass}>
             <div>
               <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.dataPrivacyTitle || 'Data & Privacy'}</h2>
               <p className="text-xs text-slate-400 mb-4">{t.dataPrivacyDesc || 'Manage your data, privacy and personalization settings.'}</p>

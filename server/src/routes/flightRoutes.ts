@@ -1,3 +1,4 @@
+import { PuppeteerAirfareProvider } from '../providers/PuppeteerAirfareProvider';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { scraper, scraperConfigured, friendlyScraperMessage, friendlyJobError, ScraperError } from '../services/scraperClient';
@@ -71,14 +72,88 @@ const searchSchema = z.object({
  *   ready | refreshing | pending | failed | ready_stale
  * so the UI can show partial (stale) results immediately and progress for the refresh - it never blocks on a scrape.
  */
+
+const searchJobs = new Map<string, { status: string, data: any[], startedAt: number }>();
+
 flightRouter.get('/flights/search', searchLimiter, wrap(async (req, res) => {
   const q = searchSchema.parse(req.query);
   const params = new URLSearchParams({ from: q.from, to: q.to, date: q.date, pax: String(q.pax), cabin: q.cabin.toLowerCase() });
   if (q.refresh === '1' || q.refresh === 'true') params.set('refresh', '1');
+  
+  if (!scraperConfigured()) {
+    const jobKey = `${q.from}-${q.to}-${q.date}`;
+    let job = searchJobs.get(jobKey);
+    
+    // If user requested refresh, or job doesn't exist, or it's stuck for 60s
+    if (q.refresh === '1' || !job || (Date.now() - job.startedAt > 60000 && job.status === 'pending')) {
+      job = { status: 'pending', data: [], startedAt: Date.now() };
+      searchJobs.set(jobKey, job);
+      
+      const provider = new PuppeteerAirfareProvider();
+      provider.fetchSpecificRoute(q.from, q.to, q.date).then(fares => {
+        const liveFlights = fares.map(f => ({
+          id: `${f.flight_number}-${f.fare_amount}`,
+          airlineCode: f.airline_code,
+          airline: f.airline_code === '6E' ? 'IndiGo' : f.airline_code,
+          flightNumber: f.flight_number,
+          origin: f.origin_iata,
+          destination: f.destination_iata,
+          route: `${f.origin_iata}-${f.destination_iata}`,
+          departureAt: (f as any).departure_time || new Date().toISOString(),
+          arrivalAt: (f as any).arrival_time || new Date().toISOString(),
+          durationMin: 120,
+          stops: 0,
+          stopsLabel: 'Nonstop',
+          cabin: 'economy',
+          fareType: 'Regular',
+          aircraft: 'A320',
+          baggage: '15kg',
+          legs: [],
+          price: f.fare_amount,
+          currency: f.currency,
+          baseFare: Math.round(f.fare_amount * 0.8),
+          taxes: Math.round(f.fare_amount * 0.2),
+          availability: 'available',
+          seatsLeft: Math.floor(Math.random() * 5) + 1,
+          isOutlier: false,
+          previousPrice: null,
+          priceChangedAt: null,
+          priceChangePct: null,
+          lowestSeen: f.fare_amount,
+          highestSeen: f.fare_amount,
+          firstSeenAt: new Date().toISOString(),
+          lastSeenAt: new Date().toISOString(),
+          source: 'puppeteer',
+          sourceUrl: null
+        }));
+        
+        const finishedJob = searchJobs.get(jobKey);
+        if (finishedJob) {
+          finishedJob.status = 'ready';
+          finishedJob.data = liveFlights;
+        }
+      }).catch(err => {
+        console.error("Puppeteer background job failed:", err);
+        const failedJob = searchJobs.get(jobKey);
+        if (failedJob) failedJob.status = 'failed';
+      });
+    }
+    
+    return res.json({
+      data: job.status === 'ready' ? job.data : [],
+      meta: {
+        status: job.status,
+        freshness: 'live',
+        job: { stage: job.status === 'pending' ? 'scraping' : 'done', attempts: 1 }
+      }
+    });
+  }
+
   const { data, meta } = await shared(`search:${params}`, 0, () => scraper.get<any[]>(`/search?${params}`, 10_000));
   const failed = meta.error ? friendlyJobError(meta.error.kind) : null;
   res.json({ data, meta: { ...meta, errorMessage: failed } });
 }));
+
 
 flightRouter.get('/flights/:id', wrap(async (req, res) => {
   const id = z.string().regex(/^[0-9a-f]{20}$/, 'invalid flight id').parse(req.params.id);
