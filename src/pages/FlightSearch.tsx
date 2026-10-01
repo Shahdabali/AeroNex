@@ -22,15 +22,7 @@ const isSearchableDate = (d: string | null): d is string => !!d && /^\d{4}-\d{2}
 
 export function FlightSearch() {
   usePageTitle('Flight Search');
-  if (!hasBackend) {
-    return (
-      <DashboardLayout>
-        <div className="p-8 text-center text-white">
-          Live flight data is unavailable because the backend is not configured. Please set VITE_API_BASE_URL or run the backend server.
-        </div>
-      </DashboardLayout>
-    );
-  }
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialFrom = searchParams.get('from') || 'DEL';
@@ -215,6 +207,13 @@ export function FlightSearch() {
 
   return (
     <DashboardLayout>
+      {!hasBackend ? (
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center max-w-lg mx-auto">
+          <p className="text-sm text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20">
+            Live flight data is unavailable because the backend is not configured. Please set VITE_API_BASE_URL or run the backend server.
+          </p>
+        </div>
+      ) : (
       <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
         {/* Toast alert */}
         {toastMessage && (
@@ -647,7 +646,7 @@ export function FlightSearch() {
                   <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-1/3 pt-4 md:pt-0 border-t md:border-t-0 border-slate-800">
                     <div className="text-left md:text-right">
                       <div className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">
-                        ₹{flight.price.toLocaleString('en-IN')}
+                        ₹{flight.price?.toLocaleString('en-IN') ?? '--'}
                       </div>
                       <span className="text-[11px] text-slate-400 block">
                         {!listed ? 'No longer listed' : flight.seatsLeft ? `${flight.seatsLeft} seats left` : 'per adult, taxes incl.'}
@@ -710,6 +709,7 @@ export function FlightSearch() {
           </div>
         )}
       </div>
+      )}
       {detailFlight && <FlightDetailModal flight={detailFlight} onClose={() => setDetailFlight(null)} />}
     </DashboardLayout>
   );
