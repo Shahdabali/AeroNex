@@ -29,8 +29,8 @@ export function AuthCallback() {
     if (!authLoading) {
       if (isAuthenticated) {
         setStatus('success');
-        const t = setTimeout(() => navigate('/dashboard', { replace: true }), 400);
-        return () => clearTimeout(t);
+        window.location.replace('/dashboard');
+        return;
       } else {
         setStatus('error');
         setErrorMessage('Authentication session expired or failed. Please try signing in again.');

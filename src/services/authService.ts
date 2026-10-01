@@ -121,28 +121,7 @@ export const authService = {
     return { user, token: data.session.access_token };
   },
 
-  /**
-   * Instant Guest Login: creates a personalized guest session
-   */
-  guestLogin: async (nameInput: string): Promise<AuthResponse> => {
-    const cleanName = nameInput.trim();
-    if (!cleanName || cleanName.length < 2) {
-      throw new Error('Please enter your name (minimum 2 characters).');
-    }
 
-    const guestId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const guestUser: AuthUser = {
-      id: guestId,
-      name: cleanName,
-      email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'guest'}@guest.aeronex.com`,
-      role: 'Guest Passenger',
-      avatarUrl: undefined,
-      isGuest: true,
-    };
-
-    const token = `aeronex_guest_${guestId}`;
-    return { user: guestUser, token };
-  },
 
   /**
    * Real Email + Password Registration via Supabase Auth

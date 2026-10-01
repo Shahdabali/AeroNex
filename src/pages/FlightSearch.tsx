@@ -191,14 +191,14 @@ export function FlightSearch() {
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'cheapest') return a.price - b.price;
-      if (sortBy === 'fastest') return a.durationMin - b.durationMin || a.price - b.price;
-      if (sortBy === 'departure') return a.departureAt.localeCompare(b.departureAt);
+      if (sortBy === 'cheapest') return (a.price || 0) - (b.price || 0);
+      if (sortBy === 'fastest') return (a.durationMin || 0) - (b.durationMin || 0) || (a.price || 0) - (b.price || 0);
+      if (sortBy === 'departure') return String(a.departureAt || '').localeCompare(String(b.departureAt || ''));
       return 0;
     });
 
   // Filter options come from the flights actually returned, not a hard-coded airline list.
-  const airlineOptions = [...new Map(flights.map(f => [f.airlineCode, f.airline] as const)).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const airlineOptions = [...new Map(flights.map(f => [f.airlineCode || 'Unknown', f.airline || 'Unknown'] as const)).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1])));
   const lowestPrice = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.price)) : 0;
   const fastestMin = processedFlights.length > 0 ? Math.min(...processedFlights.map(f => f.durationMin)) : 0;
   const fromInfo = getAirportInfo(fromCode);
