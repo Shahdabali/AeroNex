@@ -1,26 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, Search, LineChart, TrendingUp, 
-  Map, Plane, Calculator, Settings, Activity,
-  BookOpen, ShieldAlert, FileText, Brain
+  Map, Settings, Activity, BookOpen
 } from 'lucide-react';
 import { AeroNexLogo } from '../AeroNexLogo';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../../services/api';
 import { useDataStatus } from '../../hooks/useDataStatus';
 
 export function Sidebar() {
   const location = useLocation();
   const feed = useDataStatus();
-  const { data: notifications = [] } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: api.getNotifications,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-    retry: false,
-  });
-  const unread = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
   const feedBadge = feed.state === 'live' ? 'LIVE' : undefined;
 
   const navItems = [
@@ -28,14 +17,9 @@ export function Sidebar() {
     { icon: LineChart, label: 'Airfare Index', path: '/airfare-index', badgeText: feedBadge },
     { icon: Activity, label: 'Data Pipeline', path: '/data-scraping' },
     { icon: Map, label: 'Routes', path: '/routes' },
-    { icon: Plane, label: 'Airlines', path: '/airlines' },
     { icon: Search, label: 'Flight Search', path: '/search' },
     { icon: TrendingUp, label: 'Price Trends', path: '/price-trends' },
-    { icon: ShieldAlert, label: 'Price Alerts', path: '/price-alerts', badge: unread > 0 ? Math.min(unread, 9) : undefined },
-    { icon: Calculator, label: 'CPI Analytics', path: '/cpi-analytics' },
-    { icon: Brain, label: 'AI Analytics', path: '/ai-analytics', badgeText: 'NEW' },
     { icon: BookOpen, label: 'Methodology', path: '/methodology' },
-    { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
@@ -51,7 +35,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-2 lg:px-3 flex flex-col gap-1 lg:gap-0.5 pb-6">
+      <nav className="flex-1 px-2 lg:px-4 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
           return (
@@ -68,42 +52,48 @@ export function Sidebar() {
               {isActive && (
                 <motion.div
                   layoutId="activeSidebarIndicator"
-                  className="absolute inset-0 bg-[#161822] border border-white/[0.08] rounded-lg"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <div className="relative z-10 flex items-center lg:gap-3">
-                <item.icon 
-                  size={18} 
-                  className={`transition-colors lg:w-[15px] lg:h-[15px] ${
-                    isActive 
-                      ? 'text-cyan-400' 
-                      : 'text-zinc-500 group-hover:text-zinc-400'
-                  }`} 
-                />
-                <span className="hidden lg:block text-[13px] tracking-tight">{item.label}</span>
+              
+              <div className="flex items-center gap-3 relative z-10">
+                <item.icon size={18} className={isActive ? 'text-cyan-400' : 'text-zinc-500 group-hover:text-cyan-400 transition-colors'} />
+                <span className="hidden lg:block text-[13px]">{item.label}</span>
               </div>
               
-              {/* Badges - Hidden on mobile */}
-              {item.badge && (
-                <div className="hidden lg:flex relative z-10 w-4 h-4 rounded bg-rose-500/20 border border-rose-500/30 items-center justify-center text-[9px] font-bold text-rose-400 shadow-sm">
-                  {item.badge}
-                </div>
-              )}
               {item.badgeText && (
-                <div className="hidden lg:block relative z-10 px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold font-mono tracking-wider">
-                  {item.badgeText}
+                <div className="hidden lg:flex items-center relative z-10">
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                    item.badgeText === 'LIVE'
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                  }`}>
+                    {item.badgeText}
+                  </span>
                 </div>
-              )}
-
-              {/* Mobile notification dot if item has badge */}
-              {(item.badge) && (
-                <div className="lg:hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-rose-500" />
               )}
             </Link>
           );
         })}
       </nav>
+      
+      {/* Bottom Profile/Status Area */}
+      <div className="p-4 border-t border-white/[0.05] hidden lg:block">
+        <div className="flex items-center gap-3 bg-[#03091B]/80 p-2.5 rounded-xl border border-cyan-500/10">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-white">OP</span>
+          </div>
+          <div className="overflow-hidden flex-1">
+            <p className="text-xs font-semibold text-white truncate">Operations</p>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] text-zinc-500 truncate">System Online</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </aside>
   );
 }

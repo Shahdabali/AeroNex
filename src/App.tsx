@@ -13,15 +13,10 @@ const Dashboard = lazy(() => import('./pages/dashboard/Dashboard').then(m => ({ 
 const FlightSearch = lazy(() => import('./pages/FlightSearch').then(m => ({ default: m.FlightSearch })));
 const AirfareIndex = lazy(() => import('./pages/AirfareIndex').then(m => ({ default: m.AirfareIndex })));
 const PriceTrends = lazy(() => import('./pages/PriceTrends').then(m => ({ default: m.PriceTrends })));
-const PriceAlerts = lazy(() => import('./pages/PriceAlerts').then(m => ({ default: m.PriceAlerts })));
 const RoutesPage = lazy(() => import('./pages/RoutesPage').then(m => ({ default: m.RoutesPage })));
-const AirlinesPage = lazy(() => import('./pages/AirlinesPage').then(m => ({ default: m.AirlinesPage })));
-const CPIAnalytics = lazy(() => import('./pages/CPIAnalytics').then(m => ({ default: m.CPIAnalytics })));
 const MethodologyPage = lazy(() => import('./pages/MethodologyPage').then(m => ({ default: m.MethodologyPage })));
 const DataScrapingPage = lazy(() => import('./pages/DataScrapingPage').then(m => ({ default: m.DataScrapingPage })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
-const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
-const AiAnalyticsPage = lazy(() => import('./pages/AiAnalyticsPage').then(m => ({ default: m.AiAnalyticsPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,21 +62,14 @@ function App() {
               <Route path="/price-trends" element={<ProtectedRoute><PriceTrends /></ProtectedRoute>} />
               <Route path="/trends" element={<ProtectedRoute><PriceTrends /></ProtectedRoute>} />
               <Route path="/predictions" element={<Navigate to="/airfare-index" replace />} />
-              <Route path="/price-alerts" element={<ProtectedRoute><PriceAlerts /></ProtectedRoute>} />
-              <Route path="/alerts" element={<ProtectedRoute><PriceAlerts /></ProtectedRoute>} />
               <Route path="/routes" element={<ProtectedRoute><RoutesPage /></ProtectedRoute>} />
-              <Route path="/airlines" element={<ProtectedRoute><AirlinesPage /></ProtectedRoute>} />
-              <Route path="/cpi-analytics" element={<ProtectedRoute><CPIAnalytics /></ProtectedRoute>} />
-              <Route path="/cpi" element={<ProtectedRoute><CPIAnalytics /></ProtectedRoute>} />
               <Route path="/methodology" element={<ProtectedRoute><MethodologyPage /></ProtectedRoute>} />
               <Route path="/data-scraping" element={<ProtectedRoute><DataScrapingPage /></ProtectedRoute>} />
               <Route path="/scraping" element={<Navigate to="/data-scraping" replace />} />
               <Route path="/gamification" element={<Navigate to="/dashboard" replace />} />
               <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
               <Route path="/my-flights" element={<Navigate to="/search" replace />} />
-              <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="/ai-analytics" element={<ProtectedRoute><AiAnalyticsPage /></ProtectedRoute>} />
 
               {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />
