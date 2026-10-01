@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api, type DataStatus } from '../services/api';
 
-export type FeedState = 'live' | 'delayed' | 'offline' | 'loading';
+export type FeedState = 'live' | 'simulated' | 'delayed' | 'offline' | 'loading';
 
 export interface FeedInfo {
   state: FeedState;
@@ -82,9 +82,9 @@ export function useDataStatus(): FeedInfo {
     };
   }
   return {
-    state: 'offline',
+    state: 'simulated',
     status: data,
-    label: 'Unknown',
-    detail: 'Unknown feed state.',
+    label: 'Simulated',
+    detail: `${data.provider}. Fares are modelled, not real airline prices. Updated ${age}.`,
   };
 }

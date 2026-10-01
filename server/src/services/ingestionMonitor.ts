@@ -4,7 +4,7 @@
  * ran and whether it failed. Nothing in here is synthetic — the Data Pipeline
  * page and `/api/data-status` read straight from these counters.
  */
-export type DataMode = 'live' | 'unconfigured';
+export type DataMode = 'live' | 'simulated' | 'unconfigured';
 export type Freshness = 'live' | 'delayed' | 'stale' | 'unavailable';
 
 export interface Observation {

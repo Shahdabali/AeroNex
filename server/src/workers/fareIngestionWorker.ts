@@ -1,5 +1,5 @@
 import { AirfareProvider } from '../providers/AirfareProvider';
-import { PuppeteerAirfareProvider } from '../providers/PuppeteerAirfareProvider';
+import { DemoAirfareProvider } from '../providers/DemoAirfareProvider';
 import { AmadeusAirfareProvider } from '../providers/AmadeusAirfareProvider';
 import { validateFareData, FareDataInput } from '../utils/validation';
 import { indexEngine } from '../analytics/indexEngine';
@@ -20,21 +20,23 @@ const isAmadeusConfigured = Boolean(process.env.AMADEUS_CLIENT_ID && process.env
  * Where fares come from, in order of preference:
  *   scraper    the AeroNex scraper service (real fares collected from a live source)          [SCRAPER_API_URL]
  *   amadeus    the Amadeus Self-Service API (real fares)                                      [AMADEUS_CLIENT_ID/SECRET]
- *   puppeteer  built-in puppeteer scraper (real fares)                                        (default fallback)
- *   none       nothing configured
+ *   simulated  a market MODEL for development only - refused in production unless ALLOW_SIMULATED_DATA=true
+ *   none       nothing configured: the app says so instead of showing invented numbers
  */
-export type SourceKind = 'scraper' | 'amadeus' | 'puppeteer' | 'none';
+export type SourceKind = 'scraper' | 'amadeus' | 'simulated' | 'none';
 export const sourceKind: SourceKind = scraperConfigured()
   ? 'scraper'
   : isAmadeusConfigured
     ? 'amadeus'
-    : 'puppeteer';
+    : config.allowSimulatedData
+      ? 'simulated'
+      : 'none';
 
 const provider: AirfareProvider | null =
   sourceKind === 'amadeus'
     ? new AmadeusAirfareProvider(process.env.AMADEUS_CLIENT_ID!, process.env.AMADEUS_CLIENT_SECRET!)
-    : sourceKind === 'puppeteer'
-      ? new PuppeteerAirfareProvider()
+    : sourceKind === 'simulated'
+      ? new DemoAirfareProvider()
       : null;
 
 const configuredInterval = parseInt(process.env.DATA_REFRESH_INTERVAL_SECONDS || '30', 10);
@@ -43,7 +45,6 @@ const INTERVAL_SEC =
   sourceKind === 'scraper'
     ? Math.max(10, parseInt(process.env.SCRAPER_POLL_SECONDS || '30', 10) || 30)
     : Math.max(provider?.mode === 'live' ? 60 : 5, Number.isFinite(configuredInterval) ? configuredInterval : 30);
-
 
 let running = false;
 
@@ -163,7 +164,7 @@ export async function startIngestionWorker() {
   const info = getProviderInfo();
   ingestionMonitor.configure(info.name, info.mode, INTERVAL_SEC);
   if (sourceKind === 'none') {
-    console.warn('[Worker] No fare source configured (set SCRAPER_API_URL or AMADEUS_* for development). The app will report "no data source".');
+    console.warn('[Worker] No fare source configured (set SCRAPER_API_URL, AMADEUS_*, or ALLOW_SIMULATED_DATA=true for development). The app will report "no data source" instead of showing made-up fares.');
     return;
   }
   console.log(`[Worker] ${info.name} (${info.mode}) - refresh every ${INTERVAL_SEC}s`);
