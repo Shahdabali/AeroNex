@@ -115,7 +115,7 @@ export function SearchBanner({ phase, meta, onRefresh, refreshing }: BannerProps
         <Icon size={14} className={`shrink-0 ${phase === 'refreshing' ? 'animate-spin' : ''}`} />
         <FreshnessChip freshness={meta.freshness} ageSec={meta.ageSec} />
         <span>
-          Source: <strong>{meta.sources[0]?.name ?? 'EaseMyTrip'}</strong> · {note}
+          Source: <strong>{meta.sources?.[0]?.name ?? 'EaseMyTrip'}</strong> · {note}
         </span>
       </span>
       <button onClick={onRefresh} disabled={refreshing || phase === 'refreshing'} className="shrink-0 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 font-semibold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer">
