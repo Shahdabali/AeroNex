@@ -1,112 +1,42 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { syncUserProfile, formatAuthError } from '../services/authService';
 import { useAppContext } from '../context/AppProvider';
 import { AeroNexLogo } from '../components/AeroNexLogo';
 import { AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 export function AuthCallback() {
-  usePageTitle('Authenticating — AERONEX');
+  usePageTitle('Authenticating - AERONEX');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login } = useAppContext();
+  const { isAuthenticated, authLoading } = useAppContext();
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    let isCancelled = false;
-    let settled = false;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let unsubscribe: (() => void) | undefined;
-
-    async function handleAuthCallback() {
-      // 1. Check for explicit OAuth error in search params
-      const errorParam = searchParams.get('error');
-      const errorDesc = searchParams.get('error_description');
-
-      if (errorParam) {
-        if (!isCancelled) {
-          setStatus('error');
-          setErrorMessage(formatAuthError(errorDesc || errorParam));
-        }
-        return;
-      }
-
-      // 2. Check for PKCE authorization code in query string
-      const code = searchParams.get('code');
-
-      try {
-        if (code) {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-          if (data?.session?.user) {
-            const mappedUser = await syncUserProfile(data.session.user);
-            login(mappedUser, data.session.access_token);
-            if (!isCancelled) {
-              setStatus('success');
-              setTimeout(() => navigate('/dashboard', { replace: true }), 400);
-            }
-            return;
-          }
-        }
-
-        // 3. Check for implicit hash session or active session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
-
-        if (session?.user) {
-          const mappedUser = await syncUserProfile(session.user);
-          login(mappedUser, session.access_token);
-          if (!isCancelled) {
-            setStatus('success');
-            setTimeout(() => navigate('/dashboard', { replace: true }), 400);
-          }
-          return;
-        }
-
-        // If no session found after slight delay, check onAuthStateChange
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-          if (event === 'SIGNED_IN' && currentSession?.user) {
-            settled = true;
-            const mappedUser = await syncUserProfile(currentSession.user);
-            login(mappedUser, currentSession.access_token);
-            if (!isCancelled) {
-              setStatus('success');
-              subscription.unsubscribe();
-              setTimeout(() => navigate('/dashboard', { replace: true }), 400);
-            }
-          }
-        });
-
-        unsubscribe = () => subscription.unsubscribe();
-
-        // Timeout fallback if no session received within 8 seconds
-        timeoutId = setTimeout(() => {
-          if (!isCancelled && !settled) {
-            setStatus('error');
-            setErrorMessage('Authentication session timed out. Please try signing in again.');
-          }
-        }, 8000);
-
-      } catch (err: any) {
-        if (!isCancelled) {
-          setStatus('error');
-          setErrorMessage(formatAuthError(err));
-        }
-      }
+    const errorParam = searchParams.get('error');
+    const errorDesc = searchParams.get('error_description');
+    
+    if (errorParam) {
+      setStatus('error');
+      // Format the error nicely (e.g. replace + with space)
+      const cleanError = (errorDesc || errorParam).replace(/\+/g, ' ');
+      setErrorMessage(cleanError);
+      return;
     }
 
-    handleAuthCallback();
-
-    return () => {
-      isCancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      unsubscribe?.();
-    };
-  }, [searchParams, navigate, login]);
+    if (!authLoading) {
+      if (isAuthenticated) {
+        setStatus('success');
+        const t = setTimeout(() => navigate('/dashboard', { replace: true }), 400);
+        return () => clearTimeout(t);
+      } else {
+        setStatus('error');
+        setErrorMessage('Authentication session expired or failed. Please try signing in again.');
+      }
+    }
+  }, [authLoading, isAuthenticated, navigate, searchParams]);
 
   return (
     <div className="min-h-screen w-full bg-[#020A1D] flex flex-col items-center justify-center p-6 text-white select-none">

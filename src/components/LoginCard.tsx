@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Lock, Eye, EyeOff, User, 
   CheckCircle2, AlertCircle, ArrowRight,
-  RotateCcw, UserCheck
+  RotateCcw
 } from 'lucide-react';
 import { AeroNexLogo } from './AeroNexLogo';
 import { authService } from '../services/authService';
@@ -20,8 +20,7 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
   
   const [isSignUpMode, setIsSignUpMode] = useState(initialMode === 'signup');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showGuestMode, setShowGuestMode] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string>('Authenticating...');
   const [rememberMe, setRememberMe] = useState(true);
@@ -33,9 +32,7 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
   const [password, setPassword] = useState('');
   
   // Guest Sign In Field
-  const [guestName, setGuestName] = useState('');
-
-  // Sign Up Fields
+    // Sign Up Fields
   const [fullName, setFullName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
@@ -60,34 +57,6 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       // Browser automatically redirects to Google OAuth
     } catch (err: any) {
       setError(err.message || 'Google sign-in could not be completed. Please try again.');
-      setIsLoading(false);
-    }
-  };
-
-  // 2. GUEST LOGIN
-  const handleGuestLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanName = guestName.trim();
-    if (!cleanName || cleanName.length < 2) {
-      setError('Please enter your name (minimum 2 characters).');
-      return;
-    }
-
-    setIsLoading(true);
-    setLoadingAction('Preparing guest session...');
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const response = await authService.guestLogin(cleanName);
-      login(response.user, response.token);
-      setSuccess(`Welcome aboard, ${response.user.name}! Entering AeroNex...`);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 250);
-    } catch (err: any) {
-      setError(err.message || 'Could not start guest session.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -195,18 +164,14 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       {/* 2. Welcome Headline & Subtitle */}
       <div className="text-center mb-5">
         <h2 className="login-card-title text-[24px] sm:text-[26px] font-bold text-white tracking-tight">
-          {showGuestMode
-            ? 'Guest Access'
-            : showForgotPassword
+          {showForgotPassword
               ? 'Reset Password'
               : isSignUpMode
                 ? (t.createAccountTab || 'Create Your Account')
                 : (t.welcomeBack || 'Welcome Back')}
         </h2>
         <p className="login-card-subtitle text-slate-400 text-xs mt-1.5 max-w-xs mx-auto leading-relaxed">
-          {showGuestMode
-            ? 'Enter your name to explore live airfare indices and market intelligence.'
-            : showForgotPassword
+          {showForgotPassword
               ? 'Enter your email to receive recovery instructions.'
               : isSignUpMode
                 ? (t.signUpSubtitle || 'Join AeroNex to access real-time airfare intelligence.')
@@ -215,7 +180,7 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       </div>
 
       {/* 3. Segmented Tab Switcher (Sign In vs Create Account) */}
-      {!showForgotPassword && !showGuestMode && (
+      {!showForgotPassword && (
         <div className="w-full bg-[#03091B]/90 border border-slate-700/80 rounded-full p-1 flex items-center mb-5 login-tab-container">
           <button
             type="button"
@@ -271,9 +236,9 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       </AnimatePresence>
 
       {/* 4. SOCIAL SIGN IN & GUEST ACCESS BUTTONS */}
-      {!showForgotPassword && !showGuestMode && (
+      {!showForgotPassword && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 gap-2.5">
             <button
               type="button"
               disabled={isLoading}
@@ -291,15 +256,7 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
               </span>
             </button>
 
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => { setShowGuestMode(true); setError(null); setSuccess(null); }}
-              className="login-social-btn h-[44px] rounded-2xl bg-cyan-950/30 hover:bg-cyan-900/50 border border-cyan-500/40 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-[0_0_20px_rgba(0,217,255,0.25)] group disabled:opacity-60"
-            >
-              <UserCheck size={16} className="text-cyan-400 group-hover:scale-110 transition-transform" />
-              <span className="font-semibold tracking-wide">Continue as Guest</span>
-            </button>
+            
           </div>
 
           {/* Divider */}
@@ -312,54 +269,8 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
           </div>
         </div>
       )}
-
-      {/* 5. GUEST LOGIN VIEW */}
-      {showGuestMode ? (
-        <form onSubmit={handleGuestLogin} className="flex flex-col gap-3.5">
-          <div className="login-input-row h-[48px] rounded-xl bg-[#040C20]/90 border border-slate-700/80 flex items-center px-4 gap-3 focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400 transition-all">
-            <User size={18} className="login-input-icon text-cyan-400 shrink-0" />
-            <input
-              type="text"
-              required
-              autoFocus
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Enter your name"
-              className="login-input-field text-xs sm:text-sm text-white placeholder-slate-500 bg-transparent outline-none w-full"
-              autoComplete="name"
-            />
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.015 }}
-            whileTap={{ scale: 0.985 }}
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-[48px] mt-1 rounded-full bg-gradient-to-r from-cyan-500 via-[#00A3FF] to-[#0070F3] hover:shadow-[0_0_25px_rgba(0,217,255,0.45)] text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-60"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>{loadingAction}</span>
-              </div>
-            ) : (
-              <span className="flex items-center gap-2">
-                <span>Enter AeroNex as Guest</span>
-                <ArrowRight size={17} />
-              </span>
-            )}
-          </motion.button>
-
-          <button
-            type="button"
-            onClick={() => { setShowGuestMode(false); setError(null); setSuccess(null); }}
-            className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer text-center mt-2 flex items-center justify-center gap-1.5"
-          >
-            <RotateCcw size={13} />
-            <span>Back to Sign In</span>
-          </button>
-        </form>
-      ) : showForgotPassword ? (
+      {/* 6. FORGOT PASSWORD VIEW */}
+      {showForgotPassword ? (
         /* 6. FORGOT PASSWORD VIEW */
         <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col gap-3.5">
           <div className="login-input-row h-[46px] rounded-xl bg-[#040C20]/90 border border-slate-700/80 flex items-center px-4 gap-3 focus-within:border-[#00A3FF]">
