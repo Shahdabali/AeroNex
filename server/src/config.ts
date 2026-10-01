@@ -13,6 +13,4 @@ export const config = {
   scraperToken: process.env.SCRAPER_API_TOKEN || '',
   // Who may trigger manual scrapes. Empty in production = nobody; outside production any signed-in user may (local development).
   adminEmails: (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean),
-  // Simulated fares are a development aid. They are never used in production unless explicitly allowed.
-  allowSimulatedData: process.env.ALLOW_SIMULATED_DATA === 'true' || process.env.NODE_ENV !== 'production',
 };
