@@ -1,4 +1,5 @@
 import { FareDataInput } from '../utils/validation';
+import { dgcaRouteBasket } from './dgcaBasket';
 
 export interface IndexCalculationResult {
   index_value: number;
@@ -36,31 +37,33 @@ export class AirfareIndexEngine {
 
   /** The fixed basket behind the index: baseline fare and weight (share of baseline total) per corridor. */
   public getBasket() {
-    const total = Object.values(this.baselineFares).reduce((a, b) => a + b, 0);
-    return Object.entries(this.baselineFares).map(([route, baseline]) => ({
-      route,
-      baseline,
-      weightPct: parseFloat(((baseline / total) * 100).toFixed(1)),
+    return dgcaRouteBasket.routes.map(r => ({
+      route: r.route,
+      baseline: this.baselineFares[r.route] || 5000,
+      weightPct: r.weightPct,
     }));
   }
 
   public calculateIndex(currentFares: FareDataInput[]): IndexCalculationResult {
-    let totalBaseline = 0;
-    let totalCurrent = 0;
+    let indexSum = 0;
     let sampleSize = 0;
+    let totalWeightUsed = 0;
 
+    // We calculate a weighted average of price relatives: sum((Current_i / Base_i) * Weight_i)
     for (const fare of currentFares) {
       const route = `${fare.origin_iata}-${fare.destination_iata}`;
       const baseline = this.baselineFares[route];
+      const basketRoute = dgcaRouteBasket.routes.find(r => r.route === route);
       
-      if (baseline) {
-        totalBaseline += baseline;
-        totalCurrent += fare.fare_amount;
+      if (baseline && basketRoute) {
+        const priceRelative = fare.fare_amount / baseline;
+        indexSum += priceRelative * basketRoute.weightPct;
+        totalWeightUsed += basketRoute.weightPct;
         sampleSize++;
       }
     }
 
-    if (totalBaseline === 0) {
+    if (totalWeightUsed === 0) {
       return {
         index_value: this.lastIndexValue ?? 0,
         previous_index_value: this.lastIndexValue ?? 0,
@@ -69,7 +72,8 @@ export class AirfareIndexEngine {
       };
     }
 
-    const rawIndex = (totalCurrent / totalBaseline) * 100;
+    // Normalize back to 100 base if not all weights are present
+    const rawIndex = (indexSum / totalWeightUsed) * 100;
     const indexValue = parseFloat(rawIndex.toFixed(2));
     
     const previous = this.lastIndexValue ?? indexValue;
@@ -87,8 +91,8 @@ export class AirfareIndexEngine {
   }
 
   public calculateRegionalIndex(currentFares: FareDataInput[], region: string): { index_value: number; change_percent: number } {
-    let totalBaseline = 0;
-    let totalCurrent = 0;
+    let indexSum = 0;
+    let totalWeightUsed = 0;
 
     for (const fare of currentFares) {
       const route = `${fare.origin_iata}-${fare.destination_iata}`;
@@ -101,20 +105,22 @@ export class AirfareIndexEngine {
 
       if (matched) {
         const baseline = this.baselineFares[route];
-        if (baseline) {
-          totalBaseline += baseline;
-          totalCurrent += fare.fare_amount;
+        const basketRoute = dgcaRouteBasket.routes.find(r => r.route === route);
+        if (baseline && basketRoute) {
+          const priceRelative = fare.fare_amount / baseline;
+          indexSum += priceRelative * basketRoute.weightPct;
+          totalWeightUsed += basketRoute.weightPct;
         }
       }
     }
 
     const prevIndex = this.lastRegionalIndices[region] ?? null;
 
-    if (totalBaseline === 0) {
+    if (totalWeightUsed === 0) {
       return { index_value: prevIndex ?? 0, change_percent: 0 };
     }
 
-    const rawIndex = (totalCurrent / totalBaseline) * 100;
+    const rawIndex = (indexSum / totalWeightUsed) * 100;
     const indexValue = parseFloat(rawIndex.toFixed(2));
     const changePercent = prevIndex ? parseFloat(((indexValue - prevIndex) / prevIndex * 100).toFixed(2)) : 0;
 

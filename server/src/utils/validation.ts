@@ -10,6 +10,7 @@ export const fareDataSchema = z.object({
   departure_time: z.string().datetime(), // ISO string
   arrival_time: z.string().datetime(),
   source: z.string(),
+  lead_days: z.number().optional(),
 });
 
 export type FareDataInput = z.infer<typeof fareDataSchema>;

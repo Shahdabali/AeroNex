@@ -319,7 +319,7 @@ export function AirfareIndex() {
         <div className="bg-[#12141C]/90 rounded-2xl border border-white/[0.1] overflow-hidden">
           <div className="p-5 border-b border-white/[0.08]">
             <h3 className="text-white font-bold text-base">Index basket</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">The corridors behind the index. Weight is each corridor&apos;s share of the total baseline fare. Click a row for route details.</p>
+            <p className="text-xs text-zinc-400 mt-0.5">The corridors behind the index. Weight is derived from official DGCA domestic passenger traffic statistics. Click a row for route details.</p>
           </div>
           {basket.isPending ? (
             <LoadingBlock />
@@ -377,7 +377,7 @@ export function AirfareIndex() {
               <p>
                 <strong>Index = (Σ current fares ÷ Σ baseline fares) × 100</strong> over the corridors in the basket above. A value of 110 means observed fares are, in aggregate, 10% above the baseline.
               </p>
-              <p>Each corridor&apos;s weight is its baseline fare divided by the total baseline. The data source and refresh interval are shown in the badge at the top of this page; open the Data Pipeline page for validation and outlier statistics.</p>
+              <p>Each corridor's weight corresponds to its DGCA passenger volume share. The data source and refresh interval are shown in the badge at the top of this page; open the Data Pipeline page for validation and outlier statistics.</p>
               <button onClick={() => navigate('/methodology')} className="text-cyan-400 hover:underline text-xs font-semibold cursor-pointer">Read the full methodology →</button>
             </div>
           )}

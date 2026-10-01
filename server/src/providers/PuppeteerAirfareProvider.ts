@@ -13,14 +13,16 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
   
   private routeIndex = 0;
 
-    async fetchLatestFares(): Promise<FareDataInput[]> {
+  async fetchLatestFares(): Promise<FareDataInput[]> {
     const route = ROUTES[this.routeIndex];
     this.routeIndex = (this.routeIndex + 1) % ROUTES.length;
     const [origin, dest] = route.split('-');
 
-    // Fetch flights for 2 days from today
+    const LEAD_TIMES = [1, 7, 15, 30, 45];
+    const leadDays = LEAD_TIMES[this.routeIndex % LEAD_TIMES.length];
+    
     const date = new Date();
-    date.setDate(date.getDate() + 2);
+    date.setDate(date.getDate() + leadDays);
     const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
     
     // Target EaseMyTrip which is much more friendly to cloud scrapers
@@ -45,7 +47,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         // Wait 5 seconds for the flight results to load fully (reduced to give timeout room)
         await new Promise(r => setTimeout(r, 5000));
 
-        const fares = await page.evaluate((originIata, destIata, dateString) => {
+        const fares = await page.evaluate((originIata, destIata, dateString, leadDaysArg) => {
           const results: any[] = [];
           const text = document.body.innerText;
           
@@ -74,6 +76,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
               origin_iata: originIata,
               destination_iata: destIata,
               fare_amount: price,
+              lead_days: leadDaysArg,
               currency: 'INR',
               departure_time: new Date(new Date(dateString).getTime() + (8 + i) * 3600 * 1000).toISOString(),
               arrival_time: new Date(new Date(dateString).getTime() + (10 + i) * 3600 * 1000).toISOString(),
@@ -82,14 +85,14 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
           });
 
           return results;
-        }, origin, dest, dateStr);
+        }, origin, dest, dateStr, leadDays);
 
         console.log(`[Scraper] Found ${fares.length} real fares for ${route}`);
         
         // If Cloudflare blocked us (returns 0 fares) on the cloud server, use smart deterministic fallback
         if (fares.length === 0) {
           console.log(`[Scraper] Cloud bot protection blocked request, falling back to modeled market data for ${route}`);
-          return this.generateFallbackFares(route, origin, dest, dateStr);
+          return this.generateFallbackFares(route, origin, dest, dateStr, leadDays);
         }
         
         return fares;
@@ -109,7 +112,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
       return (await Promise.race([scrapePromise, timeoutPromise])) as FareDataInput[];
     } catch (err) {
       console.error(`[Scraper Error] Failed to scrape ${route}:`, err);
-      return this.generateFallbackFares(route, origin, dest, dateStr); 
+      return this.generateFallbackFares(route, origin, dest, dateStr, leadDays); 
     }
   }
 
@@ -117,6 +120,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
   async fetchSpecificRoute(origin: string, dest: string, dateStr: string): Promise<any[]> {
     const route = `${origin}-${dest}`;
     const emtDate = dateStr.split('-').reverse().join('/'); // DD/MM/YYYY
+    const leadDays = Math.max(1, Math.round((new Date(dateStr).getTime() - new Date().getTime()) / (1000 * 3600 * 24)));
     const url = `https://flight.easemytrip.com/FlightList/Index?srch=${origin}-1|${dest}-1|${emtDate}&px=1-0-0&cbn=0&ar=undefined&isow=true&isdst=false&isrf=true`;
     console.log(`[Scraper] Fetching ON-DEMAND fares for ${route} at ${url}`);
 
@@ -133,7 +137,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
         await new Promise(r => setTimeout(r, 5000));
 
-        const fares = await page.evaluate((originIata, destIata, dStr) => {
+        const fares = await page.evaluate((originIata, destIata, dStr, leadDaysArg) => {
           const results: any[] = [];
           const text = document.body.innerText;
           const matches = text.match(/(?:\u20B9|\$)\s*[\d,]+/g) || [];
@@ -152,6 +156,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
               origin_iata: originIata,
               destination_iata: destIata,
               fare_amount: price,
+              lead_days: leadDaysArg,
               currency: 'INR',
               departure_time: new Date(new Date(dStr).getTime() + (8 + i) * 3600 * 1000).toISOString(),
               arrival_time: new Date(new Date(dStr).getTime() + (10 + i) * 3600 * 1000).toISOString(),
@@ -159,9 +164,9 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
             });
           });
           return results;
-        }, origin, dest, dateStr);
+        }, origin, dest, dateStr, leadDays);
 
-        if (fares.length === 0) return this.generateFallbackFares(route, origin, dest, dateStr);
+        if (fares.length === 0) return this.generateFallbackFares(route, origin, dest, dateStr, leadDays);
         return fares;
       } finally {
         if (browser) await browser.close().catch(console.error);
@@ -173,11 +178,11 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
       return (await Promise.race([scrapePromise, timeoutPromise])) as any[];
     } catch (err) {
       console.error(`[Scraper Error] On-demand scrape failed for ${route}:`, err);
-      return this.generateFallbackFares(route, origin, dest, dateStr); 
+      return this.generateFallbackFares(route, origin, dest, dateStr, leadDays); 
     }
   }
 
-  public generateFallbackFares(route: string, origin: string, dest: string, dateStr: string): FareDataInput[] {
+  public generateFallbackFares(route: string, origin: string, dest: string, dateStr: string, leadDays?: number): FareDataInput[] {
     const results: FareDataInput[] = [];
     const seed = Array.from(route).reduce((acc, char) => acc + char.charCodeAt(0), 0) + new Date().getHours();
     
@@ -198,6 +203,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         origin_iata: origin,
         destination_iata: dest,
         fare_amount: finalPrice,
+        lead_days: leadDays,
         currency: 'INR',
         departure_time: new Date(new Date(dateStr).getTime() + (8 + i) * 3600 * 1000).toISOString(),
         arrival_time: new Date(new Date(dateStr).getTime() + (10 + i) * 3600 * 1000).toISOString(),
