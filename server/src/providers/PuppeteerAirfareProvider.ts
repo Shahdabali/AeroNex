@@ -46,13 +46,13 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         await new Promise(r => setTimeout(r, 5000));
 
         const fares = await page.evaluate((originIata, destIata, dateString) => {
-          const results = [];
+          const results: any[] = [];
           const text = document.body.innerText;
           
           // Scan for Rupee or Dollar symbols
           const matches = text.match(/(?:\u20B9|\$)\s*[\d,]+/g) || [];
           
-          const validPrices = [];
+          const validPrices: any[] = [];
           matches.forEach(m => {
             let numStr = m.replace(/[^0-9]/g, '');
             let num = parseInt(numStr, 10);
@@ -134,10 +134,10 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
         await new Promise(r => setTimeout(r, 5000));
 
         const fares = await page.evaluate((originIata, destIata, dStr) => {
-          const results = [];
+          const results: any[] = [];
           const text = document.body.innerText;
           const matches = text.match(/(?:\u20B9|\$)\s*[\d,]+/g) || [];
-          const validPrices = [];
+          const validPrices: any[] = [];
           matches.forEach(m => {
             let numStr = m.replace(/[^0-9]/g, '');
             let num = parseInt(numStr, 10);
@@ -170,7 +170,7 @@ export class PuppeteerAirfareProvider implements AirfareProvider {
 
     const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Scraping timed out')), 15000));
     try {
-      return (await Promise.race([scrapePromise, timeoutPromise]));
+      return (await Promise.race([scrapePromise, timeoutPromise])) as any[];
     } catch (err) {
       console.error(`[Scraper Error] On-demand scrape failed for ${route}:`, err);
       return this.generateFallbackFares(route, origin, dest, dateStr); 
