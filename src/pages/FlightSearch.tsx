@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { api, type LiveFlight } from '../services/api';
+import { api, type LiveFlight, hasBackend } from '../services/api';
 import { INDIAN_AIRPORTS, type IndianAirport } from '../data/indianAviation';
 
 /** Calendar date in India (IST) `n` days from now, as YYYY-MM-DD. Fares are for Indian departures, so "today" is the IST day. */
@@ -22,6 +22,15 @@ const isSearchableDate = (d: string | null): d is string => !!d && /^\d{4}-\d{2}
 
 export function FlightSearch() {
   usePageTitle('Flight Search');
+  if (!hasBackend) {
+    return (
+      <DashboardLayout>
+        <div className="p-8 text-center text-white">
+          Live flight data is unavailable because the backend is not configured. Please set VITE_API_BASE_URL or run the backend server.
+        </div>
+      </DashboardLayout>
+    );
+  }
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialFrom = searchParams.get('from') || 'DEL';
