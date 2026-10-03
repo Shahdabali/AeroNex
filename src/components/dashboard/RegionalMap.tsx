@@ -171,20 +171,20 @@ export const RegionalMap = memo(function RegionalMap() {
               onMouseLeave={() => setHoveredSector(null)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-left transition-all cursor-pointer shrink-0 ${
                 isSelected
-                  ? 'bg-[#161B2E] border-cyan-500/60 shadow-[0_0_12px_rgba(0,229,255,0.2)]'
-                  : isHovered
-                  ? 'bg-[#121624] border-white/[0.15] text-zinc-200'
-                  : 'bg-[#0E111A]/80 border-white/[0.06] text-zinc-400 hover:text-zinc-200'
+                    ? isLight ? 'bg-cyan-50 border-cyan-300 shadow-sm' : 'bg-[#161B2E] border-cyan-500/60 shadow-[0_0_12px_rgba(0,229,255,0.2)]'
+                    : isHovered
+                    ? isLight ? 'bg-slate-100 border-slate-300 text-slate-700' : 'bg-[#121624] border-white/[0.15] text-zinc-200'
+                    : isLight ? 'bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50' : 'bg-[#0E111A]/80 border-white/[0.06] text-zinc-400 hover:text-zinc-200'
               }`}
             >
               <span 
                 className="w-2 h-2 rounded-full shrink-0" 
                 style={{ backgroundColor: hub.color }} 
               />
-              <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-zinc-300'}`}>
+              <span className={`text-xs font-bold ${isSelected ? (isLight ? 'text-cyan-800' : 'text-white') : (isLight ? 'text-slate-600' : 'text-zinc-300')}`}>
                 {hub.id.toUpperCase()}
               </span>
-              <span className={`text-xs font-mono font-extrabold ${isSelected ? 'text-cyan-300' : 'text-zinc-400'}`}>
+              <span className={`text-xs font-mono font-extrabold ${isSelected ? (isLight ? 'text-cyan-600' : 'text-cyan-300') : (isLight ? 'text-slate-500' : 'text-zinc-400')}`}>
                 <AnimatedNumber value={metrics.value} format={(v) => v.toFixed(1)} />
               </span>
               <span className={`text-[10px] font-mono font-bold tabular-nums ${metrics.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>

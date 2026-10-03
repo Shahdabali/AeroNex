@@ -116,6 +116,7 @@ export function Settings() {
     t
   } = useAppContext();
 
+  const isLight = theme === 'light';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ─── Tab state ─── */
@@ -622,30 +623,31 @@ export function Settings() {
       <div className="flex flex-col gap-6 max-w-[1400px] pb-12">
 
         {/* ── HERO BANNER ── */}
-        <div className="settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#090A0F] via-[#12141C] to-[#161924] border border-white/[0.08] p-6 md:p-8 shadow-xl">
+        <div className={`settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r ${isLight ? "from-blue-50 via-slate-50 to-white border-slate-200" : "from-[#090A0F] via-[#12141C] to-[#161924] border-white/[0.08]"} border p-6 md:p-8 shadow-xl`}>
           {/* Subtle Sunset Airplane backdrop on right */}
           <div className="absolute right-0 top-0 h-full w-1/2 overflow-hidden pointer-events-none rounded-r-2xl">
             <img
               src="/assets/login-hero-clean.jpg"
               alt="AeroNex Aviation"
-              className="w-full h-full object-cover object-right opacity-20 mix-blend-screen"
+              className={`w-full h-full object-cover object-right ${isLight ? "opacity-30 mix-blend-multiply grayscale" : "opacity-20 mix-blend-screen"}`}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/70 to-transparent" />
+            {!isLight && <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/70 to-transparent" />}
+            {isLight && <div className="absolute inset-0 bg-gradient-to-r from-blue-50/90 via-slate-50/70 to-transparent" />}
           </div>
 
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-13 h-13 rounded-2xl bg-[#161824] border border-white/[0.1] flex items-center justify-center shadow-lg text-cyan-400 shrink-0">
+              <div className={`w-13 h-13 rounded-2xl flex items-center justify-center shadow-lg shrink-0 ${isLight ? "bg-white border border-slate-200 text-blue-600" : "bg-[#161824] border border-white/[0.1] text-cyan-400"}`}>
                 <SettingsIcon className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{t.settingsPageTitle || 'Settings'}</h1>
-                <p className="text-xs md:text-sm text-zinc-400 mt-1">{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
+                <h1 className={`text-2xl md:text-3xl font-bold tracking-tight ${isLight ? "text-slate-900" : "text-white"}`}>{t.settingsPageTitle || 'Settings'}</h1>
+                <p className={`text-xs md:text-sm mt-1 ${isLight ? "text-slate-500" : "text-zinc-400"}`}>{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
               </div>
             </div>
             <div className="hidden lg:flex flex-col items-end text-right pr-4">
-              <span className="hero-tagline text-[11px] font-bold tracking-[0.25em] text-cyan-400 uppercase">{t.settingsHeroTagline || 'CUSTOMIZE YOUR EXPERIENCE'}</span>
-              <span className="text-[11px] text-zinc-400 mt-1">{t.settingsHeroSubtitle || '— Settings for a smarter journey —'}</span>
+              <span className={`hero-tagline text-[11px] font-bold tracking-[0.25em] uppercase ${isLight ? "text-blue-600" : "text-cyan-400"}`}>{t.settingsHeroTagline || 'CUSTOMIZE YOUR EXPERIENCE'}</span>
+              <span className={`text-[11px] mt-1 ${isLight ? "text-slate-500" : "text-zinc-400"}`}>{t.settingsHeroSubtitle || '— Settings for a smarter journey —'}</span>
             </div>
           </div>
         </div>
