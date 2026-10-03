@@ -118,6 +118,13 @@ class AlertService {
     const list = this.listNotifications(userId);
     list.unshift({ id: crypto.randomUUID(), message, read: false, timestamp: new Date().toISOString(), alertId });
     this.notifications.set(userId, list.slice(0, MAX_NOTIFICATIONS));
+
+    const user = userService.peek(userId);
+    if (user && user.profile && user.profile.email) {
+      import('./emailService').then(({ sendEmailAlert }) => {
+        sendEmailAlert(user.profile.email, 'AeroNex Price Alert Triggered', message);
+      });
+    }
   }
 
   /** Runs after every ingestion cycle: compares observed fares to each user's targets. */

@@ -158,7 +158,9 @@ app.use('/api', (_req, res) => {
 });
 app.use(errorHandler);
 
-app.listen(config.port, () => {
+app.listen(config.port, async () => {
+  const { initEmailService } = await import('./services/emailService');
+  await initEmailService();
   console.log(`AeroNex API running on port ${config.port}`);
   console.log(`Persistence: ${config.isDemoMode ? 'in-memory (no Supabase configured)' : 'Supabase'}`);
   if (!config.supabaseUrl || !config.supabaseServiceKey) {
