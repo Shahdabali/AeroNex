@@ -1618,3 +1618,8 @@ html.light .obsidian-btn:hover {
   animation: floatAnimation 12s ease-in-out infinite;
   animation-delay: 2s;
 }
+
+@keyframes dash {
+  0% { stroke-dashoffset: 1000; }
+  100% { stroke-dashoffset: 0; }
+}
