@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAppContext } from '../context/AppProvider';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -20,6 +21,8 @@ export function AeroNexLogo({
   variant = 'full',
   alt = "AeroNex — Fly Beyond Limits"
 }: LogoProps) {
+  let isLight = false;
+  try { isLight = useAppContext().theme === 'light'; } catch(e) {}
   // 1. Standalone 3D Icon Variant
   if (variant === 'icon') {
     return (
@@ -76,7 +79,7 @@ export function AeroNexLogo({
           />
         </div>
         <div className="flex flex-col text-left select-none">
-          <span className="text-2xl font-black tracking-wider text-slate-900 dark:text-white font-['Inter',sans-serif] flex items-center leading-none">
+          <span className={`text-2xl font-black tracking-wider ${isLight ? "text-slate-900" : "text-white"} font-['Inter',sans-serif] flex items-center leading-none`}>
             AERO<span className="bg-gradient-to-r from-cyan-400 via-[#1788FF] to-[#4E55F5] bg-clip-text text-transparent">NEX</span>
           </span>
         </div>
