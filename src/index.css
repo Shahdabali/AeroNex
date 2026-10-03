@@ -1596,3 +1596,25 @@ html.light .obsidian-btn:hover {
   animation: scanlinePulse 6s linear infinite;
   pointer-events: none;
 }
+
+@keyframes fluidGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-fluid-gradient {
+  background-size: 200% 200%;
+  animation: fluidGradient 10s ease infinite;
+}
+@keyframes floatAnimation {
+  0% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+  100% { transform: translateY(0px) translateX(0px); }
+}
+.animate-float {
+  animation: floatAnimation 8s ease-in-out infinite;
+}
+.animate-float-delayed {
+  animation: floatAnimation 12s ease-in-out infinite;
+  animation-delay: 2s;
+}
