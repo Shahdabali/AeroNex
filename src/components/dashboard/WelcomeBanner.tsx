@@ -125,7 +125,7 @@ export function WelcomeBanner() {
         <div className="flex flex-col items-start md:items-end gap-1">
           <span className={`text-[10px] font-bold uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>Data last refreshed</span>
           <span className={`text-[13px] font-mono tabular-nums ${isLight ? 'text-slate-700 font-semibold' : 'text-zinc-300'}`}>
-            {last ? format(last, 'dd MMMM yyyy \\u00B7 hh:mm:ss a') : 'Waiting for first update?'}
+            {last ? format(last, 'dd MMMM yyyy') + ' \u00B7 ' + format(last, 'hh:mm:ss a') : 'Waiting for first update?'}
           </span>
           <div className={`mt-1 flex items-center gap-1.5 text-[10px] font-mono ${isLight ? 'text-blue-600 font-semibold' : 'text-cyan-400/90'}`} title={feed.detail}>
             <Activity size={12} className={feed.state === 'live' ? 'text-emerald-500' : (isLight ? 'text-slate-400' : 'text-zinc-500')} />
