@@ -1,11 +1,10 @@
 import puppeteer from 'puppeteer';
 import { AirfareProvider } from './AirfareProvider';
 import { FareDataInput } from '../utils/validation';
+import { dgcaRouteBasket } from '../analytics/dgcaBasket';
 
-// Define a set of routes to scrape
-const ROUTES = [
-  'DEL-BOM', 'BOM-DEL', 'BOM-BLR', 'BLR-BOM', 'DEL-BLR', 'BLR-DEL'
-];
+// Dynamically scale scraper to cover every route registered in the DGCA basket
+const ROUTES = dgcaRouteBasket.routes.map(r => r.route);
 
 export class PuppeteerAirfareProvider implements AirfareProvider {
   readonly name = 'Real-time Scraper (Puppeteer)';

@@ -24,7 +24,24 @@ const RAW_DGCA_TRAFFIC: Record<string, number> = {
   'DEL-HYD': 280000,
   'HYD-DEL': 280000,
   'BOM-GOI': 250000,
-  'GOI-BOM': 250000
+  'GOI-BOM': 250000,
+  // Regional additions
+  'DEL-PNQ': 180000,
+  'PNQ-DEL': 180000,
+  'BOM-AMD': 150000,
+  'AMD-BOM': 150000,
+  'BLR-HYD': 140000,
+  'HYD-BLR': 140000,
+  'CCU-GAU': 120000,
+  'GAU-CCU': 120000,
+  'DEL-SXR': 95000,
+  'SXR-DEL': 95000,
+  'BOM-IXC': 85000,
+  'IXC-BOM': 85000,
+  'MAA-CJB': 75000,
+  'CJB-MAA': 75000,
+  'BLR-COK': 110000,
+  'COK-BLR': 110000
 };
 
 const totalTraffic = Object.values(RAW_DGCA_TRAFFIC).reduce((a, b) => a + b, 0);

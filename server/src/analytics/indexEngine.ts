@@ -30,6 +30,20 @@ export class AirfareIndexEngine {
     'CCU-BLR': 5200,
     'BLR-HYD': 3000,
     'HYD-BLR': 3000,
+    'DEL-PNQ': 4800,
+    'PNQ-DEL': 4800,
+    'BOM-AMD': 2500,
+    'AMD-BOM': 2500,
+    'CCU-GAU': 3200,
+    'GAU-CCU': 3200,
+    'DEL-SXR': 5500,
+    'SXR-DEL': 5500,
+    'BOM-IXC': 5100,
+    'IXC-BOM': 5100,
+    'MAA-CJB': 2800,
+    'CJB-MAA': 2800,
+    'BLR-COK': 2900,
+    'COK-BLR': 2900,
   };
   
   private lastIndexValue: number | null = null;
