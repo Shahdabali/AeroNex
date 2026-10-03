@@ -108,14 +108,17 @@ export class AirfareIndexEngine {
     let indexSum = 0;
     let totalWeightUsed = 0;
 
-    for (const fare of currentFares) {
+      for (const fare of currentFares) {
       const route = `${fare.origin_iata}-${fare.destination_iata}`;
-      let matched = false;
+      
+      const regionalMap: Record<string, string[]> = {
+        'North': ['DEL-BOM', 'BOM-DEL', 'DEL-BLR', 'BLR-DEL', 'DEL-GOI', 'GOI-DEL', 'DEL-PNQ', 'PNQ-DEL', 'DEL-SXR', 'SXR-DEL', 'DEL-HYD', 'HYD-DEL', 'DEL-CCU', 'CCU-DEL', 'DEL-MAA', 'MAA-DEL'],
+        'West': ['BOM-BLR', 'BLR-BOM', 'BOM-HYD', 'GOI-BOM', 'BOM-GOI', 'BOM-AMD', 'AMD-BOM', 'BOM-IXC', 'IXC-BOM'],
+        'South': ['MAA-DEL', 'HYD-DEL', 'BLR-HYD', 'HYD-BLR', 'MAA-CJB', 'CJB-MAA', 'BLR-COK', 'COK-BLR', 'BLR-CCU', 'CCU-BLR'],
+        'East': ['CCU-DEL', 'CCU-BLR', 'CCU-GAU', 'GAU-CCU']
+      };
 
-      if (region === 'North' && (route === 'DEL-BOM' || route === 'DEL-BLR' || route === 'DEL-GOI')) matched = true;
-      if (region === 'West' && (route === 'BOM-BLR' || route === 'BOM-HYD')) matched = true;
-      if (region === 'South' && (route === 'MAA-DEL' || route === 'HYD-DEL')) matched = true;
-      if (region === 'East' && (route === 'CCU-DEL' || route === 'CCU-BLR')) matched = true;
+      let matched = regionalMap[region]?.includes(route) ?? false;
 
       if (matched) {
         const baseline = this.baselineFares[route];

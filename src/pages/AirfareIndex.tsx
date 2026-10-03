@@ -276,10 +276,10 @@ export function AirfareIndex() {
                       itemStyle={{ color: isLight ? '#0F172A' : '#fff', fontWeight: 700 }}
                       formatter={(v) => [`${Number(v).toFixed(1)} pt`, 'Index Value']}
                     />
-                    <Bar dataKey="index" radius={[0, 4, 4, 0]} maxBarSize={40}>
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={40}>
                       {
                         (regional.data || []).map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={entry.index > 100 ? (isLight ? '#ef4444' : '#f87171') : (isLight ? '#10b981' : '#34d399')} />
+                          <Cell key={`cell-${index}`} fill={entry.value > 100 ? (isLight ? '#ef4444' : '#f87171') : (isLight ? '#10b981' : '#34d399')} />
                         ))
                       }
                     </Bar>
