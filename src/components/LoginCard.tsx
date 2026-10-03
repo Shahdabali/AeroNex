@@ -501,9 +501,9 @@ export function LoginCard({ initialMode = 'signin' }: LoginCardProps) {
       {/* 9. Legal terms agreement note */}
       <p className="login-terms-text text-center text-[10px] text-slate-400 mt-4 leading-normal">
         {t.loginTermsAgreement || 'By continuing, you agree to our'}{' '}
-        <a href="#" className="text-[#00A3FF] hover:underline">{t.loginTermsOfService || 'Terms of Service'}</a>{' '}
+        <span className="text-[#00A3FF] hover:underline">{t.loginTermsOfService || 'Terms of Service'}</span>{' '}
         {t.loginAndWord || 'and'}{' '}
-        <a href="#" className="text-[#00A3FF] hover:underline">{t.loginPrivacyPolicy || 'Privacy Policy'}</a>.
+        <span className="text-[#00A3FF] hover:underline">{t.loginPrivacyPolicy || 'Privacy Policy'}</span>.
       </p>
 
     </motion.div>

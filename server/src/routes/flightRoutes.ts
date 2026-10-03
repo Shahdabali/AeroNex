@@ -114,7 +114,7 @@ flightRouter.get('/flights/search', searchLimiter, wrap(async (req, res) => {
           baseFare: Math.round(f.fare_amount * 0.8),
           taxes: Math.round(f.fare_amount * 0.2),
           availability: 'available',
-          seatsLeft: Math.floor(Math.random() * 5) + 1,
+          seatsLeft: null,
           isOutlier: false,
           previousPrice: null,
           priceChangedAt: null,

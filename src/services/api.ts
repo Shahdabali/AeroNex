@@ -20,7 +20,7 @@ const API_BASE: string = (
 ).replace(/\/$/, '');
 
 export const API_BASE_URL = API_BASE;
-export const hasBackend = Boolean(API_BASE);
+export const hasBackend = true;
 
 /** Error carrying a user-presentable message. `network` is true when the server could not be reached. */
 export class ApiError extends Error {

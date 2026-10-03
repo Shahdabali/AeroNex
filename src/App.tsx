@@ -70,6 +70,11 @@ function App() {
               <Route path="/rewards" element={<Navigate to="/dashboard" replace />} />
               <Route path="/my-flights" element={<Navigate to="/search" replace />} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              
+              {/* Feature Redirects for missing pages */}
+              <Route path="/price-alerts" element={<Navigate to="/settings" replace />} />
+              <Route path="/cpi-analytics" element={<Navigate to="/airfare-index" replace />} />
+              <Route path="/ai-analytics" element={<Navigate to="/airfare-index" replace />} />
 
               {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />
