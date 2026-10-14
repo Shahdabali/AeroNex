@@ -18,6 +18,7 @@ const MethodologyPage = lazy(() => import('./pages/MethodologyPage').then(m => (
 const DataScrapingPage = lazy(() => import('./pages/DataScrapingPage').then(m => ({ default: m.DataScrapingPage })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 const AiAnalytics = lazy(() => import('./pages/AiAnalytics').then(m => ({ default: m.AiAnalytics })));
+const CPIAnalytics = lazy(() => import('./pages/CPIAnalytics').then(m => ({ default: m.CPIAnalytics })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,7 +75,8 @@ function App() {
               
               {/* Feature Redirects for missing pages */}
               <Route path="/price-alerts" element={<Navigate to="/settings" replace />} />
-              <Route path="/cpi-analytics" element={<Navigate to="/airfare-index" replace />} />
+              <Route path="/cpi-analytics" element={<ProtectedRoute><CPIAnalytics /></ProtectedRoute>} />
+              <Route path="/cpi" element={<Navigate to="/cpi-analytics" replace />} />
               <Route path="/ai-analytics" element={<AiAnalytics />} />
 
               {/* Catch-all */}

@@ -28,3 +28,6 @@ dist-ssr
 
 # Local runtime data (per-user settings, alerts, tickets)
 server/data/*.json
+
+# Temporary / scratch scripts
+*.cjs

@@ -7,6 +7,8 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useAppContext } from '../context/AppProvider';
 import { api, API_BASE_URL } from '../services/api';
 import { FAQS } from '../data/faqs';
+import { INDIAN_AIRPORTS } from '../data/indianAviation';
+import { useDataStatus } from '../hooks/useDataStatus';
 import type { Language } from '../i18n/translations';
 import {
   Settings as SettingsIcon, User, Sliders, Bell, Shield, Puzzle, Palette,
@@ -94,6 +96,61 @@ function ModalWrapper({ isOpen, onClose, title, subtitle, children, maxWidth = '
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Layout primitives: section card, labelled row, button
+   ═══════════════════════════════════════════════════════════════ */
+function SectionCard({ title, desc, tone, children }: { title: string; desc?: string; tone?: 'danger'; children: React.ReactNode }) {
+  return (
+    <section className={`settings-card rounded-2xl border p-5 md:p-6 ${tone === 'danger' ? 'border-rose-500/25 bg-rose-500/[0.03]' : 'border-white/[0.08] bg-[#12141C]/80'}`}>
+      <div className="mb-4">
+        <h3 className={`text-base font-bold ${tone === 'danger' ? 'text-rose-300' : 'text-white'}`}>{title}</h3>
+        {desc && <p className="text-xs text-zinc-400 mt-0.5">{desc}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SettingRow({ icon: Icon, title, desc, children }: { icon?: any; title: string; desc?: React.ReactNode; children?: React.ReactNode }) {
+  return (
+    <div className="settings-row flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 border-t border-white/[0.05] first:border-t-0 first:pt-0 last:pb-0">
+      <div className="flex items-start gap-3 min-w-0">
+        {Icon && (
+          <span className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-cyan-400 shrink-0">
+            <Icon size={16} />
+          </span>
+        )}
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-white break-all">{title}</div>
+          {desc && <div className="text-xs text-zinc-400 mt-0.5">{desc}</div>}
+        </div>
+      </div>
+      {children && <div className="shrink-0 flex flex-wrap items-center gap-2">{children}</div>}
+    </div>
+  );
+}
+
+const BUTTON_TONES = {
+  default: 'bg-white/[0.05] border-white/[0.1] text-zinc-200 hover:bg-white/[0.09] hover:text-white',
+  primary: 'bg-gradient-to-r from-[#1788FF] to-[#4E55F5] border-transparent text-white hover:shadow-lg hover:shadow-blue-500/25',
+  danger: 'bg-rose-500/90 border-rose-500 text-white hover:bg-rose-500',
+  'danger-soft': 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20',
+};
+
+function ActionButton({ onClick, children, tone = 'default', disabled, title }: { onClick?: () => void; children: React.ReactNode; tone?: keyof typeof BUTTON_TONES; disabled?: boolean; title?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`settings-action-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${BUTTON_TONES[tone]}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Main Settings Page
    ═══════════════════════════════════════════════════════════════ */
 export function Settings() {
@@ -119,31 +176,25 @@ export function Settings() {
   const isLight = theme === 'light';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ─── Tab state ─── */
-  type Tab = 'profile' | 'integrations' | 'data-privacy' | 'account' | 'help' | 'app-info';
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
-
-  /* ─── Section refs for smooth scrolling ─── */
-  const sectionRefs: Record<Tab, React.RefObject<HTMLDivElement | null>> = {
-    profile: useRef<HTMLDivElement>(null),
-    integrations: useRef<HTMLDivElement>(null),
-    'data-privacy': useRef<HTMLDivElement>(null),
-    account: useRef<HTMLDivElement>(null),
-    help: useRef<HTMLDivElement>(null),
-    'app-info': useRef<HTMLDivElement>(null),
+  /* ─── Section state (deep-linkable, e.g. /settings#notifications) ─── */
+  type Tab = 'profile' | 'security' | 'preferences' | 'notifications' | 'integrations' | 'privacy' | 'help' | 'about';
+  const TAB_KEYS: Tab[] = ['profile', 'security', 'preferences', 'notifications', 'integrations', 'privacy', 'help', 'about'];
+  const [activeTab, setActiveTabState] = useState<Tab>(() => {
+    const fromHash = window.location.hash.slice(1) as Tab;
+    return TAB_KEYS.includes(fromHash) ? fromHash : 'profile';
+  });
+  const setActiveTab = (tab: Tab) => {
+    setActiveTabState(tab);
+    window.history.replaceState(null, '', `#${tab}`);
   };
-
-  const scrollToSection = (tab: Tab) => {
-    setActiveTab(tab);
-    sectionRefs[tab]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const feed = useDataStatus();
 
   /* ─── Profile state ─── */
   const [fullName, setFullName] = useState(user?.name || '');
   const [email] = useState(user?.email || '');
-  const [organization, setOrganization] = useState(user?.organization || 'AeroNex Platform User');
-  const [phone, setPhone] = useState(user?.phone || '98765 43210');
-  const [bio, setBio] = useState(user?.bio || 'Exploring data-driven insights to make travel more accessible and affordable.');
+  const [organization, setOrganization] = useState(user?.organization || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [bio, setBio] = useState(user?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -175,7 +226,7 @@ export function Settings() {
     };
   });
   const [apiKey, setApiKey] = useState(() => {
-    return localStorage.getItem('aeronex_api_key') || 'aeronex_live_sk_948f2c1b8e47a6d3f0';
+    return localStorage.getItem('aeronex_api_key') || '';
   });
   const [copiedKey, setCopiedKey] = useState(false);
 
@@ -584,27 +635,67 @@ export function Settings() {
     navigate('/login');
   };
 
-  /* ─── Tab configuration ─── */
-  const tabs: { key: Tab; label: string; icon: any }[] = [
-    { key: 'profile', label: t.tabProfile || 'Profile', icon: User },
-    { key: 'integrations', label: t.tabIntegrations || 'Integrations', icon: Puzzle },
-    { key: 'data-privacy', label: t.tabDataPrivacy || 'Data & Privacy', icon: Shield },
-    { key: 'account', label: t.tabAccount || 'Account', icon: KeyRound },
-    { key: 'help', label: t.tabHelp || 'Help & Support', icon: HelpCircle },
-    { key: 'app-info', label: 'App Information', icon: Info },
+  /* ─── Section navigation ─── */
+  const navGroups: { title: string; items: { key: Tab; label: string; icon: any; desc: string }[] }[] = [
+    {
+      title: 'Account',
+      items: [
+        { key: 'profile', label: t.tabProfile || 'Profile', icon: User, desc: 'Name, photo and contact details' },
+        { key: 'security', label: t.tabAccount || 'Account & Security', icon: KeyRound, desc: 'Password, plan and sign-out' },
+      ],
+    },
+    {
+      title: 'Workspace',
+      items: [
+        { key: 'preferences', label: 'Preferences', icon: Sliders, desc: 'Travel defaults and appearance' },
+        { key: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts and email updates' },
+        { key: 'integrations', label: t.tabIntegrations || 'Integrations & API', icon: Puzzle, desc: 'Connected services and API key' },
+      ],
+    },
+    {
+      title: 'Data',
+      items: [{ key: 'privacy', label: t.tabDataPrivacy || 'Data & Privacy', icon: Shield, desc: 'Data usage, export and deletion' }],
+    },
+    {
+      title: 'Support',
+      items: [
+        { key: 'help', label: t.tabHelp || 'Help & Support', icon: HelpCircle, desc: 'FAQs, support and feedback' },
+        { key: 'about', label: 'About', icon: Info, desc: 'Version, legal and system status' },
+      ],
+    },
   ];
+  const activeItem = navGroups.flatMap(g => g.items).find(i => i.key === activeTab)!;
 
   const accentColors = [
     '#1788FF', '#4E55F5', '#10B981', '#EAB308', '#F97316', '#EF4444', '#EC4899', '#8B5CF6',
   ];
 
-  const inputClass = 'settings-input w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all text-sm shadow-inner';
+  const inputClass = 'settings-input w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all text-sm shadow-inner placeholder:text-zinc-600';
   const selectClass = 'settings-select w-full bg-[#12141C] border border-white/[0.08] rounded-xl text-white px-4 py-2.5 focus:outline-none focus:border-cyan-400/50 transition-all appearance-none text-sm cursor-pointer shadow-inner';
-  const cardClass = 'settings-card obsidian-card bg-[#12141C]/80 backdrop-blur-xl border border-white/[0.08] rounded-[20px] p-6 shadow-sm hover:border-white/[0.16] flex flex-col justify-between transition-all';
+  const labelClass = 'text-zinc-400 text-xs mb-1.5 block font-medium';
 
   const faqs = FAQS;
 
   const filteredFaqs = faqs.filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase()));
+
+  const notificationOptions = [
+    { key: 'priceDropAlerts', value: priceDropAlerts, icon: Tag, title: 'Price drop alerts', desc: 'Email me when a tracked route falls below my target fare.' },
+    { key: 'routeUpdates', value: routeUpdates, icon: Plane, title: 'Route updates', desc: 'Schedule or availability changes on routes I follow.' },
+    { key: 'travelDeals', value: travelDeals, icon: Package, title: 'Travel deals', desc: 'Notable fare movements across the index.' },
+    { key: 'weeklyReports', value: weeklyReports, icon: Calendar, title: 'Weekly report', desc: 'A weekly summary of the airfare index.' },
+    { key: 'productUpdates', value: productUpdates, icon: Megaphone, title: 'Product updates', desc: 'New features and changes to AeroNex.' },
+    { key: 'marketingNotifs', value: marketingNotifs, icon: Mail, title: 'Marketing emails', desc: 'Occasional news and announcements.' },
+  ];
+
+  const integrationOptions = [
+    { key: 'google', icon: Globe, title: 'Google account', desc: 'Sign in with Google and link your account.' },
+    { key: 'email', icon: Mail, title: 'Email delivery', desc: 'Send price alerts and reports to your inbox.' },
+    { key: 'apiAccess', icon: Code2, title: 'Developer API', desc: 'Programmatic access to the airfare index with your API key.' },
+  ];
+
+  const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (user?.isGuest ? 'G' : 'AN');
+  const feedTone = feed.state === 'live' ? 'text-emerald-400' : feed.state === 'loading' ? 'text-zinc-400' : feed.state === 'delayed' ? 'text-amber-400' : 'text-rose-400';
+  const feedDot = feed.state === 'live' ? 'bg-emerald-400 animate-pulse' : feed.state === 'loading' ? 'bg-zinc-500' : feed.state === 'delayed' ? 'bg-amber-400' : 'bg-rose-400';
 
   /* ═══════════════════════════════════════════════════════════════
      RENDER
@@ -620,393 +711,399 @@ export function Settings() {
         className="hidden"
       />
 
-      <div className="flex flex-col gap-6 max-w-[1400px] pb-12">
+      <div className="flex flex-col gap-6 max-w-[1280px] pb-12">
 
-        {/* ── HERO BANNER ── */}
-        <div className={`settings-hero relative overflow-hidden rounded-2xl bg-gradient-to-r ${isLight ? "from-blue-50 via-slate-50 to-white border-slate-200" : "from-[#090A0F] via-[#12141C] to-[#161924] border-white/[0.08]"} border p-6 md:p-8 shadow-xl`}>
-          {/* Subtle Sunset Airplane backdrop on right */}
-          <div className="absolute right-0 top-0 h-full w-1/2 overflow-hidden pointer-events-none rounded-r-2xl">
-            <img
-              src="/assets/login-hero-clean.jpg"
-              alt="AeroNex Aviation"
-              className={`w-full h-full object-cover object-right ${isLight ? "opacity-30 mix-blend-multiply grayscale" : "opacity-20 mix-blend-screen"}`}
-            />
-            {!isLight && <div className="absolute inset-0 bg-gradient-to-r from-[#090A0F] via-[#090A0F]/70 to-transparent" />}
-            {isLight && <div className="absolute inset-0 bg-gradient-to-r from-blue-50/90 via-slate-50/70 to-transparent" />}
-          </div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        {/* ── HEADER ── */}
+        <div className={`settings-hero relative overflow-hidden rounded-2xl border p-6 ${isLight ? 'bg-gradient-to-r from-blue-50 via-slate-50 to-white border-slate-200' : 'bg-gradient-to-r from-[#090A0F] via-[#12141C] to-[#161924] border-white/[0.08]'}`}>
+          <div className="pointer-events-none absolute -right-16 -top-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className={`w-13 h-13 rounded-2xl flex items-center justify-center shadow-lg shrink-0 ${isLight ? "bg-white border border-slate-200 text-blue-600" : "bg-[#161824] border border-white/[0.1] text-cyan-400"}`}>
-                <SettingsIcon className="w-7 h-7" />
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isLight ? 'bg-white border border-slate-200 text-blue-600' : 'bg-[#161824] border border-white/[0.1] text-cyan-400'}`}>
+                <SettingsIcon className="w-6 h-6" />
               </div>
               <div>
-                <h1 className={`text-2xl md:text-3xl font-bold tracking-tight ${isLight ? "text-slate-900" : "text-white"}`}>{t.settingsPageTitle || 'Settings'}</h1>
-                <p className={`text-xs md:text-sm mt-1 ${isLight ? "text-slate-500" : "text-zinc-400"}`}>{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
+                <h1 className={`text-2xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>{t.settingsPageTitle || 'Settings'}</h1>
+                <p className={`text-sm mt-0.5 ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>{t.settingsPageSubtitle || 'Manage your account, preferences, notifications and data settings.'}</p>
               </div>
             </div>
-            <div className="hidden lg:flex flex-col items-end text-right pr-4">
-              <span className={`hero-tagline text-[11px] font-bold tracking-[0.25em] uppercase ${isLight ? "text-blue-600" : "text-cyan-400"}`}>{t.settingsHeroTagline || 'CUSTOMIZE YOUR EXPERIENCE'}</span>
-              <span className={`text-[11px] mt-1 ${isLight ? "text-slate-500" : "text-zinc-400"}`}>{t.settingsHeroSubtitle || '— Settings for a smarter journey —'}</span>
+            <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+              <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initials}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-white truncate max-w-[200px]">{fullName || (user?.isGuest ? 'Guest' : 'AeroNex user')}</div>
+                <div className="text-[11px] text-zinc-400 truncate max-w-[200px]">{email || (user?.isGuest ? 'Guest session' : 'No email on file')}</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── TAB NAVIGATION ── */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => scrollToSection(tab.key)}
-                className={`relative settings-tab flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer select-none ${
-                  isActive
-                    ? 'text-white'
-                    : 'bg-[#12141C] hover:bg-[#161824] border border-white/[0.08] text-zinc-400 hover:text-white'
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="settingsActiveTabIndicator"
-                    className="absolute inset-0 bg-[#161824] border border-white/[0.14] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  <Icon size={16} className={isActive ? 'text-cyan-400' : 'text-zinc-500'} />
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── LIVE TOAST ── */}
-        {toastMessage && (
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-2 w-fit shadow-lg backdrop-blur-md">
-            <Check size={16} className="text-emerald-400" /> {toastMessage}
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════
-           ROW 1: Profile | Travel Preferences | Notifications
-           ══════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* ── PROFILE INFORMATION ── */}
-          <div ref={sectionRefs.profile} className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.profileInfoTitle || 'Profile Information'}</h2>
-              <p className="text-xs text-slate-400 mb-5">{t.profileInfoDesc || 'Update your personal details and profile information.'}</p>
-
-              {/* Avatar + Info + Change Photo */}
-              <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-800/80">
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="relative shrink-0">
-                    <div className="w-18 h-18 rounded-full overflow-hidden bg-gradient-to-tr from-[#1788FF] to-[#00A3FF] ring-2 ring-blue-500/30 shadow-md flex items-center justify-center text-white text-xl font-bold">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={fullName || 'User'}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
-                        />
-                      ) : (
-                        <span>{fullName ? fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (user?.isGuest ? 'G' : 'AN')}</span>
-                      )}
-                    </div>
-                    <button
-                      aria-label="Upload photo"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#1788FF] text-white flex items-center justify-center border-2 border-[#0A1838] shadow-md hover:bg-blue-600 transition-colors cursor-pointer"
-                    >
-                      <Camera size={12} />
-                    </button>
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-white font-bold text-base leading-tight truncate">{fullName || (user?.isGuest ? 'Guest Traveler' : 'AeroNex Member')}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 leading-tight">{user?.isGuest ? 'Guest Passenger' : (user?.role || 'Passenger')}</p>
-                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      <span className="text-xs text-slate-400 truncate">{email || 'Active Session'}</span>
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-semibold flex items-center gap-1 shrink-0">
-                        <BadgeCheck size={11} /> {user?.isGuest ? 'Guest Session' : (t.verified || 'Verified')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold flex items-center gap-1.5 hover:bg-blue-500/20 transition-all cursor-pointer shrink-0"
-                >
-                  <Camera size={13} /> {t.changePhoto || 'Change Photo'}
-                </button>
-              </div>
-
-              {/* Form Fields */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.fullName || 'Full Name'}</label>
-                  <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} className={inputClass} />
-                </div>
-                <div>
-                  <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.emailAddress || 'Email Address'}</label>
-                  <input type="email" value={email} readOnly className={`${inputClass} opacity-70 cursor-not-allowed`} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.organizationLabel || 'Organization (Optional)'}</label>
-                  <input type="text" value={organization} onChange={e => setOrganization(e.target.value)} className={inputClass} />
-                </div>
-                <div>
-                  <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.phoneLabel || 'Phone Number'}</label>
-                  <div className="flex gap-2">
-                    <div className="settings-input flex items-center gap-1.5 bg-[#081530] border border-slate-700/70 rounded-xl px-2.5 py-2 text-xs text-white shrink-0">
-                      <span>🇮🇳</span> <span className="text-slate-400">+91</span>
-                    </div>
-                    <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="text-slate-400 text-xs mb-1.5 block font-medium">{t.bioLabel || 'Bio (Optional)'}</label>
-                <textarea
-                  value={bio}
-                  onChange={e => { if (e.target.value.length <= 200) setBio(e.target.value); }}
-                  rows={3}
-                  className={`${inputClass} resize-none`}
-                />
-                <p className="text-[10px] text-slate-500 text-right mt-1">{bio.length}/200</p>
-              </div>
-            </div>
-
-            <button
-              onClick={handleSaveProfile}
-              disabled={isSavingProfile}
-              className="w-fit bg-gradient-to-r from-[#1788FF] to-[#4E55F5] rounded-xl text-white px-6 py-2.5 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer mt-2 flex items-center gap-2"
+        {/* ── TOAST ── */}
+        <AnimatePresence>
+          {toastMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              role="status"
+              className="fixed top-6 right-6 z-[60] flex items-center gap-2 px-4 py-2.5 bg-[#0E1017] border border-emerald-500/40 text-emerald-300 rounded-xl text-sm font-medium shadow-2xl"
             >
-              {isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : null}
-              {t.saveChangesBtn || 'Save Changes'}
-            </button>
-          </div>
+              <Check size={16} className="text-emerald-400" /> {toastMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          {/* ── TRAVEL PREFERENCES ── */}
-          
-          {/* —— INTEGRATIONS —— */}
-          <div ref={sectionRefs.integrations} className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">Integrations</h2>
-              <p className="text-xs text-slate-400 mb-5">Connect AeroNex with third-party tools.</p>
-              
-              <div className="space-y-3">
-                <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#5865F2]/20 flex items-center justify-center text-[#5865F2]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">Discord Webhooks</p>
-                      <p className="text-xs text-slate-400">Receive price alerts in your Discord server</p>
-                    </div>
-                  </div>
-                  <button className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition-colors">Connect</button>
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-6 items-start">
+
+          {/* ── SECTION NAV ── */}
+          <nav aria-label="Settings sections" className="lg:sticky lg:top-6 rounded-2xl border border-white/[0.08] bg-[#12141C]/80 p-2">
+            <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible scrollbar-none">
+              {navGroups.map(group => (
+                <div key={group.title} className="flex lg:flex-col gap-1 lg:mb-2 last:mb-0">
+                  <div className="hidden lg:block px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">{group.title}</div>
+                  {group.items.map(item => {
+                    const isActive = activeTab === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => setActiveTab(item.key)}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`settings-tab relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm whitespace-nowrap text-left transition-colors cursor-pointer ${isActive ? 'text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'}`}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="settingsNavIndicator"
+                            className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/15 to-blue-500/5 border border-cyan-500/25"
+                            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                          />
+                        )}
+                        <item.icon size={16} className={`relative z-10 shrink-0 ${isActive ? 'text-cyan-300' : 'text-zinc-500'}`} />
+                        <span className="relative z-10 flex-1">{item.label}</span>
+                        <ChevronRight size={14} className={`relative z-10 hidden lg:block ${isActive ? 'text-cyan-300' : 'text-zinc-700'}`} />
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
+          </nav>
 
-<div ref={sectionRefs['data-privacy']} className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.dataPrivacyTitle || 'Data & Privacy'}</h2>
-              <p className="text-xs text-slate-400 mb-4">{t.dataPrivacyDesc || 'Manage your data, privacy and personalization settings.'}</p>
+          {/* ── SECTION CONTENT ── */}
+          <div className="min-w-0">
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-white">{activeItem.label}</h2>
+              <p className="text-xs text-zinc-400">{activeItem.desc}</p>
+            </div>
 
-              <div className="flex flex-col gap-1">
-                {/* Data Usage Modal Trigger */}
-                <button
-                  onClick={() => setShowDataUsageModal(true)}
-                  className="settings-row flex items-center justify-between py-3 px-2 border-b border-slate-800/80 hover:bg-white/5 transition-all rounded-xl cursor-pointer group text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0B254E] border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
-                      <Database size={16} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="flex flex-col gap-5"
+              >
+
+                {/* ── PROFILE ── */}
+                {activeTab === 'profile' && (
+                  <SectionCard title={t.profileInfoTitle || 'Profile information'} desc={t.profileInfoDesc || 'Update your personal details and profile information.'}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-white/[0.06]">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="relative shrink-0">
+                          <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-tr from-[#1788FF] to-[#00A3FF] ring-2 ring-blue-500/30 flex items-center justify-center text-white text-lg font-bold">
+                            {avatarUrl ? (
+                              <img
+                                src={avatarUrl}
+                                alt={fullName || 'User'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <span>{initials}</span>
+                            )}
+                          </div>
+                          <button
+                            aria-label="Upload photo"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#1788FF] text-white flex items-center justify-center border-2 border-[#12141C] hover:bg-blue-600 transition-colors cursor-pointer"
+                          >
+                            <Camera size={12} />
+                          </button>
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-white font-bold text-base leading-tight truncate">{fullName || (user?.isGuest ? 'Guest Traveler' : 'AeroNex Member')}</h3>
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className="text-xs text-zinc-400 truncate">{email || 'No email on file'}</span>
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold flex items-center gap-1 shrink-0">
+                              <BadgeCheck size={11} /> {user?.isGuest ? 'Guest session' : (t.verified || 'Verified')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <ActionButton onClick={() => fileInputRef.current?.click()}>
+                        <Camera size={14} /> {t.changePhoto || 'Change photo'}
+                      </ActionButton>
                     </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold">{t.dataUsageLabel || 'Data Usage'}</h4>
-                      <p className="text-[11px] text-slate-400">{t.dataUsageDesc || 'Control how your data is used'}</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="settings-name" className={labelClass}>{t.fullName || 'Full name'}</label>
+                        <input id="settings-name" type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Your name" className={inputClass} />
+                      </div>
+                      <div>
+                        <label htmlFor="settings-email" className={labelClass}>{t.emailAddress || 'Email address'}</label>
+                        <input id="settings-email" type="email" value={email} readOnly className={`${inputClass} opacity-70 cursor-not-allowed`} />
+                      </div>
+                      <div>
+                        <label htmlFor="settings-org" className={labelClass}>{t.organizationLabel || 'Organization (optional)'}</label>
+                        <input id="settings-org" type="text" value={organization} onChange={e => setOrganization(e.target.value)} placeholder="Company, department or institute" className={inputClass} />
+                      </div>
+                      <div>
+                        <label htmlFor="settings-phone" className={labelClass}>{t.phoneLabel || 'Phone number'}</label>
+                        <div className="flex gap-2">
+                          <div className="settings-input flex items-center gap-1.5 bg-[#12141C] border border-white/[0.08] rounded-xl px-3 text-xs text-zinc-400 shrink-0">+91</div>
+                          <input id="settings-phone" type="tel" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="10-digit mobile number" className={inputClass} />
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label htmlFor="settings-bio" className={labelClass}>{t.bioLabel || 'Bio (optional)'}</label>
+                        <textarea
+                          id="settings-bio"
+                          value={bio}
+                          onChange={e => { if (e.target.value.length <= 200) setBio(e.target.value); }}
+                          rows={3}
+                          placeholder="A short line about you"
+                          className={`${inputClass} resize-none`}
+                        />
+                        <p className="text-[10px] text-zinc-500 text-right mt-1">{bio.length}/200</p>
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-500 group-hover:text-white transition-colors" />
-                </button>
 
-                {/* Download My Data Trigger */}
-                <button
-                  onClick={handleDownloadMyData}
-                  className="settings-row flex items-center justify-between py-3 px-2 border-b border-slate-800/80 hover:bg-white/5 transition-all rounded-xl cursor-pointer group text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0B2E3D] border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                      <Download size={16} />
+                    <div className="flex justify-end pt-4 mt-2 border-t border-white/[0.06]">
+                      <ActionButton tone="primary" onClick={handleSaveProfile} disabled={isSavingProfile}>
+                        {isSavingProfile && <Loader2 size={14} className="animate-spin" />}
+                        {t.saveChangesBtn || 'Save changes'}
+                      </ActionButton>
                     </div>
-                    <div>
-                      <h4 className="text-white text-xs font-semibold">{t.downloadDataLabel || 'Download My Data'}</h4>
-                      <p className="text-[11px] text-slate-400">{t.downloadDataDesc || 'Export your data (CSV, JSON)'}</p>
+                  </SectionCard>
+                )}
+
+                {/* ── ACCOUNT & SECURITY ── */}
+                {activeTab === 'security' && (
+                  <>
+                    <SectionCard title="Sign-in & security" desc="Keep your account secure.">
+                      <SettingRow icon={Lock} title="Password" desc="Change the password you use to sign in.">
+                        <ActionButton onClick={() => setShowPasswordModal(true)} disabled={user?.isGuest} title={user?.isGuest ? 'Guest sessions have no password' : undefined}>
+                          {t.changePasswordBtn || 'Change password'}
+                        </ActionButton>
+                      </SettingRow>
+                      <SettingRow icon={CreditCard} title="Plan" desc="See what your current plan includes.">
+                        <ActionButton onClick={() => setShowSubscriptionModal(true)}>View plan</ActionButton>
+                      </SettingRow>
+                      <SettingRow icon={LogOut} title="Sign out" desc="End this session on this device.">
+                        <ActionButton tone="danger-soft" onClick={handleSignOut}>{t.signOutBtn || 'Log out'}</ActionButton>
+                      </SettingRow>
+                    </SectionCard>
+
+                    <SectionCard tone="danger" title="Danger zone" desc="These actions cannot be undone.">
+                      <SettingRow icon={Trash2} title={t.deleteAccountLabel || 'Delete account'} desc={t.deleteAccountDesc || 'Permanently delete your account and all saved data.'}>
+                        <ActionButton tone="danger" onClick={() => setShowDeleteModal(true)}>Delete account</ActionButton>
+                      </SettingRow>
+                    </SectionCard>
+                  </>
+                )}
+
+                {/* ── PREFERENCES ── */}
+                {activeTab === 'preferences' && (
+                  <>
+                    <SectionCard title="Travel defaults" desc="Used to pre-fill searches. Saved to your account as you change them.">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="pref-from" className={labelClass}>Home airport</label>
+                          <select id="pref-from" value={departureCity} onChange={e => handlePreferenceChange('departureCity', e.target.value)} className={selectClass}>
+                            {INDIAN_AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.city} ({a.code})</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="pref-to" className={labelClass}>Frequent destination</label>
+                          <select id="pref-to" value={destinationCity} onChange={e => handlePreferenceChange('destinationCity', e.target.value)} className={selectClass}>
+                            {INDIAN_AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.city} ({a.code})</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="pref-class" className={labelClass}>Cabin class</label>
+                          <select id="pref-class" value={travelClass} onChange={e => handlePreferenceChange('travelClass', e.target.value)} className={selectClass}>
+                            {['Economy', 'Premium Economy', 'Business', 'First'].map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="pref-date" className={labelClass}>Date format</label>
+                          <select id="pref-date" value={dateFormat} onChange={e => handlePreferenceChange('dateFormat', e.target.value)} className={selectClass}>
+                            {['DD MMM YYYY (10 Sep 2026)', 'DD/MM/YYYY (10/09/2026)', 'YYYY-MM-DD (2026-09-10)'].map(f => <option key={f} value={f}>{f}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                        <SettingRow icon={Plane} title="Include nearby airports" desc="Show alternative airports in search results.">
+                          <ToggleSwitch checked={showAltAirports} onChange={v => handlePreferenceChange('showAltAirports', v)} />
+                        </SettingRow>
+                      </div>
+                    </SectionCard>
+
+                    <SectionCard title="Appearance" desc="Applies on this device immediately.">
+                      <SettingRow icon={Palette} title="Theme" desc="Choose light, dark, or follow your system.">
+                        <div className="inline-flex rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
+                          {[{ v: 'light', l: 'Light', i: Sun }, { v: 'dark', l: 'Dark', i: Moon }, { v: 'system', l: 'System', i: Monitor }].map(o => (
+                            <button
+                              key={o.v}
+                              type="button"
+                              onClick={() => setTheme(o.v)}
+                              aria-pressed={theme === o.v}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${theme === o.v ? 'bg-cyan-500/15 text-cyan-300' : 'text-zinc-400 hover:text-white'}`}
+                            >
+                              <o.i size={13} /> {o.l}
+                            </button>
+                          ))}
+                        </div>
+                      </SettingRow>
+                      <SettingRow icon={Star} title="Accent colour" desc="Highlight colour used across the app.">
+                        <div className="flex flex-wrap gap-2">
+                          {accentColors.map(c => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setAccentColor(c)}
+                              aria-label={`Accent ${c}`}
+                              aria-pressed={accentColor === c}
+                              className={`w-6 h-6 rounded-full cursor-pointer transition-transform hover:scale-110 ${accentColor === c ? 'ring-2 ring-offset-2 ring-offset-[#12141C] ring-white' : ''}`}
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                      </SettingRow>
+                      <SettingRow icon={FileText} title="Text size">
+                        <div className="inline-flex rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
+                          {[{ v: 'small', l: 'Small' }, { v: 'medium', l: 'Default' }, { v: 'large', l: 'Large' }].map(o => (
+                            <button
+                              key={o.v}
+                              type="button"
+                              onClick={() => setFontSize(o.v)}
+                              aria-pressed={fontSize === o.v}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${fontSize === o.v ? 'bg-cyan-500/15 text-cyan-300' : 'text-zinc-400 hover:text-white'}`}
+                            >
+                              {o.l}
+                            </button>
+                          ))}
+                        </div>
+                      </SettingRow>
+                      <SettingRow icon={Globe} title="Language">
+                        <select aria-label="Language" value={language} onChange={e => handleLanguageChange(e.target.value as Language)} className={`${selectClass} w-40`}>
+                          <option value="English">English</option>
+                          <option value="Hindi">हिन्दी (Hindi)</option>
+                        </select>
+                      </SettingRow>
+                      <SettingRow icon={CreditCard} title="Currency" desc="All fares are collected and shown in Indian rupees.">
+                        <span className="px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-xs font-semibold text-zinc-300">INR (₹)</span>
+                      </SettingRow>
+                    </SectionCard>
+                  </>
+                )}
+
+                {/* ── NOTIFICATIONS ── */}
+                {activeTab === 'notifications' && (
+                  <SectionCard title="Email notifications" desc={email ? `Sent to ${email}. Changes save automatically.` : 'Changes save automatically.'}>
+                    {notificationOptions.map(o => (
+                      <SettingRow key={o.key} icon={o.icon} title={o.title} desc={o.desc}>
+                        <ToggleSwitch checked={o.value} onChange={v => handleNotificationToggle(o.key, v)} />
+                      </SettingRow>
+                    ))}
+                  </SectionCard>
+                )}
+
+                {/* ── INTEGRATIONS & API ── */}
+                {activeTab === 'integrations' && (
+                  <>
+                    <SectionCard title="Connected services" desc="Turn integrations on or off for your account.">
+                      {integrationOptions.map(o => (
+                        <SettingRow
+                          key={o.key}
+                          icon={o.icon}
+                          title={o.title}
+                          desc={<>{o.desc} <span className={integrations[o.key] ? 'text-emerald-400' : 'text-zinc-500'}>{integrations[o.key] ? 'Enabled' : 'Disabled'}</span></>}
+                        >
+                          <ToggleSwitch checked={!!integrations[o.key]} onChange={() => handleToggleIntegration(o.key)} />
+                        </SettingRow>
+                      ))}
+                    </SectionCard>
+                    <SectionCard title="API key" desc="Authenticate requests to the AeroNex API. Keep it on your server, never in a browser bundle.">
+                      <SettingRow icon={KeyRound} title={apiKey ? `${apiKey.slice(0, 12)}…${apiKey.slice(-4)}` : 'No key generated yet'} desc={integrations.apiAccess ? 'API access is enabled.' : 'Enable Developer API above to use the key.'}>
+                        <ActionButton onClick={() => setShowApiKeyModal(true)}>Manage key</ActionButton>
+                      </SettingRow>
+                    </SectionCard>
+                  </>
+                )}
+
+                {/* ── DATA & PRIVACY ── */}
+                {activeTab === 'privacy' && (
+                  <SectionCard title={t.dataPrivacyTitle || 'Data & privacy'} desc={t.dataPrivacyDesc || 'Manage your data, privacy and personalization settings.'}>
+                    <SettingRow icon={Database} title={t.dataUsageLabel || 'Data usage'} desc={t.dataUsageDesc || 'Control how your data is used.'}>
+                      <ActionButton onClick={() => setShowDataUsageModal(true)}>Manage</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={Download} title={t.downloadDataLabel || 'Download my data'} desc="Export your profile, preferences and alerts as JSON.">
+                      <ActionButton onClick={handleDownloadMyData}>Export</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={FileText} title="Privacy policy" desc="How AeroNex collects and uses data.">
+                      <ActionButton onClick={() => setShowPrivacyModal(true)}>Read</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={Trash2} title={t.deleteAccountLabel || 'Delete account'} desc={t.deleteAccountDesc || 'Permanently delete your account.'}>
+                      <ActionButton tone="danger-soft" onClick={() => setShowDeleteModal(true)}>Delete</ActionButton>
+                    </SettingRow>
+                  </SectionCard>
+                )}
+
+                {/* ── HELP & SUPPORT ── */}
+                {activeTab === 'help' && (
+                  <SectionCard title={t.helpSupportTitle || 'Help & support'} desc={t.helpSupportDesc || 'Get help or contact our support team.'}>
+                    <SettingRow icon={FileQuestion} title={t.faqsBtn || 'FAQs'} desc="Answers to common questions about the index and data.">
+                      <ActionButton onClick={() => setShowFaqsModal(true)}>Browse</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={Headphones} title={t.contactSupportBtn || 'Contact support'} desc="Open a support request. We reply by email.">
+                      <ActionButton onClick={() => setShowSupportModal(true)}>Contact</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={MessageSquare} title={t.giveFeedbackBtn || 'Give feedback'} desc="Tell us what works and what does not.">
+                      <ActionButton onClick={() => setShowFeedbackModal(true)}>Send feedback</ActionButton>
+                    </SettingRow>
+                  </SectionCard>
+                )}
+
+                {/* ── ABOUT ── */}
+                {activeTab === 'about' && (
+                  <SectionCard title={t.appInfoTitle || 'App information'} desc={t.appInfoDesc || 'Version, legal and other details.'}>
+                    <div className="pb-4 mb-1 border-b border-white/[0.06]">
+                      <AeroNexLogo size={28} showTagline={true} variant="full" />
                     </div>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-500 group-hover:text-white transition-colors" />
-                </button>
+                    <SettingRow icon={Info} title="Version" desc={`AeroNex v1.0.0 · ${import.meta.env.MODE} build`} />
+                    <SettingRow icon={Database} title="Data feed" desc={feed.detail}>
+                      <span className={`flex items-center gap-2 text-xs font-semibold ${feedTone}`}>
+                        <span className={`w-2 h-2 rounded-full ${feedDot}`} /> {feed.label}
+                      </span>
+                    </SettingRow>
+                    <SettingRow icon={FileText} title="Legal">
+                      <ActionButton onClick={() => setShowTermsModal(true)}>{t.termsOfService || 'Terms'}</ActionButton>
+                      <ActionButton onClick={() => setShowPrivacyModal(true)}>{t.privacyPolicyLink || 'Privacy'}</ActionButton>
+                    </SettingRow>
+                    <SettingRow icon={Info} title={t.aboutLink || 'About AeroNex'} desc="What AeroNex is and how it works.">
+                      <ActionButton onClick={() => setShowAboutModal(true)}>View</ActionButton>
+                    </SettingRow>
+                  </SectionCard>
+                )}
 
-                {/* Delete Account Trigger */}
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="settings-row flex items-center justify-between py-3 px-2 hover:bg-red-500/10 transition-all rounded-xl cursor-pointer group text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#38141F] border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                      <Trash2 size={16} />
-                    </div>
-                    <div>
-                      <h4 className="text-red-400 text-xs font-semibold">{t.deleteAccountLabel || 'Delete Account'}</h4>
-                      <p className="text-[11px] text-slate-400">{t.deleteAccountDesc || 'Permanently delete your account'}</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-500 group-hover:text-red-400 transition-colors" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── APPEARANCE ── */}
-          <div ref={sectionRefs.account} className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.accountSectionTitle || 'Account'}</h2>
-              <p className="text-xs text-slate-400 mb-4">{t.accountSectionDesc || 'Manage your account settings.'}</p>
-
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
-                >
-                  <Lock size={14} className="text-blue-400" />
-                  {t.changePasswordBtn || 'Change Password'}
-                </button>
-                <button
-                  onClick={() => setShowSubscriptionModal(true)}
-                  className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
-                >
-                  <CreditCard size={14} className="text-emerald-400" />
-                  View plan
-                </button>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs font-semibold text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
-                >
-                  <LogOut size={14} />
-                  {t.signOutBtn || 'Log Out'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── HELP & SUPPORT ── */}
-          <div ref={sectionRefs.help} className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.helpSupportTitle || 'Help & Support'}</h2>
-              <p className="text-xs text-slate-400 mb-4">{t.helpSupportDesc || 'Get help or contact our support team.'}</p>
-
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  onClick={() => setShowFaqsModal(true)}
-                  className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
-                >
-                  <FileQuestion size={14} className="text-blue-400" />
-                  {t.faqsBtn || 'FAQs'}
-                </button>
-                <button
-                  onClick={() => setShowSupportModal(true)}
-                  className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
-                >
-                  <Headphones size={14} className="text-emerald-400" />
-                  {t.contactSupportBtn || 'Contact Support'}
-                </button>
-                <button
-                  onClick={() => setShowFeedbackModal(true)}
-                  className="settings-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#081530] border border-slate-700/80 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all cursor-pointer"
-                >
-                  <MessageSquare size={14} className="text-purple-400" />
-                  {t.giveFeedbackBtn || 'Give Feedback'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-        {/* App Information Section */}
-        <div ref={sectionRefs['app-info']} className="pt-8 mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-              <Info size={20} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">App Information</h2>
-              <p className="text-xs text-slate-400">Platform version and details.</p>
-            </div>
-          </div>
-          <div className="bg-[#12141C] border border-white/[0.06] rounded-2xl p-6">
-            <div className="space-y-4 text-sm text-slate-300">
-              <p><strong>App Name:</strong> AeroNex</p>
-              <p><strong>Version:</strong> 1.0.0</p>
-              <p><strong>Environment:</strong> Production</p>
-              <button onClick={() => setShowAboutModal(true)} className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700">View About Details</button>
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
-
-
-          {/* ── APP INFORMATION ── */}
-          <div className={cardClass}>
-            <div>
-              <h2 className="text-base md:text-lg font-bold text-white mb-0.5">{t.appInfoTitle || 'App Information'}</h2>
-              <p className="text-xs text-slate-400 mb-3">{t.appInfoDesc || 'Version, legal and other details.'}</p>
-
-              <p className="text-white font-bold text-xs mb-2 tracking-wide">{t.appVersion || 'AERONEX v1.0.0'}</p>
-
-              <div className="flex items-center gap-3 text-xs text-blue-400 mb-4 font-medium flex-wrap">
-                <button
-                  onClick={() => setShowTermsModal(true)}
-                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                >
-                  {t.termsOfService || 'Terms of Service'}
-                </button>
-                <span className="text-slate-600">|</span>
-                <button
-                  onClick={() => setShowPrivacyModal(true)}
-                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                >
-                  {t.privacyPolicyLink || 'Privacy Policy'}
-                </button>
-                <span className="text-slate-600">|</span>
-                <button
-                  onClick={() => setShowAboutModal(true)}
-                  className="hover:underline text-blue-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                >
-                  {t.aboutLink || 'About AeroNex'}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
-              <AeroNexLogo size={28} showTagline={true} variant="full" />
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                {t.systemsOperational || 'All systems operational'}
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
 
       {/* ══════════════════════════════════════════════════════════
@@ -1204,6 +1301,7 @@ export function Settings() {
               <input
                 type="text"
                 value={apiKey}
+                placeholder="No key yet. Use the regenerate button to create one."
                 readOnly
                 className="w-full bg-[#081530] border border-blue-500/40 rounded-xl text-cyan-300 font-mono text-xs px-3.5 py-2.5 select-all"
               />
@@ -1229,7 +1327,7 @@ export function Settings() {
             <label className="text-xs text-slate-400 font-medium block mb-1">Example Request</label>
             <div className="p-3 bg-[#030A1D] border border-slate-800 rounded-xl font-mono text-[11px] text-slate-300 overflow-x-auto">
               <code>{`curl -X GET "${API_BASE_URL || 'https://YOUR-AERONEX-SERVER'}/api/alerts" \\
-  -H "X-API-Key: ${apiKey}"`}</code>
+  -H "X-API-Key: ${apiKey || '<your-key>'}"`}</code>
             </div>
           </div>
 

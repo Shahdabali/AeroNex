@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Sparkles, Send, BrainCircuit, Activity, Plane, Search, Settings as SettingsIcon } from 'lucide-react';
+import { Sparkles, Send, BrainCircuit, Activity, Plane, Search } from 'lucide-react';
 import { api } from '../services/api';
-import { Layout } from '../components/Layout';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { LoadingBlock } from '../components/StateViews';
-import { toast } from 'react-hot-toast';
 
 export function AiAnalytics() {
   const [prompt, setPrompt] = useState('');
@@ -24,7 +23,6 @@ export function AiAnalytics() {
       setMessages(prev => [...prev, { role: 'ai', text: data?.data?.answer || data?.answer || (typeof data === 'string' ? data : JSON.stringify(data)) }]);
     },
     onError: (err: any) => {
-      toast.error(err.message || 'AI request failed');
       setMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message || 'Failed to connect to AI server.'}` }]);
     }
   });
@@ -40,7 +38,7 @@ export function AiAnalytics() {
   const isLive = status?.configured && status?.status === 'healthy';
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -128,6 +126,6 @@ export function AiAnalytics() {
           </div>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }
