@@ -22,7 +22,10 @@ export function AeroNexLogo({
   alt = "AeroNex — Fly Beyond Limits"
 }: LogoProps) {
   let isLight = false;
-  try { isLight = useAppContext().theme === 'light'; } catch(e) {}
+  try {
+    const t = useAppContext().theme;
+    isLight = t === 'light' || (typeof document !== 'undefined' && document.documentElement.classList.contains('light'));
+  } catch(e) {}
   // 1. Standalone 3D Icon Variant
   if (variant === 'icon') {
     return (

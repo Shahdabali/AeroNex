@@ -21,7 +21,8 @@ const FEED_DOT: Record<string, string> = {
 export function Sidebar() {
   const location = useLocation();
   const feed = useDataStatus();
-  const { user } = useAppContext();
+  const { user, theme } = useAppContext();
+  const isLight = theme === 'light' || (typeof document !== 'undefined' && document.documentElement.classList.contains('light'));
   const feedBadge = feed.state === 'live' ? 'LIVE' : undefined;
 
   const sections: { title: string; items: NavItem[] }[] = [
@@ -53,14 +54,24 @@ export function Sidebar() {
   const initials = name.split(' ').map((p: string) => p[0]).join('').slice(0, 2).toUpperCase();
 
   return (
-    <aside className="relative w-[64px] lg:w-[260px] h-screen bg-gradient-to-b from-[#0B0D14] via-[#090A0F] to-[#07080C] border-r border-white/[0.08] flex flex-col overflow-hidden transition-all duration-300">
-      {/* soft brand glow */}
-      <div className="pointer-events-none absolute -top-24 -left-24 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl" />
+    <aside className={`relative w-[64px] lg:w-[260px] h-screen border-r flex flex-col overflow-hidden transition-all duration-300 ${
+      isLight 
+        ? 'bg-white border-slate-200 shadow-[1px_0_10px_rgba(0,0,0,0.03)]' 
+        : 'bg-gradient-to-b from-[#0B0D14] via-[#090A0F] to-[#07080C] border-white/[0.08]'
+    }`}>
+      {/* soft brand glow in dark mode */}
+      {!isLight && (
+        <div className="pointer-events-none absolute -top-24 -left-24 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl" />
+      )}
 
-      <div className="relative p-3 lg:px-5 lg:pt-6 lg:pb-5 flex flex-col items-center lg:items-start border-b border-white/[0.05]">
+      <div className={`relative p-3 lg:px-5 lg:pt-6 lg:pb-5 flex flex-col items-center lg:items-start border-b ${
+        isLight ? 'border-slate-100' : 'border-white/[0.05]'
+      }`}>
         <AeroNexLogo size={32} variant="icon" className="lg:hidden" />
         <AeroNexLogo size={32} showTagline={false} className="hidden lg:inline-flex" />
-        <div className="hidden lg:block mt-2 text-[10px] font-bold text-cyan-500/90 tracking-[0.22em] uppercase ml-1">
+        <div className={`hidden lg:block mt-2 text-[10px] font-bold tracking-[0.22em] uppercase ml-1 ${
+          isLight ? 'text-cyan-600' : 'text-cyan-500/90'
+        }`}>
           Airfare Intelligence
         </div>
       </div>
@@ -68,10 +79,14 @@ export function Sidebar() {
       <nav className="relative flex-1 px-2 lg:px-3 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
         {sections.map(section => (
           <div key={section.title} className="flex flex-col gap-1">
-            <div className="hidden lg:block px-3 mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+            <div className={`hidden lg:block px-3 mb-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+              isLight ? 'text-slate-400' : 'text-zinc-500'
+            }`}>
               {section.title}
             </div>
-            <div className="lg:hidden mx-auto mb-1 w-6 h-px bg-white/[0.06]" />
+            <div className={`lg:hidden mx-auto mb-1 w-6 h-px ${
+              isLight ? 'bg-slate-200' : 'bg-white/[0.06]'
+            }`} />
             {section.items.map(item => {
               const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
               return (
@@ -81,24 +96,36 @@ export function Sidebar() {
                   title={item.label}
                   aria-current={isActive ? 'page' : undefined}
                   className={`relative flex items-center justify-center lg:justify-between p-3 lg:px-3 lg:py-2.5 rounded-xl transition-all select-none group ${
-                    isActive ? 'text-white font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
+                    isActive 
+                      ? (isLight ? 'text-cyan-700 font-bold' : 'text-white font-medium')
+                      : (isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]')
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeSidebarIndicator"
-                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-transparent border border-cyan-500/25 shadow-[0_0_20px_-6px_rgba(34,211,238,0.45)]"
+                      className={`absolute inset-0 rounded-xl border ${
+                        isLight 
+                          ? 'bg-gradient-to-r from-cyan-500/10 via-blue-500/5 to-transparent border-cyan-500/30 shadow-sm'
+                          : 'bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-transparent border-cyan-500/25 shadow-[0_0_20px_-6px_rgba(34,211,238,0.45)]'
+                      }`}
                       initial={false}
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     >
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-cyan-300 to-blue-500" />
+                      <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full ${
+                        isLight 
+                          ? 'bg-gradient-to-b from-cyan-500 to-blue-600'
+                          : 'bg-gradient-to-b from-cyan-300 to-blue-500'
+                      }`} />
                     </motion.div>
                   )}
 
                   <div className="flex items-center gap-3 relative z-10">
                     <span
                       className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
-                        isActive ? 'bg-cyan-500/15 text-cyan-300' : 'bg-white/[0.03] text-zinc-500 group-hover:text-cyan-400 group-hover:bg-cyan-500/10'
+                        isActive 
+                          ? (isLight ? 'bg-cyan-500/15 text-cyan-600' : 'bg-cyan-500/15 text-cyan-300')
+                          : (isLight ? 'bg-slate-100 text-slate-500 group-hover:text-cyan-600 group-hover:bg-cyan-50' : 'bg-white/[0.03] text-zinc-500 group-hover:text-cyan-400 group-hover:bg-cyan-500/10')
                       }`}
                     >
                       <item.icon size={16} />
@@ -110,8 +137,8 @@ export function Sidebar() {
                     <span
                       className={`hidden lg:inline-flex relative z-10 text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
                         item.badgeText === 'LIVE'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25'
-                          : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/25'
+                          ? (isLight ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25')
+                          : (isLight ? 'bg-cyan-50 text-cyan-600 border border-cyan-200' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/25')
                       }`}
                     >
                       {item.badgeText}
@@ -125,11 +152,15 @@ export function Sidebar() {
       </nav>
 
       {/* Signed-in user + real data-feed status (from useDataStatus, never hard-coded) */}
-      <div className="relative p-3 border-t border-white/[0.06]">
+      <div className={`relative p-3 border-t ${isLight ? 'border-slate-100' : 'border-white/[0.06]'}`}>
         <Link
           to="/settings"
           title={`${name} — ${feed.detail}`}
-          className="flex items-center justify-center lg:justify-start gap-3 lg:bg-white/[0.03] lg:hover:bg-white/[0.06] lg:p-2.5 rounded-xl lg:border lg:border-white/[0.06] transition-colors"
+          className={`flex items-center justify-center lg:justify-start gap-3 lg:p-2.5 rounded-xl transition-colors ${
+            isLight 
+              ? 'lg:bg-slate-50 lg:hover:bg-slate-100 lg:border lg:border-slate-200' 
+              : 'lg:bg-white/[0.03] lg:hover:bg-white/[0.06] lg:border lg:border-white/[0.06]'
+          }`}
         >
           <div className="relative shrink-0">
             {user?.avatarUrl ? (
@@ -139,11 +170,13 @@ export function Sidebar() {
                 <span className="text-xs font-bold text-white">{initials || 'AN'}</span>
               </div>
             )}
-            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-[#090A0F] ${FEED_DOT[feed.state] ?? FEED_DOT.loading}`} />
+            <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ${
+              isLight ? 'ring-white' : 'ring-[#090A0F]'
+            } ${FEED_DOT[feed.state] ?? FEED_DOT.loading}`} />
           </div>
           <div className="hidden lg:block overflow-hidden flex-1">
-            <p className="text-xs font-semibold text-white truncate">{name}</p>
-            <p className="text-[10px] text-zinc-500 truncate">Data feed: {feed.label}</p>
+            <p className={`text-xs font-semibold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>{name}</p>
+            <p className={`text-[10px] truncate ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>Data feed: {feed.label}</p>
           </div>
         </Link>
       </div>

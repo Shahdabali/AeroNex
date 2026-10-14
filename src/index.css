@@ -137,9 +137,9 @@ html.light [class*="bg-[#070910]"] {
 /* Inner Stripes & Header Strips in Light Mode */
 html.light [class*="bg-[#0E1017]"],
 html.light [class*="bg-[#141824]"],
-html.light [class*="bg-white/[0.02]"],
-html.light [class*="bg-white/[0.04]"],
-html.light [class*="bg-white/[0.06]"] {
+html.light :not([class*="hover:"])[class*="bg-white/[0.02]"],
+html.light :not([class*="hover:"])[class*="bg-white/[0.04]"],
+html.light :not([class*="hover:"])[class*="bg-white/[0.06]"] {
   background-color: #F8FAFC !important;
   border-color: #E2E8F0 !important;
 }
@@ -190,9 +190,15 @@ html.light aside,
 html.light aside.bg-\[\#040D24\],
 html.light aside.bg-\[\#090A0F\],
 html.light [class*="bg-[#040D24]"] {
+  background-image: none !important;
   background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
   box-shadow: 1px 0 10px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light aside [class*="bg-cyan-500/10"],
+html.light aside .bg-cyan-500\/10 {
+  display: none !important;
 }
 
 html.light aside [class*="bg-[#161822]"],
@@ -218,6 +224,10 @@ html.light aside a .text-zinc-400 {
 html.light aside a:hover {
   background-color: #F1F5F9 !important;
   color: #0F172A !important;
+}
+
+html.light aside nav a:not(:hover) {
+  background-color: transparent !important;
 }
 
 html.light aside [class*="bg-[#12141C]"],
