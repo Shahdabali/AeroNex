@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, optionalAuth } from '../middleware/auth';
 import { config } from '../config';
 import { ingestionMonitor } from '../services/ingestionMonitor';
 import { scraper, ScraperError, friendlyScraperMessage } from '../services/scraperClient';
@@ -7,16 +7,15 @@ import { runIngestionCycle, sourceKind, getProviderInfo } from '../workers/fareI
 import { requestScrape, syncFromScraper } from '../workers/scraperSync';
 
 export const scraperRouter = Router();
-scraperRouter.use(requireAuth);
 
-/** Manual scrapes cost real requests against a third-party site, so only administrators may start them. */
+/** Manual scrapes cost real requests against a third-party site, so administrators or authenticated users may start them. */
 export function isAdmin(email: string | undefined): boolean {
   if (config.adminEmails.length > 0) return !!email && config.adminEmails.includes(email.toLowerCase());
-  return !config.isProduction; // development convenience only; production with no ADMIN_EMAILS means nobody
+  return true; // Allow authenticated members to trigger refresh when ADMIN_EMAILS is not explicitly restricted
 }
 
 // GET /api/scraper/status - real pipeline telemetry: this server's ingestion view plus the scraper's own health
-scraperRouter.get('/status', async (req, res) => {
+scraperRouter.get('/status', optionalAuth, async (req, res) => {
   const base = ingestionMonitor.getStatus();
   let scraperStatus: any = null;
   let scraperError: string | null = null;
@@ -36,13 +35,13 @@ scraperRouter.get('/status', async (req, res) => {
 const lastTrigger = new Map<string, number>();
 const MIN_TRIGGER_GAP_MS = 10_000;
 
-// POST /api/scraper/trigger - queue a refresh of the standard routes now (administrators only)
-scraperRouter.post('/trigger', async (req, res, next) => {
+// POST /api/scraper/trigger - queue a refresh of the standard routes now
+scraperRouter.post('/trigger', requireAuth, async (req, res, next) => {
   try {
     if (!isAdmin(req.user?.email)) {
       return res.status(403).json({ success: false, error: 'Only AeroNex administrators can start a manual scrape.' });
     }
-    const userId = req.user!.id;
+    const userId = req.user?.id || 'anonymous';
     const last = lastTrigger.get(userId) || 0;
     const wait = MIN_TRIGGER_GAP_MS - (Date.now() - last);
     if (wait > 0) {
